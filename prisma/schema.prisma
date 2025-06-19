@@ -10,6 +10,31 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Resume {
+  id     String @id @default(uuid())
+  userId String
+
+  title       String?
+  description String?
+
+  photoUrl    String?
+  colorHex    String  @default("#000000")
+  fontFamily  String?
+  borderStyle String  @default("squircle")
+  summary     String?
+  fisrtName   String?
+  lastName    String?
+  email       String?
+  phone       String?
+  jobTitle    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("resumes")
 }
