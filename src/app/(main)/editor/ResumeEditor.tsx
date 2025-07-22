@@ -3,12 +3,14 @@
 import React, { ReactNode, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import ResumeSteps from "./createResumeSteps";
-import PersonalInfo from "./forms/PersonalInfo";
-import ResumeDescription from "./forms/ResumeDescription";
-import WorkExperience from "./forms/WorkExperience";
-import { useForm } from "react-hook-form";
-import { Form } from "@/components/ui/form";
+import PersonalInfo from "./components/forms/PersonalInfo";
+import ResumeDescription from "./components/forms/ResumeDescription";
+import WorkExperience from "./components/forms/WorkExperience";
+import Education from "./components/forms/Education";
+import Skills from "./components/forms/Skills";
+import Summary from "./components/forms/Summary";
+import ResumeSteps from "./components/createResumeSteps";
+import { useFormContext } from "react-hook-form";
 
 const resumeSections: {
   title: string;
@@ -30,6 +32,21 @@ const resumeSections: {
     slug: "work-experience",
     item: <WorkExperience />,
   },
+  {
+    title: "Education",
+    slug: "education",
+    item: <Education />,
+  },
+  {
+    title: "Skills",
+    slug: "skills",
+    item: <Skills />,
+  },
+  {
+    title: "Summary",
+    slug: "summary",
+    item: <Summary />,
+  },
 ];
 
 // Use in case we need to remember the number of step from URL params
@@ -45,25 +62,19 @@ const useWithParamsNavigation = () => {
 };
 
 const ResumeEditor = () => {
-  const form = useForm();
+  const f = useFormContext();
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
   return (
-    <main className="">
-      <div className="flex w-full">
-        <div className="w-full md:w-1/2">
-          <ResumeSteps
-            items={sectionTitles}
-            currentStep={currentEditorStep}
-            setItem={setCurrentEditorStep}
-          />
-
-          {resumeSections[currentEditorStep].item}
-        </div>
-        <div className="hidden w-1/2 md:flex">Right</div>
-      </div>
-    </main>
+    <form onSubmit={f.handleSubmit((data) => console.log(data))}>
+      <ResumeSteps
+        items={sectionTitles}
+        currentStep={currentEditorStep}
+        setItem={setCurrentEditorStep}
+      />
+      {resumeSections[currentEditorStep].item}
+    </form>
   );
 };
 

@@ -1,6 +1,5 @@
 import React from "react";
-import ResumeEditor from "./ResumeEditor";
-import CreateResumeSteps from "./createResumeSteps";
+import ResumeApp from "./components/ResumeApp";
 
 export const metadata = {
   title: "Editor",
@@ -9,9 +8,11 @@ export const metadata = {
 
 const Page = () => {
   return (
-    <div>
-      <ResumeEditor />
-    </div>
+    <main className="">
+      <div className="flex w-full">
+        <ResumeApp />
+      </div>
+    </main>
   );
 };
 
