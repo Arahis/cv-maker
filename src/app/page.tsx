@@ -1,3 +1,9 @@
+import CreateResumeButton from "./(main)/components/CreateResumeButton";
+
 export default function Home() {
-  return <main>Hello</main>;
+  return (
+    <main>
+      <CreateResumeButton />
+    </main>
+  );
 }
