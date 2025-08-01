@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useFormContext } from "react-hook-form";
 
 import PersonalInfo from "./components/forms/PersonalInfo";
 import ResumeDescription from "./components/forms/ResumeDescription";
@@ -9,8 +10,8 @@ import WorkExperience from "./components/forms/WorkExperience";
 import Education from "./components/forms/Education";
 import Skills from "./components/forms/Skills";
 import Summary from "./components/forms/Summary";
-import ResumeSteps from "./components/createResumeSteps";
-import { useFormContext } from "react-hook-form";
+import ResumeSteps from "./components/CreateResumeSteps";
+import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 
 const resumeSections: {
   title: string;
@@ -61,10 +62,13 @@ const useWithParamsNavigation = () => {
   return { currentStep, setStep };
 };
 
-const ResumeEditor = () => {
+const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const f = useFormContext();
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
+
+  // ✅ Автосохранение в IndexedDB
+  useIndexedDBDebouncedSave(f.control, resumeId, 2000);
 
   return (
     <form onSubmit={f.handleSubmit((data) => console.log(data))}>

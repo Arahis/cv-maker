@@ -64,7 +64,7 @@ const ResumePreview = ({
           className={cn("space-y-6 p-6", !zoom && "invisible")}
           style={{ zoom }}
         >
-          {formData.firstName}
+          Name here: {formData.firstName}
         </div>
       </div>
     </div>

@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
-import Link from "next/link";
 import React from "react";
 
 export const metadata: Metadata = {
@@ -9,13 +7,7 @@ export const metadata: Metadata = {
 };
 
 const Page = () => {
-  return (
-    <main>
-      <Button asChild className="rounded bg-blue-500 p-4 text-white">
-        <Link href="/editor">New Resume</Link>
-      </Button>
-    </main>
-  );
+  return <main>List of your created resumes</main>;
 };
 
 export default Page;
