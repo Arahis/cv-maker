@@ -1,31 +1,60 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { ResumeForm } from "@/lib/validation";
-import React, {
-  HTMLAttributes,
-  RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { RefObject, useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { Stage, Layer, Rect } from "react-konva";
 
-const useSheetZoom = (container: RefObject<HTMLDivElement | null>) => {
-  const [zoom, setZoom] = useState<number>(0);
+type StageSize = {
+  scale: number;
+  width: number;
+  height: number;
+};
+
+const useStageScale = (
+  container: RefObject<HTMLDivElement | null>,
+  maxScale = 1.2,
+  minScale = 0.5,
+  targetWidth = 794,
+  targetHeight = 1123,
+) => {
+  const [stageSize, setStageSize] = useState<StageSize>({
+    scale: maxScale,
+    width: targetWidth,
+    height: targetHeight,
+  });
+
+  const [zoomIn, setZoomIn] = useState(false);
+  const [isZoomDisabled, setIsZoomDisabled] = useState(false);
+
+  const handleZoomInAndOut = () => {
+    setZoomIn((prev) => !prev);
+  };
 
   useEffect(() => {
     if (!container.current) return;
 
-    const targetWidth = 794;
-
     const observer = new ResizeObserver((items) => {
       const item = items[0];
-      const { width } = item.contentRect;
+      const { width, height } = item.contentRect;
 
-      const zoomX = (1 / targetWidth) * width;
+      const scaleByWidth = width / targetWidth;
+      const scaleByHeight = height / targetHeight;
 
-      setZoom(zoomX);
+      const clampedScaleByWidth = Math.min(scaleByWidth, maxScale);
+      const clampedScaleByHeight = Math.max(scaleByHeight, minScale);
+
+      const scale = zoomIn
+        ? Math.min(scaleByHeight, scaleByWidth)
+        : scaleByWidth;
+
+      setIsZoomDisabled(clampedScaleByHeight >= clampedScaleByWidth);
+
+      setStageSize({
+        scale,
+        width: targetWidth * scale,
+        height: targetHeight * scale,
+      });
     });
 
     observer.observe(container.current);
@@ -33,40 +62,56 @@ const useSheetZoom = (container: RefObject<HTMLDivElement | null>) => {
     return () => {
       observer.disconnect();
     };
-  }, [container]);
+  }, [container, maxScale, minScale, targetWidth, targetHeight, zoomIn]);
 
-  return zoom;
+  return { handleZoomInAndOut, zoomIn, isZoomDisabled, ...stageSize };
 };
 
-const ResumePreview = ({
-  className,
-}: {
-  className?: HTMLAttributes<HTMLDivElement>;
-}) => {
+const ResumePreview = () => {
   const { control } = useFormContext();
   const formData = useWatch<ResumeForm>({ control });
 
   console.log({ formData });
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const zoom = useSheetZoom(containerRef);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const { scale, width, height, handleZoomInAndOut, zoomIn, isZoomDisabled } =
+    useStageScale(containerRef);
 
   return (
-    <div className="bg-secondary flex w-full justify-center overflow-y-auto p-4">
-      <div
-        ref={containerRef}
-        className={cn(
-          "relative aspect-[210/297] h-fit w-full max-w-2xl bg-white text-black shadow-md",
-          className,
-        )}
+    <div
+      ref={containerRef}
+      className="flex w-full items-start justify-center overflow-y-auto bg-gray-50 p-6"
+    >
+      <button
+        disabled={isZoomDisabled}
+        onClick={handleZoomInAndOut}
+        className={
+          isZoomDisabled
+            ? "pointer-events-none cursor-none"
+            : zoomIn
+              ? "cursor-zoom-in"
+              : "cursor-zoom-out"
+        }
       >
-        <div
-          className={cn("space-y-6 p-6", !zoom && "invisible")}
-          style={{ zoom }}
+        <Stage
+          width={width}
+          height={height}
+          scaleX={scale}
+          scaleY={scale}
+          className="h-fit w-fit overflow-hidden rounded-md bg-white shadow-xl"
         >
-          Name here: {formData.firstName}
-        </div>
-      </div>
+          <Layer>
+            <Rect
+              x={0}
+              y={0}
+              width={794 * 0.3}
+              height={1123}
+              fill="red"
+              listening={false}
+            />
+          </Layer>
+        </Stage>
+      </button>
     </div>
   );
 };
