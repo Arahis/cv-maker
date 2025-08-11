@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ResumeEditor from "../ResumeEditor";
-import ResumePreview from "../ResumePreview";
+import ResumeEditor from "./ResumeEditor";
+import ResumePreview from "./ResumePreview";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
