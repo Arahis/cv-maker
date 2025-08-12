@@ -17,13 +17,20 @@ export const konvaTextContainers = (
 ) => {
   let yOffset = 0;
 
-  return textBlocks.map((text: string) => {
+  const elements = textBlocks.map((text) => {
     const height = getTextHeight(text, textStyle);
-    const y = yOffset;
-    yOffset += height + 12; // Add some spacing between text blocks
 
-    return (
-      <Text key={text} text={text} x={0} y={y} {...textStyle} fill="black" />
+    const konvaText = (
+      <Text key={text} text={text} y={yOffset} {...textStyle} height={height} />
     );
+
+    yOffset += height;
+
+    return konvaText;
   });
+
+  return {
+    totalHeight: yOffset,
+    elements,
+  };
 };
