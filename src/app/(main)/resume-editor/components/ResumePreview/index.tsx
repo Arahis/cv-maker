@@ -28,7 +28,6 @@ const ResumePreview = () => {
         <button
           key={idx}
           disabled={isZoomDisabled}
-          // disabled={true}
           onClick={handleZoomInAndOut}
           className={cn(
             isZoomDisabled
