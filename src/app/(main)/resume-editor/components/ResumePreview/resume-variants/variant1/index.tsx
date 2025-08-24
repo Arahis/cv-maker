@@ -1,5 +1,8 @@
 import React from "react";
 import HeaderSection from "./HeaderSection";
+import Summary from "./Summary";
+import LeftSection from "./LeftSection";
+import RightSection from "./RightSection";
 
 // const leftSectionWidth = initialWidth * 0.3; // 30% of the width
 // const leftSectionWidthWithPadding = leftSectionWidth - padding * 2; // 30% of the width
@@ -21,6 +24,11 @@ const ResumeVariant1 = ({
     >
       <div className="p-8" style={{ zoom: scale }}>
         <HeaderSection />
+        <Summary />
+        <div className="flex w-full">
+          <LeftSection />
+          <RightSection />
+        </div>
       </div>
     </div>
   );
