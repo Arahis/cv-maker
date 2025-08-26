@@ -4,25 +4,10 @@ import Summary from "./Summary";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
 
-// const leftSectionWidth = initialWidth * 0.3; // 30% of the width
-// const leftSectionWidthWithPadding = leftSectionWidth - padding * 2; // 30% of the width
-// const leftSectionHeightWithPadding = initialHeight - padding * 2; // 30% of the width
-
-const ResumeVariant1 = ({
-  scale,
-  width,
-  height,
-}: {
-  scale: number;
-  width: number;
-  height: number;
-}) => {
+const ResumeVariant1 = ({ ref }: { ref: React.Ref<HTMLDivElement> }) => {
   return (
-    <div
-      className="h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-      style={{ width, height }}
-    >
-      <div className="p-8" style={{ zoom: scale }}>
+    <>
+      <div ref={ref}>
         <HeaderSection />
         <Summary />
         <div className="flex w-full">
@@ -30,7 +15,7 @@ const ResumeVariant1 = ({
           <RightSection />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
