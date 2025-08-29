@@ -1,5 +1,6 @@
 import React from "react";
 import SectionItem from "../SectionItem";
+import { Paginate } from "../../../Paginate";
 
 const sections = {
   education: {
@@ -28,8 +29,9 @@ const sections = {
 };
 
 const LeftSection = () => {
+  // TODO: refactor later the rest with Paginate
   return (
-    <div className="w-[30%]">
+    <Paginate.Column className="w-[30%]">
       <SectionItem
         title={sections.education.name}
         renderItem={(item) => (
@@ -61,7 +63,7 @@ const LeftSection = () => {
           <p className="">Years of education</p>
         </div>
       </div>
-    </div>
+    </Paginate.Column>
   );
 };
 

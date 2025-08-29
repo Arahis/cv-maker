@@ -2,19 +2,26 @@ import React from "react";
 import HeaderSection from "./HeaderSection";
 import Summary from "./Summary";
 import LeftSection from "./LeftSection";
-import RightSection from "./RightSection";
+import RightSection, { JobSection, sections } from "./RightSection";
+import SectionItem from "./SectionItem";
+import { Paginate } from "../../Paginate";
 
 const ResumeVariant1 = ({ ref }: { ref: React.Ref<HTMLDivElement> }) => {
   return (
     <>
-      <div ref={ref}>
+      <Paginate ref={ref}>
         <HeaderSection />
         <Summary />
-        <div className="flex w-full">
+        <Paginate.Columns className="w-full">
           <LeftSection />
           <RightSection />
-        </div>
-      </div>
+          {/* <SectionItem
+            title={sections.jobDescription.name}
+            items={sections.jobDescription.items}
+            renderItem={(item) => <JobSection item={item} />}
+          /> */}
+        </Paginate.Columns>
+      </Paginate>
     </>
   );
 };
