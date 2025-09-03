@@ -24,8 +24,8 @@ export const Paginate = Object.assign(
         {children}
       </div>
     ),
-    Column: ({ children, ...props }: PaginateProps) => (
-      <div data-paginate="column" {...props}>
+    Block: ({ children, ...props }: PaginateProps) => (
+      <div data-paginate="block" {...props}>
         {children}
       </div>
     ),
