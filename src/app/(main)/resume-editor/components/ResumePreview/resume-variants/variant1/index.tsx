@@ -10,17 +10,13 @@ const ResumeVariant1 = ({ ref }: { ref: React.Ref<HTMLDivElement> }) => {
   return (
     <>
       <Paginate ref={ref}>
-        <HeaderSection />
+        {/* <HeaderSection /> */}
         <Summary />
-        <Paginate.Columns className="w-full">
-          <LeftSection />
+
+        <Paginate.Section className="flex w-full" datatype="main-cv-info">
+          {/* <LeftSection /> */}
           <RightSection />
-          {/* <SectionItem
-            title={sections.jobDescription.name}
-            items={sections.jobDescription.items}
-            renderItem={(item) => <JobSection item={item} />}
-          /> */}
-        </Paginate.Columns>
+        </Paginate.Section>
       </Paginate>
     </>
   );

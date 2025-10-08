@@ -8,7 +8,7 @@ export const Paginate = Object.assign(
     ref,
   ) {
     return (
-      <div ref={ref} {...props}>
+      <div ref={ref} {...props} data-paginate="main">
         {children}
       </div>
     );
