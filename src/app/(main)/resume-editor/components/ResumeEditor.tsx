@@ -1,16 +1,15 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useFormContext } from "react-hook-form";
 
-import PersonalInfo from "./components/forms/PersonalInfo";
-import ResumeDescription from "./components/forms/ResumeDescription";
-import WorkExperience from "./components/forms/WorkExperience";
-import Education from "./components/forms/Education";
-import Skills from "./components/forms/Skills";
-import Summary from "./components/forms/Summary";
-import ResumeSteps from "./components/CreateResumeSteps";
+import PersonalInfo from "./forms/PersonalInfo";
+import ResumeDescription from "./forms/ResumeDescription";
+import WorkExperience from "./forms/WorkExperience";
+import Education from "./forms/Education";
+import Skills from "./forms/Skills";
+import Summary from "./forms/Summary";
+import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 
 const resumeSections: {
@@ -49,18 +48,6 @@ const resumeSections: {
     item: <Summary />,
   },
 ];
-
-// Use in case we need to remember the number of step from URL params
-const useWithParamsNavigation = () => {
-  const searchParams = useSearchParams();
-  const currentStep = searchParams.get("step") || resumeSections[0].slug;
-  const setStep = (slug: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("step", slug);
-    window.history.pushState(null, "", `?${newSearchParams.toString()}`);
-  };
-  return { currentStep, setStep };
-};
 
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const f = useFormContext();

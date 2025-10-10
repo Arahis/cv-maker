@@ -1,0 +1,181 @@
+import React, { useLayoutEffect } from "react";
+
+type Page = HTMLElement[];
+
+type PaginatedDomProps = {
+  ref: React.RefObject<HTMLElement | null>;
+};
+
+// TODO: Meybe try to use different types for block and text nodes
+type VNode = {
+  type: string; // тег (div, p, span) или "text"
+  props: Record<string, string>; // атрибуты (class, id, data-*, ...)
+  children: VNode[]; // дочерние VNode
+  text?: string; // содержимое для текстовых узлов
+};
+
+const PAGE_HEIGHT = 1123;
+
+// e.g. { 0: [SectionWrapperColumn1, SectionWrapperColumn2],
+// 1: [SectionWrapperColumn1, SectionWrapperColumn2] }
+// 2: NodeObject || {}
+
+function getBottom(node: Node): number {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rect = range.getBoundingClientRect();
+    return rect.bottom;
+  }
+  return (node as HTMLElement).getBoundingClientRect().bottom;
+}
+
+function elementToVNode(el: HTMLElement | Text): VNode {
+  if (el.nodeType === Node.TEXT_NODE) {
+    return {
+      type: "text",
+      props: {},
+      children: [],
+      text: el.textContent || "",
+    };
+  }
+
+  const props: Record<string, string> = {};
+  for (const { name, value } of (el as HTMLElement).attributes) {
+    props[name] = value;
+  }
+
+  return {
+    type: (el as HTMLElement).tagName.toLowerCase(),
+    props,
+    children: [],
+  };
+}
+
+function clonePathToVNode(
+  rootMap: WeakMap<Node, VNode>,
+  root: { value: VNode | null },
+  path: Node[],
+  newChild: Node,
+) {
+  let current: VNode | undefined;
+
+  for (const parent of path) {
+    const isColumnContainer =
+      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
+
+    // Если уже создавали клон этого уровня — используем его
+    const parentClone = rootMap.get(parent);
+
+    if (parentClone) {
+      current = parentClone;
+      continue;
+    }
+
+    const newParent: VNode = elementToVNode(parent as HTMLElement);
+
+    if (isColumnContainer) {
+      for (const col of parent.childNodes) {
+        const childClone = elementToVNode(col as HTMLElement);
+
+        newParent.children.push(childClone);
+        rootMap.set(col, childClone);
+      }
+    }
+
+    if (current) {
+      current.children.push(newParent);
+    }
+
+    rootMap.set(parent, newParent);
+    current = newParent;
+    root.value ??= newParent;
+  }
+
+  // добавляем переносимый узел
+  // const newVChild = elementToVNode(newChild as HTMLElement);
+  // if (current) current.children.push(newVChild);
+
+  // Child part check
+  const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
+  const childClone = rootMap.get(newChild);
+  if (!childClone) {
+    rootMap.set(newChild, newChildVNode);
+    if (current) {
+      current.children.push(newChildVNode);
+    }
+  }
+}
+
+function getProcessNode(
+  pageIndex: { value: number },
+  pageBottom: { value: number },
+  chunks: VNode[][],
+  root: { value: VNode | null },
+) {
+  let rootMap = new Map<Node, VNode>();
+
+  function handle(node: Node, path: Node[], isLastChild: boolean) {
+    const bottom = getBottom(node);
+    // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
+    if (isLastChild) {
+      // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
+      if (bottom !== undefined && bottom > pageBottom.value) {
+        if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
+        chunks[pageIndex.value].push(root.value!);
+        pageIndex.value += 1;
+        pageBottom.value += PAGE_HEIGHT;
+        root.value = null;
+        rootMap = new Map();
+      }
+    }
+
+    clonePathToVNode(rootMap, root, path, node);
+  }
+
+  const processNode = (node: Node, path: Node[] = []) => {
+    const isLastChild = (node as HTMLElement).childNodes.length === 0;
+
+    // Смысл в том чтобы начинать обработку с детей, а потом уже с родителя
+    for (const child of (node as HTMLElement).childNodes) {
+      processNode(child, [...path, node]);
+    }
+
+    handle(node, path, isLastChild);
+  };
+  return processNode;
+}
+
+const usePaginateDom = ({ ref }: PaginatedDomProps) => {
+  const [pages, setPages] = React.useState<Page[]>([]);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+
+    const chunks: VNode[][] = [[]];
+    const currentChunk: VNode[] = [];
+    const currentIndex = { value: 0 };
+    const pageBottom = { value: PAGE_HEIGHT };
+    const root: { value: VNode | null } = { value: null };
+
+    const processNode = getProcessNode(currentIndex, pageBottom, chunks, root);
+
+    for (const child of ref.current.childNodes) {
+      processNode(child);
+
+      if (root.value) {
+        if (!chunks[currentIndex.value]) chunks[currentIndex.value] = [];
+
+        chunks[currentIndex.value].push(root.value);
+        root.value = null;
+      }
+    }
+
+    console.log({ chunks });
+  }, [ref]);
+
+  console.log({ pages });
+  return pages;
+};
+
+export default usePaginateDom;

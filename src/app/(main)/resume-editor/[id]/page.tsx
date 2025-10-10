@@ -5,13 +5,13 @@ export const metadata = {
   description: "Create and edit your resumes here",
 };
 
-const Page = ({ params }: { params: { id: string } }) => {
-  const resumeId = params.id;
+const Page = async ({ params }: { params: { id: string } }) => {
+  const { id } = await params;
 
   return (
     <main className="">
       <div className="flex w-full">
-        <ResumeApp resumeId={resumeId} />
+        <ResumeApp resumeId={id} />
       </div>
     </main>
   );

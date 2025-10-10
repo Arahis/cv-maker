@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ResumeEditor from "../ResumeEditor";
-import ResumePreview from "../ResumePreview";
+import ResumeEditor from "./ResumeEditor";
+import ResumePreview from "./ResumePreview";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
@@ -39,14 +39,16 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
   if (valid === null) return <p>Загрузка...</p>;
   if (!valid) return notFound();
   return (
-    <Form {...f}>
-      <div className="w-full md:w-1/2">
-        <ResumeEditor resumeId={resumeId} />
-      </div>
-      <div className="hidden w-1/2 md:flex">
-        <ResumePreview />
-      </div>
-    </Form>
+    <div className="flex h-screen w-full">
+      <Form {...f}>
+        <div className="w-full overflow-y-auto border-r md:w-1/2">
+          <ResumeEditor resumeId={resumeId} />
+        </div>
+        <div className="hidden h-screen w-1/2 overflow-y-auto md:flex">
+          <ResumePreview />
+        </div>
+      </Form>
+    </div>
   );
 };
 
