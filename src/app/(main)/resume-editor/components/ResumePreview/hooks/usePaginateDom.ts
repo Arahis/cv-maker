@@ -6,12 +6,12 @@ type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
 };
 
+// TODO: Meybe try to use different types for block and text nodes
 type VNode = {
   type: string; // тег (div, p, span) или "text"
   props: Record<string, string>; // атрибуты (class, id, data-*, ...)
   children: VNode[]; // дочерние VNode
   text?: string; // содержимое для текстовых узлов
-  bottom?: number; // нижняя граница элемента (для измерения)
 };
 
 const PAGE_HEIGHT = 1123;
@@ -20,11 +20,14 @@ const PAGE_HEIGHT = 1123;
 // 1: [SectionWrapperColumn1, SectionWrapperColumn2] }
 // 2: NodeObject || {}
 
-function getTextNodeBottom(textNode: Text): number {
-  const range = document.createRange();
-  range.selectNodeContents(textNode);
-  const rect = range.getBoundingClientRect();
-  return rect.bottom;
+function getBottom(node: Node): number {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rect = range.getBoundingClientRect();
+    return rect.bottom;
+  }
+  return (node as HTMLElement).getBoundingClientRect().bottom;
 }
 
 function elementToVNode(el: HTMLElement | Text): VNode {
@@ -34,7 +37,6 @@ function elementToVNode(el: HTMLElement | Text): VNode {
       props: {},
       children: [],
       text: el.textContent || "",
-      bottom: getTextNodeBottom(el as Text),
     };
   }
 
@@ -47,19 +49,21 @@ function elementToVNode(el: HTMLElement | Text): VNode {
     type: (el as HTMLElement).tagName.toLowerCase(),
     props,
     children: [],
-    bottom: (el as HTMLElement).getBoundingClientRect().bottom,
   };
 }
 
 function clonePathToVNode(
-  rootMap: Map<VNode, VNode>,
+  rootMap: WeakMap<Node, VNode>,
   root: { value: VNode | null },
-  path: VNode[],
-  newChild: VNode,
+  path: Node[],
+  newChild: Node,
 ) {
   let current: VNode | undefined;
 
   for (const parent of path) {
+    const isColumnContainer =
+      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
+
     // Если уже создавали клон этого уровня — используем его
     const parentClone = rootMap.get(parent);
 
@@ -68,11 +72,16 @@ function clonePathToVNode(
       continue;
     }
 
-    const newParent: VNode = {
-      type: parent.type,
-      props: { ...parent.props },
-      children: [],
-    };
+    const newParent: VNode = elementToVNode(parent as HTMLElement);
+
+    if (isColumnContainer) {
+      for (const col of parent.childNodes) {
+        const childClone = elementToVNode(col as HTMLElement);
+
+        newParent.children.push(childClone);
+        rootMap.set(col, childClone);
+      }
+    }
 
     if (current) {
       current.children.push(newParent);
@@ -83,12 +92,17 @@ function clonePathToVNode(
     root.value ??= newParent;
   }
 
+  // добавляем переносимый узел
+  // const newVChild = elementToVNode(newChild as HTMLElement);
+  // if (current) current.children.push(newVChild);
+
   // Child part check
+  const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
   const childClone = rootMap.get(newChild);
   if (!childClone) {
-    rootMap.set(newChild, newChild);
+    rootMap.set(newChild, newChildVNode);
     if (current) {
-      current.children.push(newChild);
+      current.children.push(newChildVNode);
     }
   }
 }
@@ -99,13 +113,14 @@ function getProcessNode(
   chunks: VNode[][],
   root: { value: VNode | null },
 ) {
-  let rootMap = new Map<VNode, VNode>();
+  let rootMap = new Map<Node, VNode>();
 
-  function handle(vNode: VNode, path: VNode[], isLastChild: boolean) {
+  function handle(node: Node, path: Node[], isLastChild: boolean) {
+    const bottom = getBottom(node);
     // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
     if (isLastChild) {
       // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
-      if (vNode.bottom !== undefined && vNode.bottom > pageBottom.value) {
+      if (bottom !== undefined && bottom > pageBottom.value) {
         if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
         chunks[pageIndex.value].push(root.value!);
         pageIndex.value += 1;
@@ -115,20 +130,18 @@ function getProcessNode(
       }
     }
 
-    clonePathToVNode(rootMap, root, path, vNode);
+    clonePathToVNode(rootMap, root, path, node);
   }
 
-  const processNode = (node: Node, path: VNode[] = []) => {
-    const vNode = elementToVNode(node as HTMLElement);
-
+  const processNode = (node: Node, path: Node[] = []) => {
     const isLastChild = (node as HTMLElement).childNodes.length === 0;
 
     // Смысл в том чтобы начинать обработку с детей, а потом уже с родителя
     for (const child of (node as HTMLElement).childNodes) {
-      processNode(child, [...path, vNode]);
+      processNode(child, [...path, node]);
     }
 
-    handle(vNode, path, isLastChild);
+    handle(node, path, isLastChild);
   };
   return processNode;
 }

@@ -17,22 +17,22 @@ const HeaderSection = () => {
         </Paginate.Section>
         <Paginate.Section className="pt-2">
           <Paginate.Section className="flex items-center gap-2">
-            {/* <Icon name="location" size={16} /> */}
+            <Icon name="location" size={16} />
             <Paginate.Text>Address</Paginate.Text>
           </Paginate.Section>
           <Paginate.Section className="flex w-full">
             <div className="flex flex-1 items-center gap-2">
-              {/* <Icon name="phone" size={16} /> */}
+              <Icon name="phone" size={16} />
               <Paginate.Text>Phone</Paginate.Text>
             </div>
-            {/* <div className="flex flex-1 items-center gap-2">
+            <div className="flex flex-1 items-center gap-2">
               <Icon name="mail" size={16} />
               <Paginate.Text>Mail</Paginate.Text>
             </div>
             <div className="flex flex-1 items-center gap-2">
               <Icon name="web" size={16} />
               <Paginate.Text>Website</Paginate.Text>
-            </div> */}
+            </div>
           </Paginate.Section>
         </Paginate.Section>
       </Paginate.Section>

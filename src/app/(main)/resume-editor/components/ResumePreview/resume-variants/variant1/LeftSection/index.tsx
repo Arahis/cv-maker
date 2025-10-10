@@ -56,8 +56,10 @@ const LeftSection = () => {
           )}
         />
       </div> */}
-      <div className="mb-6">
-        <p className="text-[16px] uppercase">Social</p>
+      <div className="mb-6" datatype="left-section-wrapper">
+        <p className="text-[16px] uppercase" datatype="left-section-text">
+          Social
+        </p>
         {/* <div className="">
           <p className="font-serif">LinkedIn</p>
           <p className="">Years of education</p>
