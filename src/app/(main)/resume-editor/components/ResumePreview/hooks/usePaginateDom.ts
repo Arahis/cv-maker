@@ -6,7 +6,7 @@ type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
 };
 
-// TODO: Meybe try to use different types for block and text nodes
+// TODO: Maybe try to use different types for block and text nodes
 type VNode = {
   type: string; // тег (div, p, span) или "text"
   props: Record<string, string>; // атрибуты (class, id, data-*, ...)
@@ -15,10 +15,6 @@ type VNode = {
 };
 
 const PAGE_HEIGHT = 1123;
-
-// e.g. { 0: [SectionWrapperColumn1, SectionWrapperColumn2],
-// 1: [SectionWrapperColumn1, SectionWrapperColumn2] }
-// 2: NodeObject || {}
 
 function getBottom(node: Node): number {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -92,10 +88,6 @@ function clonePathToVNode(
     root.value ??= newParent;
   }
 
-  // добавляем переносимый узел
-  // const newVChild = elementToVNode(newChild as HTMLElement);
-  // if (current) current.children.push(newVChild);
-
   // Child part check
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
   const childClone = rootMap.get(newChild);
@@ -153,7 +145,6 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
     if (!ref.current) return;
 
     const chunks: VNode[][] = [[]];
-    const currentChunk: VNode[] = [];
     const currentIndex = { value: 0 };
     const pageBottom = { value: PAGE_HEIGHT };
     const root: { value: VNode | null } = { value: null };
@@ -171,11 +162,32 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
       }
     }
 
-    console.log({ chunks });
+    const newPages: Page[] = chunks.map((chunk) =>
+      chunk.map((vNode) => vNodeToElement(vNode) as HTMLElement),
+    );
+
+    setPages(newPages);
   }, [ref]);
 
-  console.log({ pages });
   return pages;
+};
+
+const vNodeToElement = (vNode: VNode): Node => {
+  if (vNode.type === "text") {
+    return document.createTextNode(vNode.text || "");
+  }
+
+  const el = document.createElement(vNode.type);
+
+  for (const [key, value] of Object.entries(vNode.props)) {
+    el.setAttribute(key, value);
+  }
+
+  for (const child of vNode.children) {
+    el.appendChild(vNodeToElement(child));
+  }
+
+  return el;
 };
 
 export default usePaginateDom;

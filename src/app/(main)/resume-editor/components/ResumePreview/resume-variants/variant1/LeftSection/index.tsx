@@ -32,7 +32,7 @@ const LeftSection = () => {
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
-      {/* <SectionItem
+      <SectionItem
         title={sections.education.name}
         renderItem={(item) => (
           <div>
@@ -43,8 +43,8 @@ const LeftSection = () => {
         )}
         items={sections.education.items}
         className="mb-6"
-      /> */}
-      {/* <div className="mb-6">
+      />
+      <div className="mb-6">
         <SectionItem
           title={sections.skills.name}
           items={sections.skills.items}
@@ -55,15 +55,15 @@ const LeftSection = () => {
             </React.Fragment>
           )}
         />
-      </div> */}
+      </div>
       <div className="mb-6" datatype="left-section-wrapper">
         <p className="text-[16px] uppercase" datatype="left-section-text">
           Social
         </p>
-        {/* <div className="">
+        <div className="">
           <p className="font-serif">LinkedIn</p>
           <p className="">Years of education</p>
-        </div> */}
+        </div>
       </div>
     </Paginate.Section>
   );
