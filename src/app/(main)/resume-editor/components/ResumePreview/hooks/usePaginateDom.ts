@@ -1,4 +1,5 @@
 import React, { useLayoutEffect } from "react";
+import { no } from "zod/v4/locales";
 
 type Page = HTMLElement[];
 
@@ -53,6 +54,7 @@ function clonePathToVNode(
   root: { value: VNode | null },
   path: Node[],
   newChild: Node,
+  pageBottom: number,
 ) {
   let current: VNode | undefined;
 
@@ -89,7 +91,14 @@ function clonePathToVNode(
   }
 
   // Child part check
+  const bottom = getBottom(newChild);
+  if (newChild.nodeType === Node.TEXT_NODE) {
+    console.log({ bottom, pageBottom, sr: bottom > pageBottom });
+    const dividedChildren = divideTextNode(newChild as Text, pageBottom);
+    console.log({ dividedChildren });
+  }
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
+
   const childClone = rootMap.get(newChild);
   if (!childClone) {
     rootMap.set(newChild, newChildVNode);
@@ -97,6 +106,82 @@ function clonePathToVNode(
       current.children.push(newChildVNode);
     }
   }
+}
+
+// Функция для получения реального количества строк текста в элементе
+// UPD: не сработало
+function mergeRectsToLines(rects: DOMRectList): DOMRect[] {
+  const lines: DOMRect[] = [];
+  const EPS = 5; // допуск на погрешность в пикселях
+
+  for (const rect of Array.from(rects)) {
+    // Берём последний элемент из lines
+    const last = lines[lines.length - 1];
+
+    // Если нет послднего элемента или Последний элемент - нынещний rect по модулю больше EPS, добавляем в lines новый элемент
+    if (!last || Math.abs(last.bottom - rect.top) > EPS) {
+      lines.push(rect);
+    } else {
+      const line = new DOMRect(
+        Math.min(last.left, rect.left),
+        Math.min(last.top, rect.top),
+        Math.max(last.right, rect.right) - Math.min(last.left, rect.left),
+        Math.max(last.bottom, rect.bottom) - Math.min(last.top, rect.top),
+      );
+      lines[lines.length - 1] = line;
+    }
+  }
+
+  return lines;
+}
+
+function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
+  const text = textNode.textContent || "";
+  let left = 0;
+  let right = text.length;
+  let splitOffset = text.length; // Assume that all the text fits on the first iteration
+
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+
+    const range = document.createRange();
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, mid);
+
+    // Get the dimensions of the selected range
+    const rect = range.getBoundingClientRect();
+
+    if (rect.bottom <= pageBottom) {
+      left = mid + 1;
+    } else {
+      right = mid;
+      splitOffset = mid;
+    }
+  }
+  return splitOffset;
+}
+
+function divideTextNode(node: Text, pageBottom: number): VNode[] {
+  const splitOffset = binarySearchSplitIndex(node, pageBottom);
+
+  const firstPart = node.textContent?.slice(0, splitOffset) || "";
+  const secondPart = node.textContent?.slice(splitOffset) || "";
+
+  const firstVNode: VNode = {
+    type: "text",
+    props: {},
+    children: [],
+    text: firstPart,
+  };
+
+  const secondVNode: VNode = {
+    type: "text",
+    props: {},
+    children: [],
+    text: secondPart,
+  };
+
+  return [firstVNode, secondVNode];
 }
 
 function getProcessNode(
@@ -112,7 +197,7 @@ function getProcessNode(
     // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
     if (isLastChild) {
       // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
-      if (bottom !== undefined && bottom > pageBottom.value) {
+      if (bottom > pageBottom.value) {
         if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
         chunks[pageIndex.value].push(root.value!);
         pageIndex.value += 1;
@@ -122,7 +207,7 @@ function getProcessNode(
       }
     }
 
-    clonePathToVNode(rootMap, root, path, node);
+    clonePathToVNode(rootMap, root, path, node, pageBottom.value);
   }
 
   const processNode = (node: Node, path: Node[] = []) => {

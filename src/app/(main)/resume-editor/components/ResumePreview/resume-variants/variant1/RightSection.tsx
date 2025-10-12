@@ -20,7 +20,7 @@ export const sections = {
         years: "2020-2021",
         companyName: "Simple company",
         description:
-          "Results-driven Web Developer with 2+ years of experience building responsive, user-friendly web applications. Skilled in developing and maintaining modern front-end interfaces using React, Redux, and TypeScript, with a strong foundation in JavaScript and UI/UX best practices. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack.",
+          "Results-driven Web Developer with 2+ years of experience building responsive, user-friendly web applications. Skilled in developing and maintaining modern front-end interfaces using React, Redux, and TypeScript, with a strong foundation in JavaScript and UI/UX best practices. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack.",
       },
       {
         position: "Web Developer",
@@ -30,14 +30,14 @@ export const sections = {
         description:
           "Results-driven Web Developer with 2+ years of experience building responsive, user-friendly web applications. Skilled in developing and maintaining modern front-end interfaces using React, Redux, and TypeScript, with a strong foundation in JavaScript and UI/UX best practices. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack.",
       },
-      {
-        position: "Web Developer",
-        city: "Melbourne 3",
-        years: "2020-2021",
-        companyName: "Simple company",
-        description:
-          "Results-driven Web Developer with 2+ years of experience building responsive, user-friendly web applications. Skilled in developing and maintaining modern front-end interfaces using React, Redux, and TypeScript, with a strong foundation in JavaScript and UI/UX best practices. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack.",
-      },
+      // {
+      //   position: "Web Developer",
+      //   city: "Melbourne 3",
+      //   years: "2020-2021",
+      //   companyName: "Simple company",
+      //   description:
+      //     "Results-driven Web Developer with 2+ years of experience building responsive, user-friendly web applications. Skilled in developing and maintaining modern front-end interfaces using React, Redux, and TypeScript, with a strong foundation in JavaScript and UI/UX best practices. Experienced in collaborating within agile teams, integrating APIs, optimizing performance, and delivering clean, maintainable code. Motivated to continue learning backend technologies (Node.js, Express) to contribute across the full stack.",
+      // },
     ],
   },
 };
@@ -59,7 +59,7 @@ export function JobSection({
   idx: number;
 }) {
   return (
-    <Paginate.Section
+    <Paginate.Columns
       className="mb-6 flex"
       datatype={`cv_info-job_section-wrapper-${idx}`}
     >
@@ -68,13 +68,13 @@ export function JobSection({
         <p>{item.city}</p>
         <p>{item.years}</p>
       </Paginate.Section>
-      <Paginate.Section>
+      <Paginate.Section className="w-[70%]">
         <p className="mb-1 font-bold uppercase">{item.companyName}</p>
         <Paginate.Text datatype={`cv_info-job_section-text-${idx}`}>
           {item.description}
         </Paginate.Text>
       </Paginate.Section>
-    </Paginate.Section>
+    </Paginate.Columns>
   );
 }
 
