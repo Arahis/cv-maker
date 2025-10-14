@@ -91,12 +91,6 @@ function clonePathToVNode(
   }
 
   // Child part check
-  const bottom = getBottom(newChild);
-  if (newChild.nodeType === Node.TEXT_NODE) {
-    console.log({ bottom, pageBottom, sr: bottom > pageBottom });
-    const dividedChildren = divideTextNode(newChild as Text, pageBottom);
-    console.log({ dividedChildren });
-  }
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
 
   const childClone = rootMap.get(newChild);
@@ -161,7 +155,7 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
   return splitOffset;
 }
 
-function divideTextNode(node: Text, pageBottom: number): VNode[] {
+function divideTextNode(node: Text, pageBottom: number): Node[] {
   const splitOffset = binarySearchSplitIndex(node, pageBottom);
 
   const firstPart = node.textContent?.slice(0, splitOffset) || "";
@@ -181,7 +175,7 @@ function divideTextNode(node: Text, pageBottom: number): VNode[] {
     text: secondPart,
   };
 
-  return [firstVNode, secondVNode];
+  return [vNodeToTextNode(firstVNode), vNodeToTextNode(secondVNode)];
 }
 
 function getProcessNode(
@@ -192,18 +186,22 @@ function getProcessNode(
 ) {
   let rootMap = new Map<Node, VNode>();
 
+  function closeCurrentPage() {
+    if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
+    chunks[pageIndex.value].push(root.value!);
+    pageIndex.value += 1;
+    pageBottom.value += PAGE_HEIGHT;
+    root.value = null;
+    rootMap = new Map();
+  }
+
   function handle(node: Node, path: Node[], isLastChild: boolean) {
     const bottom = getBottom(node);
     // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
     if (isLastChild) {
       // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
       if (bottom > pageBottom.value) {
-        if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
-        chunks[pageIndex.value].push(root.value!);
-        pageIndex.value += 1;
-        pageBottom.value += PAGE_HEIGHT;
-        root.value = null;
-        rootMap = new Map();
+        closeCurrentPage();
       }
     }
 
@@ -212,6 +210,25 @@ function getProcessNode(
 
   const processNode = (node: Node, path: Node[] = []) => {
     const isLastChild = (node as HTMLElement).childNodes.length === 0;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const bottom = getBottom(node);
+
+      closeCurrentPage();
+
+      if (bottom > pageBottom.value) {
+        const [firstNode, secondNode] = divideTextNode(
+          node as Text,
+          pageBottom.value,
+        );
+        processNode(firstNode, path);
+
+        processNode(secondNode, path);
+        return;
+      }
+
+      handle(node, path, true);
+      return;
+    }
 
     // Смысл в том чтобы начинать обработку с детей, а потом уже с родителя
     for (const child of (node as HTMLElement).childNodes) {
@@ -257,9 +274,13 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
   return pages;
 };
 
+function vNodeToTextNode(vNode: VNode): Node {
+  return document.createTextNode(vNode.text || "");
+}
+
 const vNodeToElement = (vNode: VNode): Node => {
   if (vNode.type === "text") {
-    return document.createTextNode(vNode.text || "");
+    return vNodeToTextNode(vNode);
   }
 
   const el = document.createElement(vNode.type);
