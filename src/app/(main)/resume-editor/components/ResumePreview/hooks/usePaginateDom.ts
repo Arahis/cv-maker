@@ -1,5 +1,4 @@
 import React, { useLayoutEffect } from "react";
-import { no } from "zod/v4/locales";
 
 type Page = HTMLElement[];
 
@@ -131,10 +130,13 @@ function mergeRectsToLines(rects: DOMRectList): DOMRect[] {
 
 function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
   const text = textNode.textContent || "";
+  if (!text.length) return 0;
+
   let left = 0;
   let right = text.length;
-  let splitOffset = text.length; // Assume that all the text fits on the first iteration
+  let mainRect = 0;
 
+  // --- Этап 1: бинарный поиск, где текст перестаёт помещаться ---
   while (left < right) {
     const mid = Math.floor((left + right) / 2);
 
@@ -142,17 +144,44 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
     range.setStart(textNode, 0);
     range.setEnd(textNode, mid);
 
-    // Get the dimensions of the selected range
+    const rngText = range.toString();
+
     const rect = range.getBoundingClientRect();
+    mainRect = rect.bottom;
 
     if (rect.bottom <= pageBottom) {
       left = mid + 1;
     } else {
       right = mid;
-      splitOffset = mid;
     }
   }
-  return splitOffset;
+
+  const splitOffset = Math.max(0, left - 1);
+
+  // --- Этап 2: доходим до конца визуальной строки ---
+  const range = document.createRange();
+  range.setStart(textNode, 0);
+  range.setEnd(textNode, splitOffset);
+  let prevBottom = range.getBoundingClientRect().bottom;
+
+  let idx = splitOffset;
+  const EPS = 1;
+
+  while (idx < text.length) {
+    range.setEnd(textNode, idx + 1);
+    const rngText2 = range.toString();
+    const rect = range.getBoundingClientRect();
+
+    // если нижняя граница изменилась — значит началась новая строка
+    if (rect.bottom - prevBottom > EPS) break;
+    idx++;
+    prevBottom = rect.bottom;
+  }
+
+  // --- Этап 3: откат до пробела, если не хотим резать слово ---
+  while (idx > 0 && !/[\s\u00A0]/.test(text[idx - 1])) idx--;
+
+  return idx > 0 ? idx : splitOffset;
 }
 
 function divideTextNode(node: Text, pageBottom: number): Node[] {
@@ -213,14 +242,14 @@ function getProcessNode(
     if (node.nodeType === Node.TEXT_NODE) {
       const bottom = getBottom(node);
 
-      closeCurrentPage();
-
       if (bottom > pageBottom.value) {
         const [firstNode, secondNode] = divideTextNode(
           node as Text,
           pageBottom.value,
         );
         processNode(firstNode, path);
+
+        closeCurrentPage();
 
         processNode(secondNode, path);
         return;
@@ -263,6 +292,8 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
         root.value = null;
       }
     }
+
+    console.log({ chunks });
 
     const newPages: Page[] = chunks.map((chunk) =>
       chunk.map((vNode) => vNodeToElement(vNode) as HTMLElement),
