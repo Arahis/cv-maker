@@ -14,7 +14,7 @@ type VNode = {
   text?: string; // содержимое для текстовых узлов
 };
 
-const PAGE_HEIGHT = 1123;
+const PAGE_HEIGHT = 1123 - 24;
 
 function getBottom(node: Node): number {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -134,7 +134,6 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
 
   let left = 0;
   let right = text.length;
-  let mainRect = 0;
 
   // --- Этап 1: бинарный поиск, где текст перестаёт помещаться ---
   while (left < right) {
@@ -144,10 +143,7 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
     range.setStart(textNode, 0);
     range.setEnd(textNode, mid);
 
-    const rngText = range.toString();
-
     const rect = range.getBoundingClientRect();
-    mainRect = rect.bottom;
 
     if (rect.bottom <= pageBottom) {
       left = mid + 1;
@@ -169,7 +165,6 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
 
   while (idx < text.length) {
     range.setEnd(textNode, idx + 1);
-    const rngText2 = range.toString();
     const rect = range.getBoundingClientRect();
 
     // если нижняя граница изменилась — значит началась новая строка

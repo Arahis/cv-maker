@@ -7,6 +7,7 @@ import React, { useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import ResumeVariant1 from "./resume-variants/variant1";
 import usePaginateDom from "./hooks/usePaginateDom";
+import { useReactToPrint } from "react-to-print";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ type ResumeWrapperProps = {
   height: number;
 };
 
-const ResumeWrapper = ({
+const ResumeWrapperPages = ({
   children,
   scale,
   width,
@@ -24,11 +25,19 @@ const ResumeWrapper = ({
   return (
     <div
       className="h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-      style={{ width, height }}
+      style={{ width: 794, height: 1123 }}
     >
-      <div className="p-8" style={{ zoom: scale }}>
+      <div className="p-[24px]" style={{ zoom: scale }}>
         {children}
       </div>
+    </div>
+  );
+};
+
+const ResumeWrapper = ({ children }: ResumeWrapperProps) => {
+  return (
+    <div className="h-fit w-full bg-white" style={{ width: 794, height: 1123 }}>
+      <div className="p-[24px]">{children}</div>
     </div>
   );
 };
@@ -38,6 +47,8 @@ const ResumePreview = () => {
   const formData = useWatch<ResumeForm>({ control });
 
   const ref = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLButtonElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
   const pages = usePaginateDom({ ref });
 
   console.log({ formData });
@@ -52,10 +63,11 @@ const ResumePreview = () => {
       className="relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50"
     >
       <button
+        ref={contentRef}
         disabled
         id="printableArea"
         className={cn(
-          "pointer-events-none absolute mb-4 text-left text-[14px] opacity-100",
+          "pointer-events-none absolute mb-4 border-2 border-green-600 text-left text-[14px] opacity-0",
         )}
       >
         <ResumeWrapper scale={scale} width={width} height={height}>
@@ -73,7 +85,7 @@ const ResumePreview = () => {
               : zoomIn
                 ? "cursor-zoom-in"
                 : "cursor-zoom-out",
-            "mb-4 text-left text-[14px]",
+            "mb-4 border-2 border-amber-700 text-left text-[14px]",
           )}
         >
           <ResumeWrapper scale={scale} width={width} height={height}>

@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+@page {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
