@@ -85,7 +85,7 @@ const ResumePreview = () => {
               : zoomIn
                 ? "cursor-zoom-in"
                 : "cursor-zoom-out",
-            "mb-4 border-2 border-amber-700 text-left text-[14px]",
+            "mb-4 text-left text-[14px]",
           )}
         >
           <ResumeWrapper scale={scale} width={width} height={height}>

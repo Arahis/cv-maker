@@ -6,14 +6,14 @@ type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
 };
 
-// TODO: Maybe try to use different types for block and text nodes
 type VNode = {
-  type: string; // тег (div, p, span) или "text"
-  props: Record<string, string>; // атрибуты (class, id, data-*, ...)
-  children: VNode[]; // дочерние VNode
-  text?: string; // содержимое для текстовых узлов
+  type: string;
+  props: Record<string, string>;
+  children: VNode[];
+  text?: string;
 };
 
+// TODO: Make it in a variable which excludes padding top and bottom from the page height.
 const PAGE_HEIGHT = 1123 - 24;
 
 function getBottom(node: Node): number {
@@ -53,7 +53,6 @@ function clonePathToVNode(
   root: { value: VNode | null },
   path: Node[],
   newChild: Node,
-  pageBottom: number,
 ) {
   let current: VNode | undefined;
 
@@ -61,7 +60,6 @@ function clonePathToVNode(
     const isColumnContainer =
       (parent as HTMLElement).getAttribute("data-paginate") === "columns";
 
-    // Если уже создавали клон этого уровня — используем его
     const parentClone = rootMap.get(parent);
 
     if (parentClone) {
@@ -99,33 +97,6 @@ function clonePathToVNode(
       current.children.push(newChildVNode);
     }
   }
-}
-
-// Функция для получения реального количества строк текста в элементе
-// UPD: не сработало
-function mergeRectsToLines(rects: DOMRectList): DOMRect[] {
-  const lines: DOMRect[] = [];
-  const EPS = 5; // допуск на погрешность в пикселях
-
-  for (const rect of Array.from(rects)) {
-    // Берём последний элемент из lines
-    const last = lines[lines.length - 1];
-
-    // Если нет послднего элемента или Последний элемент - нынещний rect по модулю больше EPS, добавляем в lines новый элемент
-    if (!last || Math.abs(last.bottom - rect.top) > EPS) {
-      lines.push(rect);
-    } else {
-      const line = new DOMRect(
-        Math.min(last.left, rect.left),
-        Math.min(last.top, rect.top),
-        Math.max(last.right, rect.right) - Math.min(last.left, rect.left),
-        Math.max(last.bottom, rect.bottom) - Math.min(last.top, rect.top),
-      );
-      lines[lines.length - 1] = line;
-    }
-  }
-
-  return lines;
 }
 
 function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
@@ -208,6 +179,7 @@ function getProcessNode(
   chunks: VNode[][],
   root: { value: VNode | null },
 ) {
+  // The most important part. It keeps original element (Node) as the key, and as the value keeps the VNode, made from the original Node. It is used to take action, mutate or check VNodes.
   let rootMap = new Map<Node, VNode>();
 
   function closeCurrentPage() {
@@ -219,17 +191,30 @@ function getProcessNode(
     rootMap = new Map();
   }
 
+  function markMarginRemove(
+    path: Node[],
+    type: "top" | "bottom",
+    rootMap: WeakMap<Node, VNode>,
+  ) {
+    const key =
+      type === "top" ? "data-remove-spacing-top" : "data-remove-spacing-bottom";
+
+    for (const el of path) {
+      const parentNode = rootMap.get(el);
+      if (!parentNode) continue;
+      parentNode.props[key] = "true";
+    }
+  }
+
   function handle(node: Node, path: Node[], isLastChild: boolean) {
     const bottom = getBottom(node);
-    // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
     if (isLastChild) {
-      // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
       if (bottom > pageBottom.value) {
         closeCurrentPage();
       }
     }
 
-    clonePathToVNode(rootMap, root, path, node, pageBottom.value);
+    clonePathToVNode(rootMap, root, path, node);
   }
 
   const processNode = (node: Node, path: Node[] = []) => {
@@ -242,11 +227,14 @@ function getProcessNode(
           node as Text,
           pageBottom.value,
         );
+        markMarginRemove(path, "bottom", rootMap);
         processNode(firstNode, path);
 
         closeCurrentPage();
 
         processNode(secondNode, path);
+        // Has to be here, because we don't have rootMap till upper line, as we renewed it with closeCurrentPage()
+        markMarginRemove(path, "top", rootMap);
         return;
       }
 
@@ -254,7 +242,7 @@ function getProcessNode(
       return;
     }
 
-    // Смысл в том чтобы начинать обработку с детей, а потом уже с родителя
+    // Start process with leaves (deepest child)
     for (const child of (node as HTMLElement).childNodes) {
       processNode(child, [...path, node]);
     }
@@ -287,8 +275,6 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
         root.value = null;
       }
     }
-
-    console.log({ chunks });
 
     const newPages: Page[] = chunks.map((chunk) =>
       chunk.map((vNode) => vNodeToElement(vNode) as HTMLElement),
