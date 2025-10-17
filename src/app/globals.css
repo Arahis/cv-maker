@@ -120,3 +120,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-remove-spacing-top] {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+[data-remove-spacing-bottom] {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+@page {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}

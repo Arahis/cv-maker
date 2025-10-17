@@ -6,19 +6,15 @@ type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
 };
 
-// TODO: Meybe try to use different types for block and text nodes
 type VNode = {
-  type: string; // тег (div, p, span) или "text"
-  props: Record<string, string>; // атрибуты (class, id, data-*, ...)
-  children: VNode[]; // дочерние VNode
-  text?: string; // содержимое для текстовых узлов
+  type: string;
+  props: Record<string, string>;
+  children: VNode[];
+  text?: string;
 };
 
-const PAGE_HEIGHT = 1123;
-
-// e.g. { 0: [SectionWrapperColumn1, SectionWrapperColumn2],
-// 1: [SectionWrapperColumn1, SectionWrapperColumn2] }
-// 2: NodeObject || {}
+// TODO: Make it in a variable which excludes padding top and bottom from the page height.
+const PAGE_HEIGHT = 1123 - 24;
 
 function getBottom(node: Node): number {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -64,7 +60,6 @@ function clonePathToVNode(
     const isColumnContainer =
       (parent as HTMLElement).getAttribute("data-paginate") === "columns";
 
-    // Если уже создавали клон этого уровня — используем его
     const parentClone = rootMap.get(parent);
 
     if (parentClone) {
@@ -92,12 +87,9 @@ function clonePathToVNode(
     root.value ??= newParent;
   }
 
-  // добавляем переносимый узел
-  // const newVChild = elementToVNode(newChild as HTMLElement);
-  // if (current) current.children.push(newVChild);
-
   // Child part check
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
+
   const childClone = rootMap.get(newChild);
   if (!childClone) {
     rootMap.set(newChild, newChildVNode);
@@ -107,26 +99,118 @@ function clonePathToVNode(
   }
 }
 
+function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
+  const text = textNode.textContent || "";
+  if (!text.length) return 0;
+
+  let left = 0;
+  let right = text.length;
+
+  // --- Этап 1: бинарный поиск, где текст перестаёт помещаться ---
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+
+    const range = document.createRange();
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, mid);
+
+    const rect = range.getBoundingClientRect();
+
+    if (rect.bottom <= pageBottom) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+
+  const splitOffset = Math.max(0, left - 1);
+
+  // --- Этап 2: доходим до конца визуальной строки ---
+  const range = document.createRange();
+  range.setStart(textNode, 0);
+  range.setEnd(textNode, splitOffset);
+  let prevBottom = range.getBoundingClientRect().bottom;
+
+  let idx = splitOffset;
+  const EPS = 1;
+
+  while (idx < text.length) {
+    range.setEnd(textNode, idx + 1);
+    const rect = range.getBoundingClientRect();
+
+    // если нижняя граница изменилась — значит началась новая строка
+    if (rect.bottom - prevBottom > EPS) break;
+    idx++;
+    prevBottom = rect.bottom;
+  }
+
+  // --- Этап 3: откат до пробела, если не хотим резать слово ---
+  while (idx > 0 && !/[\s\u00A0]/.test(text[idx - 1])) idx--;
+
+  return idx > 0 ? idx : splitOffset;
+}
+
+function divideTextNode(node: Text, pageBottom: number): Node[] {
+  const splitOffset = binarySearchSplitIndex(node, pageBottom);
+
+  const firstPart = node.textContent?.slice(0, splitOffset) || "";
+  const secondPart = node.textContent?.slice(splitOffset) || "";
+
+  const firstVNode: VNode = {
+    type: "text",
+    props: {},
+    children: [],
+    text: firstPart,
+  };
+
+  const secondVNode: VNode = {
+    type: "text",
+    props: {},
+    children: [],
+    text: secondPart,
+  };
+
+  return [vNodeToTextNode(firstVNode), vNodeToTextNode(secondVNode)];
+}
+
 function getProcessNode(
   pageIndex: { value: number },
   pageBottom: { value: number },
   chunks: VNode[][],
   root: { value: VNode | null },
 ) {
+  // The most important part. It keeps original element (Node) as the key, and as the value keeps the VNode, made from the original Node. It is used to take action, mutate or check VNodes.
   let rootMap = new Map<Node, VNode>();
+
+  function closeCurrentPage() {
+    if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
+    chunks[pageIndex.value].push(root.value!);
+    pageIndex.value += 1;
+    pageBottom.value += PAGE_HEIGHT;
+    root.value = null;
+    rootMap = new Map();
+  }
+
+  function markMarginRemove(
+    path: Node[],
+    type: "top" | "bottom",
+    rootMap: WeakMap<Node, VNode>,
+  ) {
+    const key =
+      type === "top" ? "data-remove-spacing-top" : "data-remove-spacing-bottom";
+
+    for (const el of path) {
+      const parentNode = rootMap.get(el);
+      if (!parentNode) continue;
+      parentNode.props[key] = "true";
+    }
+  }
 
   function handle(node: Node, path: Node[], isLastChild: boolean) {
     const bottom = getBottom(node);
-    // Проверка на высоты должна проходить только для самого глубокого элемента, ради этого и применяем технику обхода в глубину DFS
     if (isLastChild) {
-      // Если не помещается на текущую страницу — начинаем новый чанк. Обнуляем всё
-      if (bottom !== undefined && bottom > pageBottom.value) {
-        if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
-        chunks[pageIndex.value].push(root.value!);
-        pageIndex.value += 1;
-        pageBottom.value += PAGE_HEIGHT;
-        root.value = null;
-        rootMap = new Map();
+      if (bottom > pageBottom.value) {
+        closeCurrentPage();
       }
     }
 
@@ -135,8 +219,30 @@ function getProcessNode(
 
   const processNode = (node: Node, path: Node[] = []) => {
     const isLastChild = (node as HTMLElement).childNodes.length === 0;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const bottom = getBottom(node);
 
-    // Смысл в том чтобы начинать обработку с детей, а потом уже с родителя
+      if (bottom > pageBottom.value) {
+        const [firstNode, secondNode] = divideTextNode(
+          node as Text,
+          pageBottom.value,
+        );
+        markMarginRemove(path, "bottom", rootMap);
+        processNode(firstNode, path);
+
+        closeCurrentPage();
+
+        processNode(secondNode, path);
+        // Has to be here, because we don't have rootMap till upper line, as we renewed it with closeCurrentPage()
+        markMarginRemove(path, "top", rootMap);
+        return;
+      }
+
+      handle(node, path, true);
+      return;
+    }
+
+    // Start process with leaves (deepest child)
     for (const child of (node as HTMLElement).childNodes) {
       processNode(child, [...path, node]);
     }
@@ -153,7 +259,6 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
     if (!ref.current) return;
 
     const chunks: VNode[][] = [[]];
-    const currentChunk: VNode[] = [];
     const currentIndex = { value: 0 };
     const pageBottom = { value: PAGE_HEIGHT };
     const root: { value: VNode | null } = { value: null };
@@ -171,11 +276,36 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
       }
     }
 
-    console.log({ chunks });
+    const newPages: Page[] = chunks.map((chunk) =>
+      chunk.map((vNode) => vNodeToElement(vNode) as HTMLElement),
+    );
+
+    setPages(newPages);
   }, [ref]);
 
-  console.log({ pages });
   return pages;
+};
+
+function vNodeToTextNode(vNode: VNode): Node {
+  return document.createTextNode(vNode.text || "");
+}
+
+const vNodeToElement = (vNode: VNode): Node => {
+  if (vNode.type === "text") {
+    return vNodeToTextNode(vNode);
+  }
+
+  const el = document.createElement(vNode.type);
+
+  for (const [key, value] of Object.entries(vNode.props)) {
+    el.setAttribute(key, value);
+  }
+
+  for (const child of vNode.children) {
+    el.appendChild(vNodeToElement(child));
+  }
+
+  return el;
 };
 
 export default usePaginateDom;
