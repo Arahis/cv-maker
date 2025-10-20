@@ -54,8 +54,8 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
-  // ✅ Автосохранение в IndexedDB
-  useIndexedDBDebouncedSave(f.control, resumeId, 2000);
+  // Autosave в IndexedDB with debounce
+  useIndexedDBDebouncedSave(f.control, resumeId, 3000);
 
   return (
     <form onSubmit={f.handleSubmit((data) => console.log(data))}>

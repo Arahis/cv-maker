@@ -28,6 +28,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
       const data = await loadFormData(resumeId);
       if (!!data) {
         console.log({ data });
+        // TODO: figure out why I put it here
         f.reset(data.content);
       }
       setValid(!!data);
@@ -38,6 +39,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
 
   if (valid === null) return <p>Загрузка...</p>;
   if (!valid) return notFound();
+
   return (
     <div className="flex h-screen w-full">
       <Form {...f}>
