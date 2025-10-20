@@ -49,7 +49,7 @@ const ResumePreview = () => {
   const ref = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLButtonElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
-  const pages = usePaginateDom({ ref });
+  const pages = usePaginateDom({ ref, data: formData });
 
   console.log({ formData });
 
@@ -89,9 +89,7 @@ const ResumePreview = () => {
           )}
         >
           <ResumeWrapper scale={scale} width={width} height={height}>
-            {page.map((el, j) => (
-              <div key={j} dangerouslySetInnerHTML={{ __html: el.outerHTML }} />
-            ))}
+            {page}
           </ResumeWrapper>
         </button>
       ))}

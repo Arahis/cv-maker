@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from "react";
 
-type Page = HTMLElement[];
+type Page = React.ReactNode[];
 
 type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
@@ -106,7 +106,7 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
   let left = 0;
   let right = text.length;
 
-  // --- Этап 1: бинарный поиск, где текст перестаёт помещаться ---
+  // Step:1 find the maximum index that fits on the page
   while (left < right) {
     const mid = Math.floor((left + right) / 2);
 
@@ -125,7 +125,7 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
 
   const splitOffset = Math.max(0, left - 1);
 
-  // --- Этап 2: доходим до конца визуальной строки ---
+  // Step:2 find the exact line break
   const range = document.createRange();
   range.setStart(textNode, 0);
   range.setEnd(textNode, splitOffset);
@@ -138,13 +138,13 @@ function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
     range.setEnd(textNode, idx + 1);
     const rect = range.getBoundingClientRect();
 
-    // если нижняя граница изменилась — значит началась новая строка
+    // if the bottom goes further, we found the line break
     if (rect.bottom - prevBottom > EPS) break;
     idx++;
     prevBottom = rect.bottom;
   }
 
-  // --- Этап 3: откат до пробела, если не хотим резать слово ---
+  // Step:3 move back to the last whitespace
   while (idx > 0 && !/[\s\u00A0]/.test(text[idx - 1])) idx--;
 
   return idx > 0 ? idx : splitOffset;
@@ -252,7 +252,8 @@ function getProcessNode(
   return processNode;
 }
 
-const usePaginateDom = ({ ref }: PaginatedDomProps) => {
+// TODO: Change "any" type to the specific one representing the form data
+const usePaginateDom = ({ ref, data }: PaginatedDomProps & { data: any }) => {
   const [pages, setPages] = React.useState<Page[]>([]);
 
   useLayoutEffect(() => {
@@ -276,12 +277,14 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
       }
     }
 
+    const renderVNode = getRenderVNode();
+
     const newPages: Page[] = chunks.map((chunk) =>
-      chunk.map((vNode) => vNodeToElement(vNode) as HTMLElement),
+      chunk.map((vNode) => renderVNode(vNode)),
     );
 
     setPages(newPages);
-  }, [ref]);
+  }, [ref, data]);
 
   return pages;
 };
@@ -289,23 +292,27 @@ const usePaginateDom = ({ ref }: PaginatedDomProps) => {
 function vNodeToTextNode(vNode: VNode): Node {
   return document.createTextNode(vNode.text || "");
 }
+function getRenderVNode() {
+  let keyCounter = 0;
 
-const vNodeToElement = (vNode: VNode): Node => {
-  if (vNode.type === "text") {
-    return vNodeToTextNode(vNode);
-  }
+  return function renderVNode(vNode: VNode): React.ReactNode {
+    keyCounter++;
 
-  const el = document.createElement(vNode.type);
+    if (vNode.type === "text") return vNode.text;
 
-  for (const [key, value] of Object.entries(vNode.props)) {
-    el.setAttribute(key, value);
-  }
+    // Remove "class" property conflict with React
+    const { class: className, ...props } = vNode.props;
 
-  for (const child of vNode.children) {
-    el.appendChild(vNodeToElement(child));
-  }
-
-  return el;
-};
+    return React.createElement(
+      vNode.type,
+      {
+        ...props,
+        className,
+        key: keyCounter,
+      },
+      vNode.children.map(renderVNode),
+    );
+  };
+}
 
 export default usePaginateDom;
