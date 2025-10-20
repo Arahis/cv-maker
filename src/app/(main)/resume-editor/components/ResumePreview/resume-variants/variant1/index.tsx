@@ -6,12 +6,18 @@ import RightSection, { JobSection, sections } from "./RightSection";
 import SectionItem from "./SectionItem";
 import { Paginate } from "../../Paginate";
 
-const ResumeVariant1 = ({ ref }: { ref: React.Ref<HTMLDivElement> }) => {
+const ResumeVariant1 = ({
+  ref,
+  data,
+}: {
+  ref: React.Ref<HTMLDivElement>;
+  data: any;
+}) => {
   return (
     <>
       <Paginate ref={ref}>
-        <HeaderSection />
-        <Summary />
+        <HeaderSection data={data} />
+        <Summary data={data} />
 
         <Paginate.Columns className="flex w-full" datatype="main-cv-info">
           <LeftSection />

@@ -51,8 +51,6 @@ const ResumePreview = () => {
   const reactToPrintFn = useReactToPrint({ contentRef });
   const pages = usePaginateDom({ ref, data: formData });
 
-  console.log({ formData });
-
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const { scale, width, height, handleZoomInAndOut, zoomIn, isZoomDisabled } =
     useStageScale(containerRef);
@@ -67,11 +65,11 @@ const ResumePreview = () => {
         disabled
         id="printableArea"
         className={cn(
-          "pointer-events-none absolute mb-4 border-2 border-green-600 text-left text-[14px] opacity-0",
+          "pointer-events-none absolute mb-4 border-2 border-green-600 text-left text-[14px] opacity-90",
         )}
       >
         <ResumeWrapper scale={scale} width={width} height={height}>
-          <ResumeVariant1 ref={ref} />
+          <ResumeVariant1 ref={ref} data={formData} />
         </ResumeWrapper>
       </button>
       {pages.map((page, idx) => (

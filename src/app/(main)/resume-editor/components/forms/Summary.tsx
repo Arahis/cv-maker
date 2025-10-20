@@ -15,7 +15,7 @@ const Summary = () => {
     <div>
       <FormField
         control={control}
-        name="skills"
+        name="summary"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Summary</FormLabel>
