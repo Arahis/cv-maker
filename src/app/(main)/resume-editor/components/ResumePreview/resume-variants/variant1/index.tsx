@@ -20,8 +20,8 @@ const ResumeVariant1 = ({
         <Summary data={data} />
 
         <Paginate.Columns className="flex w-full" datatype="main-cv-info">
-          <LeftSection />
-          <RightSection />
+          <LeftSection data={data} />
+          <RightSection data={data} />
         </Paginate.Columns>
       </Paginate>
     </>

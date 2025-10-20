@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
   FormField,
@@ -8,6 +9,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { WorkExperienceForm } from "@/lib/validation";
 import { GripHorizontal } from "lucide-react";
@@ -37,18 +39,32 @@ const WorkExperienceItem = ({
         </FormItem>
       )}
     />
-    <FormField
-      control={control}
-      name={`workExperiences.${index}.company`}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Company</FormLabel>
-          <FormControl>
-            <Input placeholder="Company" {...field} />
-          </FormControl>
-        </FormItem>
-      )}
-    />
+    <div className="flex w-full gap-2">
+      <FormField
+        control={control}
+        name={`workExperiences.${index}.company`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Company</FormLabel>
+            <FormControl>
+              <Input placeholder="Company" {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`workExperiences.${index}.city`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>City</FormLabel>
+            <FormControl>
+              <Input placeholder="City" {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
     <div className="flex w-full gap-2">
       <FormField
         control={control}
@@ -87,7 +103,26 @@ const WorkExperienceItem = ({
         )}
       />
     </div>
+    <FormField
+      control={control}
+      name={`workExperiences.${index}.isFullDate`}
+      render={({ field }) => (
+        <FormItem>
+          <FormControl>
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id={`date-${index}`}
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(!!checked)}
+              />
+              <Label htmlFor={`date-${index}`}>Show only year</Label>
+            </div>
+          </FormControl>
+        </FormItem>
+      )}
+    />
 
+    {/* TODO: Change textarea to reach-text editor */}
     <FormField
       control={control}
       name={`workExperiences.${index}.description`}
@@ -134,6 +169,7 @@ const WorkExperience = () => {
           append({
             position: "",
             company: "",
+            city: "",
             startDate: "",
             endDate: "",
             description: "",

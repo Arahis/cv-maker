@@ -28,7 +28,7 @@ const sections = {
   },
 };
 
-const LeftSection = () => {
+const LeftSection = ({ data }: { data: any }) => {
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
