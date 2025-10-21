@@ -56,6 +56,8 @@ export const educationSchema = z.object({
         institution: optionalString,
         startDate: optionalString,
         endDate: optionalString,
+        city: optionalString,
+        isFullDate: z.boolean().optional(),
         description: optionalString,
       }),
     )

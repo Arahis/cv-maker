@@ -115,7 +115,7 @@ const WorkExperienceItem = ({
                 checked={field.value}
                 onCheckedChange={(checked) => field.onChange(!!checked)}
               />
-              <Label htmlFor={`date-${index}`}>Show only year</Label>
+              <Label htmlFor={`date-${index}`}>Show full year</Label>
             </div>
           </FormControl>
         </FormItem>
@@ -173,6 +173,7 @@ const WorkExperience = () => {
             startDate: "",
             endDate: "",
             description: "",
+            isFullDate: false,
           })
         }
       >

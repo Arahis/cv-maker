@@ -47,6 +47,18 @@ const EducationItem = ({
         </FormItem>
       )}
     />
+    <FormField
+      control={control}
+      name={`educations.${index}.city`}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>City</FormLabel>
+          <FormControl>
+            <Input placeholder="City" {...field} />
+          </FormControl>
+        </FormItem>
+      )}
+    />
     <div className="flex w-full gap-2">
       <FormField
         control={control}
@@ -110,7 +122,7 @@ const Education = () => {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "workExperiences",
+    name: "educations",
   });
 
   return (
@@ -134,7 +146,9 @@ const Education = () => {
             institution: "",
             startDate: "",
             endDate: "",
+            city: "",
             description: "",
+            isFullDate: false,
           })
         }
       >

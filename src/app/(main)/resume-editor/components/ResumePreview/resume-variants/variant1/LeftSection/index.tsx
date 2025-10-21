@@ -1,6 +1,7 @@
 import React from "react";
 import SectionItem from "../SectionItem";
 import { Paginate } from "../../../Paginate";
+import { formatDate } from "../../../utils/formatDate";
 
 const sections = {
   education: {
@@ -28,22 +29,39 @@ const sections = {
   },
 };
 
+const Education = ({ educations }: { educations: any }) => {
+  return (
+    <SectionItem
+      title="Education"
+      renderItem={({
+        degree,
+        institution,
+        city,
+        startDate,
+        endDate,
+        isFullDate,
+      }) => (
+        <div>
+          <p className="text-[16px] font-bold">{degree}</p>
+          <p className="mb-1 text-[16px]">{institution}</p>
+          <p>{city}</p>
+          {startDate && endDate && (
+            <p>{`${formatDate(isFullDate, startDate)} - ${formatDate(isFullDate, endDate)}`}</p>
+          )}
+        </div>
+      )}
+      items={educations}
+      className="mb-6"
+    />
+  );
+};
+
 const LeftSection = ({ data }: { data: any }) => {
+  const { educations } = data;
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
-      <SectionItem
-        title={sections.education.name}
-        renderItem={(item) => (
-          <div>
-            <p>{item.name}</p>
-            <p>{item.location}</p>
-            <p>{item.years}</p>
-          </div>
-        )}
-        items={sections.education.items}
-        className="mb-6"
-      />
+      <Education educations={educations || []} />
       <div className="mb-6">
         <SectionItem
           title={sections.skills.name}
