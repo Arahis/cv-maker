@@ -4,16 +4,6 @@ import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 
 const sections = {
-  education: {
-    name: "Education",
-    items: [
-      {
-        name: "University of Example",
-        location: "City, Country",
-        years: "2010-2014",
-      },
-    ],
-  },
   skills: {
     name: "Skills",
     items: [

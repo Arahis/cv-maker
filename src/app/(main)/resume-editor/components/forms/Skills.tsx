@@ -1,12 +1,186 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import React from "react";
-import { useFormContext } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ControllerRenderProps,
+  FieldPath,
+  FieldValues,
+  useFormContext,
+} from "react-hook-form";
+
+const OPTIONS = [
+  "React",
+  "TypeScript",
+  "Zod",
+  "Redux Toolkit",
+  "TailwindCSS",
+  "Next.js",
+  "Node.js",
+];
+
+const TagBadge = ({
+  tag,
+  removeTag,
+}: {
+  tag: string;
+  removeTag: (tag: string) => void;
+}) => (
+  <Badge
+    key={tag}
+    variant="secondary"
+    className="flex items-center gap-1 px-2 py-1"
+  >
+    {tag}
+    <div onClick={() => removeTag(tag)}>
+      <X className="h-3 w-3 cursor-pointer" />
+    </div>
+  </Badge>
+);
+
+export function TagSelectInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>(props: ControllerRenderProps<TFieldValues, TName>) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const isAlreadySelected = (tag: string) => selected.includes(tag);
+
+  const filteredOptions = useMemo(() => {
+    if (!input) return OPTIONS;
+    return OPTIONS.filter((opt) =>
+      opt.toLowerCase().includes(input.toLowerCase()),
+    );
+  }, [input]);
+
+  const resetInput = () => {
+    setInput("");
+    setOpen(false);
+    inputRef.current?.blur();
+  };
+
+  const addTag = (tag: string) => {
+    if (!isAlreadySelected(tag)) {
+      setSelected((selected) => [...selected, tag]);
+    }
+    setInput("");
+  };
+
+  const handleTagRemove = (tag: string) => {
+    setSelected((selected) => selected.filter((t) => t !== tag));
+  };
+
+  const handleAddTagFromInput = () => {
+    const inputValues = input.trim().split(",");
+    setSelected((prev) =>
+      prev.includes(input) ? prev : [...prev, ...inputValues],
+    );
+    resetInput();
+  };
+
+  const handleSelectOption = (tag: string) => {
+    addTag(tag);
+    resetInput();
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="w-full max-w-md">
+      <div className="flex w-full gap-2">
+        <div className="relative grow" ref={wrapperRef}>
+          <Input
+            ref={inputRef}
+            className="pr-4"
+            placeholder="Начни вводить навык..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && input.trim() !== "") {
+                e.preventDefault();
+                handleAddTagFromInput();
+              }
+            }}
+          />
+
+          {open && filteredOptions.length > 0 && (
+            <Dropdown
+              options={filteredOptions}
+              onSelect={handleSelectOption}
+              isSelected={isAlreadySelected}
+            />
+          )}
+        </div>
+        <Button onClick={handleAddTagFromInput}>Add skill</Button>
+      </div>
+
+      {/* Tags under input */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {selected.map((tag) => (
+          <TagBadge key={tag} tag={tag} removeTag={handleTagRemove} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const Dropdown = ({
+  options,
+  onSelect,
+  isSelected,
+}: {
+  options: string[];
+  onSelect: (v: string) => void;
+  isSelected: (v: string) => boolean;
+}) => (
+  <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-md">
+    <Command>
+      <CommandList>
+        {options.map((opt) => (
+          <CommandItem
+            key={opt}
+            onSelect={() => onSelect(opt)}
+            className={`cursor-pointer ${
+              isSelected(opt) ? "text-muted-foreground" : ""
+            }`}
+          >
+            <div className="flex w-full items-center justify-between">
+              <p>{opt}</p>
+              {isSelected(opt) && <p className="text-[10px]">Added</p>}
+            </div>
+          </CommandItem>
+        ))}
+      </CommandList>
+    </Command>
+  </div>
+);
 
 const Skills = () => {
   const { control } = useFormContext();
@@ -14,16 +188,29 @@ const Skills = () => {
     <div>
       <FormField
         control={control}
-        name="skills"
+        name="skills.technicalSkills"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Degree</FormLabel>
+            <FormLabel>Technical skills</FormLabel>
             <FormControl>
-              <Textarea placeholder="Skills" {...field} />
+              <TagSelectInput {...field} />
             </FormControl>
           </FormItem>
         )}
       />
+
+      {/* <FormField
+        control={control}
+        name="skills.personalSkills"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Technical skills</FormLabel>
+            <FormControl>
+              <TagSelectInput {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      /> */}
     </div>
   );
 };
