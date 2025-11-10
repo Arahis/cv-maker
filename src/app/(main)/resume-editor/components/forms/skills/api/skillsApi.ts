@@ -1,3 +1,5 @@
+// Probably the file isn't needed anymore but keeping it for reference
+
 // we are telling where from to pick the files with which file extension
 const context = require.context("@/data", false, /\.json$/);
 
@@ -12,7 +14,9 @@ export const dataApi = {
     const baseApi = process.env.NEXT_PUBLIC_API_URL;
 
     if (useLocal) {
-      const fileName = locale ? `${key}.${locale}.json` : `${key}.json`;
+      const fileName = locale
+        ? `${key}.${locale}.json`
+        : `${key}.json` || `${key}.en.json`;
 
       const isFileExists = Object.keys(localDataFiles).includes(fileName);
 
