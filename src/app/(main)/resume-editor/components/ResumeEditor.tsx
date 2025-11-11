@@ -7,7 +7,7 @@ import PersonalInfo from "./forms/PersonalInfo";
 import ResumeDescription from "./forms/ResumeDescription";
 import WorkExperience from "./forms/WorkExperience";
 import Education from "./forms/Education";
-import Skills from "./forms/Skills";
+import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";

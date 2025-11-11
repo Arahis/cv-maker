@@ -17,15 +17,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 
-const OPTIONS = [
-  "React",
-  "TypeScript",
-  "Zod",
-  "Redux Toolkit",
-  "TailwindCSS",
-  "Next.js",
-  "Node.js",
-];
+type Skills = { id: string; name: string };
 
 const TagBadge = ({
   tag,
@@ -49,7 +41,11 @@ const TagBadge = ({
 export function TagSelectInput<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
->(props: ControllerRenderProps<TFieldValues, TName>) {
+>(
+  props: ControllerRenderProps<TFieldValues, TName> & {
+    skills: Skills[];
+  },
+) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -60,11 +56,11 @@ export function TagSelectInput<
   const isAlreadySelected = (tag: string) => selected.includes(tag);
 
   const filteredOptions = useMemo(() => {
-    if (!input) return OPTIONS;
-    return OPTIONS.filter((opt) =>
-      opt.toLowerCase().includes(input.toLowerCase()),
-    );
-  }, [input]);
+    if (!input) return props.skills.map((s) => s.name);
+    return props.skills
+      .filter((opt) => opt.name.toLowerCase().includes(input.toLowerCase()))
+      .map((s) => s.name);
+  }, [input, props.skills]);
 
   const resetInput = () => {
     setInput("");
@@ -182,7 +178,22 @@ const Dropdown = ({
   </div>
 );
 
+const getHardSkills = () =>
+  fetch(`/data/hardSkills.json`).then((m) => m.json());
+const getSoftSkills = (locale: string = "en") =>
+  fetch(`/data/softSkills.${locale}.json`).then((m) => m.json());
+
 const Skills = () => {
+  const [softSkills, setSoftSkills] = useState<Skills[]>([]);
+  const [hardSkills, setHardSkills] = useState<Skills[]>([]);
+
+  console.log({ hardSkills });
+
+  useEffect(() => {
+    getHardSkills().then((data) => setHardSkills(data.skills));
+    getSoftSkills().then((data) => setSoftSkills(data.skills));
+  }, []);
+
   const { control } = useFormContext();
   return (
     <div>
@@ -193,24 +204,24 @@ const Skills = () => {
           <FormItem>
             <FormLabel>Technical skills</FormLabel>
             <FormControl>
-              <TagSelectInput {...field} />
+              <TagSelectInput {...field} skills={hardSkills} />
             </FormControl>
           </FormItem>
         )}
       />
 
-      {/* <FormField
+      <FormField
         control={control}
         name="skills.personalSkills"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Technical skills</FormLabel>
+            <FormLabel>Personal skills</FormLabel>
             <FormControl>
-              <TagSelectInput {...field} />
+              <TagSelectInput {...field} skills={softSkills} />
             </FormControl>
           </FormItem>
         )}
-      /> */}
+      />
     </div>
   );
 };
