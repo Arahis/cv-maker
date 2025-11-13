@@ -66,15 +66,16 @@ export const educationSchema = z.object({
 
 export type EducationForm = z.infer<typeof educationSchema>;
 
+const skillItemSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Skill name must be at least 2 characters"),
+});
+
 export const skillsSchema = z.object({
   skills: z
     .object({
-      technicalSkills: z
-        .array(z.string().min(2, "Skill must be at least 2 characters"))
-        .optional(),
-      personalSkills: z
-        .array(z.string().min(2, "Skill must be at least 2 characters"))
-        .optional(),
+      technicalSkills: z.array(skillItemSchema).optional(),
+      personalSkills: z.array(skillItemSchema).optional(),
     })
     .optional(),
 });
