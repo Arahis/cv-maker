@@ -5,6 +5,27 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ControllerRenderProps, FieldPath, FieldValues } from "react-hook-form";
 import { SkillsOptions } from "..";
+import { distance } from "fastest-levenshtein";
+
+const filteredSkills = (
+  input: string,
+  skills: SkillsOptions[],
+  threshold: number = 0.75,
+) => {
+  const normalized = input.trim().toLowerCase();
+
+  return skills.filter((skill) => {
+    const skillName = skill.name.toLowerCase();
+
+    if (skillName.includes(normalized)) return true;
+
+    const d = distance(normalized, skillName);
+    const maxLen = Math.max(normalized.length, skillName.length);
+    const similarity = 1 - d / maxLen;
+
+    return similarity > threshold;
+  });
+};
 
 function TagSelectInput<
   TFieldValues extends FieldValues,
@@ -29,9 +50,7 @@ function TagSelectInput<
   // returns filtered options based on input in format {id, name}
   const filteredOptions = useMemo(() => {
     if (!input) return skills;
-    return skills.filter((opt) =>
-      opt.name.toLowerCase().includes(input.toLowerCase()),
-    );
+    return filteredSkills(input, skills, 0.5);
   }, [input, skills]);
 
   const resetInput = () => {
@@ -52,9 +71,41 @@ function TagSelectInput<
   };
 
   const handleAddTagFromInput = () => {
+    const skillsToAdd: SkillsOptions[] = [];
+    const userIds = new Set((value as SkillsOptions[]).map((s) => s.id));
+    const userNames = new Set(
+      (value as SkillsOptions[]).map((s) => s.name.toLowerCase()),
+    );
+
     const inputValues = input.trim().split(",");
-    // Also check if the tag(s) is already selected
-    onChange([...value, ...inputValues]);
+    // First normalize every item in array
+    const normalizedInputs = inputValues
+      .map((v) => v.trim().toLowerCase())
+      .filter((v) => v !== "");
+
+    // Then map to skills options if exists in skills list
+    if (normalizedInputs.length === 0) return;
+
+    for (const value of normalizedInputs) {
+      const matchedSkill = skills.find(
+        (skill) => skill.name.toLowerCase() === value,
+      );
+
+      const skillToAdd: SkillsOptions = matchedSkill
+        ? matchedSkill
+        : {
+            id: crypto.randomUUID(),
+            name: value.replace(/\b\w/g, (char) => char.toUpperCase()),
+          };
+
+      const exists =
+        userIds.has(skillToAdd.id) ||
+        userNames.has(skillToAdd.name.toLowerCase());
+
+      if (!exists) skillsToAdd.push(skillToAdd);
+    }
+    // TODO: Also check if the tag(s) is already selected
+    onChange([...value, ...skillsToAdd]);
     resetInput();
   };
 
