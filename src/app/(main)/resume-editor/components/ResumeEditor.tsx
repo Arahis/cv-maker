@@ -3,7 +3,7 @@
 import React, { ReactNode, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import PersonalInfo from "./forms/PersonalInfo";
+import PersonalInfo from "./forms/personalInfo";
 import ResumeDescription from "./forms/ResumeDescription";
 import WorkExperience from "./forms/WorkExperience";
 import Education from "./forms/Education";
