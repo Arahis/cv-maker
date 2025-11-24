@@ -37,7 +37,6 @@ function TagSelectInput<
 }: ControllerRenderProps<TFieldValues, TName> & {
   skills: SkillsOptions[];
 }) {
-  console.log({ value });
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
 

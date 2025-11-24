@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import PersonalInfo from "./forms/personalInfo";
 import ResumeDescription from "./forms/ResumeDescription";
@@ -51,11 +51,12 @@ const resumeSections: {
 
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const f = useFormContext();
+  const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
   // Autosave в IndexedDB with debounce
-  useIndexedDBDebouncedSave(f.control, resumeId, 3000);
+  useIndexedDBDebouncedSave(resumeId, formData, 1000);
 
   return (
     <form onSubmit={f.handleSubmit((data) => console.log(data))}>

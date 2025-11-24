@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
-import { loadFormData } from "@/lib/indexedDB";
+import { loadResume } from "@/lib/indexedDB";
 
 const useResumeForm = () =>
   useForm({
@@ -25,13 +25,11 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
   // If it doesn't exist, show a not found page
   useEffect(() => {
     const checkResumeExists = async () => {
-      const data = await loadFormData(resumeId);
-      if (!!data) {
-        console.log({ data });
-        // TODO: figure out why I put it here
-        f.reset(data.content);
+      const resume = await loadResume(resumeId);
+      if (!!resume) {
+        f.reset(resume.data);
       }
-      setValid(!!data);
+      setValid(!!resume);
     };
 
     checkResumeExists();
