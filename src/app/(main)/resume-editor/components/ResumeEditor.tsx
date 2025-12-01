@@ -11,6 +11,8 @@ import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
+import { ResumeEditorProvider } from "../context/ResumeEditorContext";
+import { ResumeForm } from "@/lib/validation";
 
 const resumeSections: {
   title: string;
@@ -50,12 +52,13 @@ const resumeSections: {
 ];
 
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
-  const f = useFormContext();
+  const f = useFormContext<ResumeForm>();
   const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
   // Autosave в IndexedDB with debounce
+  // @ts-expect-error: useWatch doesn't infer the type of formData correctly
   useIndexedDBDebouncedSave(resumeId, formData, 1000);
 
   return (
@@ -65,7 +68,9 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
         currentStep={currentEditorStep}
         setItem={setCurrentEditorStep}
       />
-      {resumeSections[currentEditorStep].item}
+      <ResumeEditorProvider value={{ resumeId }}>
+        {resumeSections[currentEditorStep].item}
+      </ResumeEditorProvider>
     </form>
   );
 };
