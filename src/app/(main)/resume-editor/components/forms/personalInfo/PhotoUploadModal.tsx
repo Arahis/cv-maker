@@ -11,7 +11,14 @@ import { Button } from "@/components/ui/button";
 import PhotoCropper from "./PhotoCropper";
 import { getCroppedImg } from "./cropImage";
 import { Area } from "react-easy-crop";
-import Image from "next/image";
+import { AvatarCropDataForm } from "@/lib/validation";
+
+export type PhotoCropperProps = {
+  croppedPixels: Area;
+  cropped: { x: number; y: number };
+  zoom: number;
+  rotation: number;
+};
 
 const DropZone = ({
   onFileSelected,
@@ -59,6 +66,7 @@ const DropZone = ({
     </div>
   );
 };
+
 const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -150,10 +158,25 @@ const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
   );
 };
 
-const DialogInner = ({ setImage }: { setImage: (v: string) => void }) => {
-  const [src, setSrc] = useState<string | null>(null);
+const DialogInner = ({
+  value, // Cropped data
+  onChange,
+  originalPhoto,
+}: {
+  value: AvatarCropDataForm;
+  originalPhoto: string | null;
+  onChange: (
+    originalPhoto: string,
+    croppedPhoto: string,
+    cropData: AvatarCropDataForm,
+  ) => void;
+}) => {
+  // Local state for working with temporary uploaded file before submitting it
+  const [src, setSrc] = useState<string | null>(originalPhoto || null);
+  const [shouldResetCrop, setShouldResetCrop] = useState(false);
 
   const handleFile = (file: File | string) => {
+    setShouldResetCrop(true);
     if (typeof file === "string") {
       setSrc(file);
       return;
@@ -166,19 +189,33 @@ const DialogInner = ({ setImage }: { setImage: (v: string) => void }) => {
     reader.readAsDataURL(file);
   };
 
+  useEffect(() => {
+    if (originalPhoto) {
+      setShouldResetCrop(false);
+      setSrc(originalPhoto);
+    }
+  }, [originalPhoto]);
+
   if (src) {
+    // We have original image SRC, we have cropData for cropping and saving into the main form in DB, and we get cropped image
     const handleResetChosenFile = () => setSrc(null);
-    const handleSaveCroppedFile = async (croppedPixels: Area) => {
-      const croppedImage = await getCroppedImg(src, croppedPixels);
+    const handleSaveFiles = async (cropData: PhotoCropperProps) => {
+      const { croppedPixels, cropped, zoom, rotation } = cropData;
+      const croppedImage = await getCroppedImg(src, croppedPixels, rotation);
+      // TODO: handleResetChosenFile needs to be replaced we a function that resets the local state and closes the modal
       handleResetChosenFile();
-      setImage(croppedImage);
+      if (croppedImage) {
+        onChange(src, croppedImage, { ...cropped, zoom, rotation });
+      }
     };
 
     return (
       <PhotoCropper
         src={src}
+        cropValue={value}
         onReset={handleResetChosenFile}
-        onSave={handleSaveCroppedFile}
+        onSave={handleSaveFiles}
+        shouldReset={shouldResetCrop}
       />
     );
   }
@@ -202,26 +239,31 @@ const DialogInner = ({ setImage }: { setImage: (v: string) => void }) => {
 const PhotoUploadModal = ({
   open,
   onModalChange,
+  value,
+  onChange,
+  originalPhoto,
 }: {
   open: boolean;
   onModalChange: (v: boolean) => void;
+  value: AvatarCropDataForm;
+  originalPhoto: string | null;
+  onChange: (
+    originalPhoto: string,
+    croppedPhoto: string,
+    cropData: AvatarCropDataForm,
+  ) => void;
 }) => {
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
   return (
     <Dialog open={open} onOpenChange={() => onModalChange(!open)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add your latest photo</DialogTitle>
         </DialogHeader>
-        <DialogInner setImage={setCroppedImage} />
-        {croppedImage && (
-          <Image
-            src={croppedImage || ""}
-            alt="Cropped"
-            width={100}
-            height={100}
-          />
-        )}
+        <DialogInner
+          value={value}
+          onChange={onChange}
+          originalPhoto={originalPhoto}
+        />
       </DialogContent>
     </Dialog>
   );

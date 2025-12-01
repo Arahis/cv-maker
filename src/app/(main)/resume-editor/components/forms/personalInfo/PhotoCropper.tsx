@@ -1,20 +1,38 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
+import { PhotoCropperProps } from "./PhotoUploadModal";
+import { AvatarCropDataForm } from "@/lib/validation";
 
 const PhotoCropper = ({
   src,
   onReset,
   onSave,
+  cropValue,
+  shouldReset,
 }: {
   src: string;
   onReset: () => void;
-  onSave: (v: Area) => void;
+  onSave: (v: PhotoCropperProps) => void;
+  cropValue: AvatarCropDataForm;
+  shouldReset: boolean;
 }) => {
-  const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const {
+    zoom: initialZoom,
+    rotation: initialRotation,
+    x: initialX,
+    y: initialY,
+  } = cropValue;
+
+  const [zoom, setZoom] = useState(initialZoom);
+  const [rotation, setRotation] = useState(initialRotation);
+  const [crop, setCrop] = useState({
+    x: initialX,
+    y: initialY,
+  });
+
+  // TODO: Check later if the condition inside can be removed
   const [croppedPixels, setCroppedPixels] = useState<Area | null>(null);
 
   const onCropComplete = (_area: Area, areaPixels: Area) => {
@@ -23,9 +41,22 @@ const PhotoCropper = ({
 
   const handleSave = () => {
     if (croppedPixels) {
-      onSave(croppedPixels);
+      onSave({
+        croppedPixels,
+        cropped: { x: crop.x, y: crop.y },
+        zoom,
+        rotation,
+      });
     }
   };
+
+  useEffect(() => {
+    if (shouldReset) {
+      setZoom(1);
+      setRotation(0);
+      setCrop({ x: 0, y: 0 });
+    }
+  }, [src, shouldReset]);
 
   return (
     <div>
@@ -37,6 +68,7 @@ const PhotoCropper = ({
           rotation={rotation}
           aspect={1}
           onCropChange={setCrop}
+          onRotationChange={setRotation}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
         />

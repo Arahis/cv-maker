@@ -9,15 +9,17 @@ export const generalFormSchema = z.object({
 
 export type GeneralResumeForm = z.infer<typeof generalFormSchema>;
 
+const avatarCropDataSchema = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  zoom: z.number().min(1).max(4),
+  rotation: z.number().min(0).max(360),
+});
+
+export type AvatarCropDataForm = z.infer<typeof avatarCropDataSchema>;
+
 export const personalInfoSchema = z.object({
-  photo: z
-    .custom<File | undefined>()
-    .refine((file) => !file || file.type.startsWith("image/"), {
-      message: "Invalid image file",
-    })
-    .refine((file) => !file || file.size <= 1024 * 1024 * 4, {
-      message: "The file size should be less then 4MB",
-    }),
+  avatarCropData: avatarCropDataSchema,
   firstName: optionalString,
   lastName: optionalString,
   jobTitle: optionalString,
@@ -97,7 +99,4 @@ export const resumeSchema = z.object({
   ...summarySchema.shape,
 });
 
-export type ResumeForm = Omit<z.infer<typeof resumeSchema>, "photo"> & {
-  id?: string; // Optional ID for existing resumes
-  photo?: File | string | null;
-};
+export type ResumeForm = z.infer<typeof resumeSchema>;

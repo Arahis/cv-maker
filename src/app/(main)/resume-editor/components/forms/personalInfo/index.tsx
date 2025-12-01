@@ -9,7 +9,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PersonalInfoForm, PersonalInfoKeys } from "@/lib/validation";
+import {
+  PersonalInfoForm,
+  PersonalInfoKeys,
+  ResumeForm,
+} from "@/lib/validation";
 import React from "react";
 import { Control, useFormContext } from "react-hook-form";
 import PhotoUploader from "./PhotoUploader";
@@ -47,14 +51,13 @@ const TextFormField = ({
 };
 
 const PersonalInfo = () => {
-  const { control } = useFormContext();
+  const { control } = useFormContext<ResumeForm>();
 
   return (
     <div>
-      {/* TODO: Add immediate validation for the Photo field  */}
       <FormField
         control={control}
-        name="photo"
+        name="avatarCropData"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Photo</FormLabel>

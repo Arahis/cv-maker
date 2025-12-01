@@ -9,20 +9,69 @@ function createImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+function getRadianAngle(degreeValue: number) {
+  return (degreeValue * Math.PI) / 180;
+}
+
+/**
+ * Returns the new bounding area of a rotated rectangle.
+ */
+function rotateSize(width: number, height: number, rotation: number) {
+  const rotRad = getRadianAngle(rotation);
+
+  return {
+    width:
+      Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
+    height:
+      Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
+  };
+}
+
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: Area,
-): Promise<string> {
+  rotation: number = 0,
+): Promise<string | null> {
   const image = await createImage(imageSrc);
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d")!;
 
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  const rotRad = getRadianAngle(rotation);
 
-  ctx.drawImage(
-    image,
+  // calculate bounding box of the rotated image
+  const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
+    image.width,
+    image.height,
+    rotation,
+  );
+
+  // set canvas size to match the bounding box
+  canvas.width = bBoxWidth;
+  canvas.height = bBoxHeight;
+
+  // translate canvas context to a central location to allow rotating around the center
+  ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.translate(-image.width / 2, -image.height / 2);
+
+  // draw rotated image
+  ctx.drawImage(image, 0, 0);
+
+  const croppedCanvas = document.createElement("canvas");
+  const croppedCtx = croppedCanvas.getContext("2d");
+
+  // Set the size of the cropped canvas
+  croppedCanvas.width = pixelCrop.width;
+  croppedCanvas.height = pixelCrop.height;
+
+  if (!croppedCtx) {
+    return null;
+  }
+
+  // Draw the cropped image onto the new canvas
+  croppedCtx.drawImage(
+    canvas,
     pixelCrop.x,
     pixelCrop.y,
     pixelCrop.width,
@@ -33,7 +82,7 @@ export async function getCroppedImg(
     pixelCrop.height,
   );
 
-  return canvas.toDataURL("image/jpeg", 0.85);
+  return croppedCanvas.toDataURL("image/jpeg", 0.9);
 }
 
 async function toBlob(input: string): Promise<Blob> {
