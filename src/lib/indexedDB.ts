@@ -14,16 +14,8 @@ interface ResumeRecord {
 
   media: {
     avatar?: {
-      original?: {
-        base64: string;
-        width: number;
-        height: number;
-      };
-      cropped?: {
-        base64: string;
-        width: number;
-        height: number;
-      };
+      original?: string;
+      cropped?: string;
     };
   };
 }
@@ -81,14 +73,12 @@ export async function saveFormData(
     },
   };
 
-  console.log({ updated });
-
   await db.put(STORE_NAME, updated);
 }
 
 export async function saveMediaData(
   resumeId: string,
-  data: Partial<ResumeRecord["media"]>,
+  data: ResumeRecord["media"]["avatar"],
 ) {
   const db = await getDB();
   const current = await db.get(STORE_NAME, resumeId);
@@ -99,8 +89,9 @@ export async function saveMediaData(
     ...current,
     updatedAt: Date.now(),
     media: {
-      ...current.media,
-      ...data,
+      avatar: {
+        ...data,
+      },
     },
   };
 
@@ -122,7 +113,10 @@ export function useIndexedDBDebouncedSave(
 
   // TODO: add correct types
   const debouncedSave = useRef(
-    debounce((latestData) => saveFormData(resumeID, latestData), debounceMs),
+    debounce(
+      (latestData: ResumeRecord["data"]) => saveFormData(resumeID, latestData),
+      debounceMs,
+    ),
   ).current;
 
   useEffect(() => {
