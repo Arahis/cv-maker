@@ -12,9 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { WorkExperienceForm } from "@/lib/validation";
-import { GripHorizontal } from "lucide-react";
 import React from "react";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
+import { SortableList } from "../SortableList";
 
 const WorkExperienceItem = ({
   index,
@@ -26,7 +26,8 @@ const WorkExperienceItem = ({
   handleItemRemove: (index: number) => void;
 }) => (
   <div>
-    <GripHorizontal />
+    <SortableList.DragHandle />
+
     <FormField
       control={control}
       name={`workExperiences.${index}.position`}
@@ -145,28 +146,32 @@ const WorkExperienceItem = ({
 const WorkExperience = () => {
   const { control } = useFormContext();
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: "workExperiences",
   });
 
   return (
     <div>
-      <div>
-        {fields.map((item, idx) => (
-          <WorkExperienceItem
-            key={item.id}
-            index={idx}
-            control={control}
-            handleItemRemove={remove}
-          />
-        ))}
-      </div>
+      <SortableList
+        items={fields}
+        onMove={move}
+        renderItem={(item, index) => (
+          <SortableList.Item id={item.id}>
+            <WorkExperienceItem
+              index={index}
+              control={control}
+              handleItemRemove={remove}
+            />
+          </SortableList.Item>
+        )}
+      />
 
       <Button
         type="button"
         onClick={() =>
           append({
+            id: crypto.randomUUID(),
             position: "",
             company: "",
             city: "",
