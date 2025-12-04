@@ -28,7 +28,7 @@ const HardSkills = ({ control }: { control: Control<SkillsForm> }) => {
   return (
     <FormField
       control={control}
-      name="skills.technicalSkills"
+      name="skills.technical"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Technical skills</FormLabel>
@@ -51,7 +51,7 @@ const SoftSkills = ({ control }: { control: Control<SkillsForm> }) => {
   return (
     <FormField
       control={control}
-      name="skills.personalSkills"
+      name="skills.personal"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Personal skills</FormLabel>

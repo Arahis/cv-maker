@@ -3,22 +3,6 @@ import SectionItem from "../SectionItem";
 import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 
-const sections = {
-  skills: {
-    name: "Skills",
-    items: [
-      {
-        head: "Technical",
-        items: ["React Native", "JavaScript", "NextJs", "TypeScript"],
-      },
-      {
-        head: "Personal",
-        items: ["Communication", "Teamwork", "Problem Solving", "Adaptability"],
-      },
-    ],
-  },
-};
-
 const Education = ({ educations }: { educations: any }) => {
   return (
     <SectionItem
@@ -47,24 +31,28 @@ const Education = ({ educations }: { educations: any }) => {
 };
 
 const LeftSection = ({ data }: { data: any }) => {
-  const { educations } = data;
+  const { educations, skills } = data;
+
+  const skillsToArray = Object.entries(skills).map(([head, items]) => {
+    return { head, items };
+  });
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
       <Education educations={educations || []} />
       <div className="mb-6">
         <SectionItem
-          title={sections.skills.name}
-          items={sections.skills.items}
+          title="Skills"
+          items={skillsToArray}
           renderItem={(item) => (
             <React.Fragment key={item.head}>
               <p className="font-bold">#{item.head}</p>
-              <p>{item.items.join(", ")}</p>
+              <p>{item.items.map((i) => i.name).join(", ")}</p>
             </React.Fragment>
           )}
         />
       </div>
-      <div className="mb-6" datatype="left-section-wrapper">
+      {/* <div className="mb-6" datatype="left-section-wrapper">
         <p className="text-[16px] uppercase" datatype="left-section-text">
           Social
         </p>
@@ -72,7 +60,7 @@ const LeftSection = ({ data }: { data: any }) => {
           <p className="font-serif">LinkedIn</p>
           <p className="">Years of education</p>
         </div>
-      </div>
+      </div> */}
     </Paginate.Section>
   );
 };

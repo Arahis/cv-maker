@@ -77,8 +77,8 @@ const skillItemSchema = z.object({
 export const skillsSchema = z.object({
   skills: z
     .object({
-      technicalSkills: z.array(skillItemSchema).optional(),
-      personalSkills: z.array(skillItemSchema).optional(),
+      technical: z.array(skillItemSchema).optional(),
+      personal: z.array(skillItemSchema).optional(),
     })
     .optional(),
 });

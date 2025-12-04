@@ -2,8 +2,7 @@ import React from "react";
 import HeaderSection from "./HeaderSection";
 import Summary from "./Summary";
 import LeftSection from "./LeftSection";
-import RightSection, { JobSection, sections } from "./RightSection";
-import SectionItem from "./SectionItem";
+import RightSection from "./RightSection";
 import { Paginate } from "../../Paginate";
 
 const ResumeVariant1 = ({
