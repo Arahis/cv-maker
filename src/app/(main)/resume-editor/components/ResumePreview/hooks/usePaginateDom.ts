@@ -5,6 +5,7 @@ type Page = React.ReactNode[];
 
 type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
+  photo?: string | null;
 };
 
 type VNode = {
@@ -254,7 +255,11 @@ function getProcessNode(
 }
 
 // TODO: Change "any" type to the specific one representing the form data
-const usePaginateDom = ({ ref, data }: PaginatedDomProps & { data: any }) => {
+const usePaginateDom = ({
+  ref,
+  data,
+  photo,
+}: PaginatedDomProps & { data: any }) => {
   const [pages, setPages] = React.useState<Page[]>([]);
 
   useLayoutEffect(() => {
@@ -285,7 +290,7 @@ const usePaginateDom = ({ ref, data }: PaginatedDomProps & { data: any }) => {
     );
 
     setPages(newPages);
-  }, [ref, data]);
+  }, [ref, data, photo]);
 
   return pages;
 };

@@ -2,10 +2,22 @@ import React from "react";
 import Icon from "../../icons/Icon";
 import { Paginate } from "../../Paginate";
 
-const HeaderSection = ({ data }: { data: any }) => {
+const HeaderSection = ({
+  data,
+  photo,
+}: {
+  data: any;
+  photo: string | null;
+}) => {
+  console.log({ photo });
   return (
     <Paginate.Section className="flex">
-      <Paginate.Section className="mt-[-30px] h-[240px] w-[30%] bg-amber-300"></Paginate.Section>
+      <Paginate.Section
+        className="-mt-8 h-[240px] w-[30%] bg-amber-300 bg-cover bg-center"
+        style={{
+          backgroundImage: photo ? `url(${photo})` : undefined,
+        }}
+      ></Paginate.Section>
       <Paginate.Section className="w-[70%] px-8">
         <Paginate.Section className="border-b border-gray-300 py-6 text-left">
           {/* <Paginate.Text className="text-3xl">Hello I&apos;m</Paginate.Text> */}

@@ -8,14 +8,16 @@ import { Paginate } from "../../Paginate";
 const ResumeVariant1 = ({
   ref,
   data,
+  photo,
 }: {
   ref: React.Ref<HTMLDivElement>;
   data: any;
+  photo: string | null;
 }) => {
   return (
     <>
       <Paginate ref={ref}>
-        <HeaderSection data={data} />
+        <HeaderSection data={data} photo={photo} />
         <Summary data={data} />
 
         <Paginate.Columns className="flex w-full" datatype="main-cv-info">

@@ -33,11 +33,6 @@ const useAvatar = (resumeId: string) => {
     setOriginal(original);
     setCropped(cropped);
 
-    console.log({
-      original,
-      cropped,
-    });
-
     await saveMediaData(resumeId, {
       original,
       cropped,

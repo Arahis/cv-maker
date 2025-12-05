@@ -8,6 +8,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import ResumeVariant1 from "./resume-variants/variant1";
 import usePaginateDom from "./hooks/usePaginateDom";
 import { useReactToPrint } from "react-to-print";
+import useAvatar from "../../store/hooks/useAvatar";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
@@ -42,14 +43,17 @@ const ResumeWrapper = ({ children }: ResumeWrapperProps) => {
   );
 };
 
-const ResumePreview = () => {
+const ResumePreview = ({ resumeId }: { resumeId: string }) => {
   const { control } = useFormContext();
   const formData = useWatch<ResumeForm>({ control });
+  const { cropped } = useAvatar(resumeId);
+
+  console.log({ formData, cropped });
 
   const ref = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLButtonElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
-  const pages = usePaginateDom({ ref, data: formData });
+  const pages = usePaginateDom({ ref, data: formData, photo: cropped });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const { scale, width, height, handleZoomInAndOut, zoomIn, isZoomDisabled } =
@@ -65,11 +69,11 @@ const ResumePreview = () => {
         disabled
         id="printableArea"
         className={cn(
-          "pointer-events-none absolute mb-4 border-2 border-green-600 text-left text-[14px] opacity-90",
+          "pointer-events-none absolute mb-4 border-2 border-green-600 text-left text-[14px] opacity-0",
         )}
       >
         <ResumeWrapper scale={scale} width={width} height={height}>
-          <ResumeVariant1 ref={ref} data={formData} />
+          <ResumeVariant1 ref={ref} data={formData} photo={cropped} />
         </ResumeWrapper>
       </button>
       {pages.map((page, idx) => (

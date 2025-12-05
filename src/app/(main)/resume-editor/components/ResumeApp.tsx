@@ -45,7 +45,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
           <ResumeEditor resumeId={resumeId} />
         </div>
         <div className="hidden h-screen w-1/2 overflow-y-auto md:flex">
-          <ResumePreview />
+          <ResumePreview resumeId={resumeId} />
         </div>
       </Form>
     </div>
