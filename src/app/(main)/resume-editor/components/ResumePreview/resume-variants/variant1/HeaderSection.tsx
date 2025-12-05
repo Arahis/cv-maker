@@ -9,7 +9,6 @@ const HeaderSection = ({
   data: any;
   photo: string | null;
 }) => {
-  console.log({ photo });
   return (
     <Paginate.Section className="flex">
       <Paginate.Section

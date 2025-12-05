@@ -48,8 +48,6 @@ const ResumePreview = ({ resumeId }: { resumeId: string }) => {
   const formData = useWatch<ResumeForm>({ control });
   const { cropped } = useAvatar(resumeId);
 
-  console.log({ formData, cropped });
-
   const ref = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLButtonElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
