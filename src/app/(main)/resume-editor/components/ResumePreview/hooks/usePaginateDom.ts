@@ -1,4 +1,5 @@
 import React, { useLayoutEffect } from "react";
+import { convertDomAttributesToProps } from "./dom-attributes-to-react-props";
 
 type Page = React.ReactNode[];
 
@@ -8,7 +9,7 @@ type PaginatedDomProps = {
 
 type VNode = {
   type: string;
-  props: Record<string, string>;
+  props: Record<string, unknown>;
   children: VNode[];
   text?: string;
 };
@@ -300,14 +301,17 @@ function getRenderVNode() {
 
     if (vNode.type === "text") return vNode.text;
 
-    // Remove "class" property conflict with React
-    const { class: className, ...props } = vNode.props;
+    const reactProps = convertDomAttributesToProps({
+      attributes: Object.entries(vNode.props).map(([name, value]) => ({
+        name,
+        value,
+      })),
+    } as any);
 
     return React.createElement(
       vNode.type,
       {
-        ...props,
-        className,
+        ...reactProps,
         key: keyCounter,
       },
       vNode.children.map(renderVNode),
