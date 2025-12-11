@@ -15,18 +15,34 @@ type VNode = {
   text?: string;
 };
 
-// TODO: Make it in a variable which excludes padding top and bottom from the page height.
-const PAGE_HEIGHT = 1123 - 24;
+const PAGE_HEIGHT = 1123;
+const PAGE_PADDING = 24;
+const CONTAINER_MARGIN_BOTTOM = 16;
 
-function getBottom(node: Node): number {
+/* ---------------------------------------------------------
+   GEOMETRY
+----------------------------------------------------------*/
+
+function processRect(node: Node): DOMRect {
   if (node.nodeType === Node.TEXT_NODE) {
     const range = document.createRange();
     range.selectNodeContents(node);
-    const rect = range.getBoundingClientRect();
-    return rect.bottom;
+    return range.getBoundingClientRect();
   }
-  return (node as HTMLElement).getBoundingClientRect().bottom;
+  return (node as HTMLElement).getBoundingClientRect();
 }
+
+// Returns real bottom value, computed from container top and node bottom, in viewport coordinates
+function calculateBottom(containerTop: number) {
+  return (input: Node) => {
+    const rect = processRect(input);
+    return rect.bottom - containerTop;
+  };
+}
+
+/* ---------------------------------------------------------
+   VNODE CREATION
+----------------------------------------------------------*/
 
 function elementToVNode(el: HTMLElement | Text): VNode {
   if (el.nodeType === Node.TEXT_NODE) {
@@ -50,6 +66,7 @@ function elementToVNode(el: HTMLElement | Text): VNode {
   };
 }
 
+// Create tree structure of VNodes from DOM nodes along the given path
 function clonePathToVNode(
   rootMap: WeakMap<Node, VNode>,
   root: { value: VNode | null },
@@ -59,117 +76,93 @@ function clonePathToVNode(
   let current: VNode | undefined;
 
   for (const parent of path) {
-    const isColumnContainer =
-      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
-
     const parentClone = rootMap.get(parent);
-
     if (parentClone) {
       current = parentClone;
       continue;
     }
 
-    const newParent: VNode = elementToVNode(parent as HTMLElement);
+    const newParent = elementToVNode(parent as HTMLElement);
 
+    const isColumnContainer =
+      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
     if (isColumnContainer) {
       for (const col of parent.childNodes) {
         const childClone = elementToVNode(col as HTMLElement);
-
         newParent.children.push(childClone);
         rootMap.set(col, childClone);
       }
     }
 
-    if (current) {
-      current.children.push(newParent);
-    }
+    if (current) current.children.push(newParent);
 
     rootMap.set(parent, newParent);
     current = newParent;
     root.value ??= newParent;
   }
 
-  // Child part check
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
 
-  const childClone = rootMap.get(newChild);
-  if (!childClone) {
+  if (!rootMap.get(newChild)) {
     rootMap.set(newChild, newChildVNode);
-    if (current) {
-      current.children.push(newChildVNode);
-    }
+    current?.children.push(newChildVNode);
   }
 }
 
-function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
-  const text = textNode.textContent || "";
-  if (!text.length) return 0;
+function binarySearchSplitIndex(textNode: Text, maxHeight: number): number {
+  const originalText = textNode.textContent || "";
+  if (!originalText.length) return 0;
 
-  let left = 0;
-  let right = text.length;
-
-  // Step:1 find the maximum index that fits on the page
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-
+  function measure(idx: number): DOMRect {
     const range = document.createRange();
     range.setStart(textNode, 0);
-    range.setEnd(textNode, mid);
+    range.setEnd(textNode, idx);
+    return range.getBoundingClientRect();
+  }
 
-    const rect = range.getBoundingClientRect();
+  // Measure the text height instead of bottom to avoid issues with line-height
+  let left = 0;
+  let right = originalText.length;
 
-    if (rect.bottom <= pageBottom) {
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    const rect = measure(mid);
+
+    if (rect.height <= maxHeight) {
       left = mid + 1;
     } else {
       right = mid;
     }
   }
 
-  const splitOffset = Math.max(0, left - 1);
+  let split = Math.max(0, left - 1);
 
-  // Step:2 find the exact line break
-  const range = document.createRange();
-  range.setStart(textNode, 0);
-  range.setEnd(textNode, splitOffset);
-  let prevBottom = range.getBoundingClientRect().bottom;
-
-  let idx = splitOffset;
-  const EPS = 1;
-
-  while (idx < text.length) {
-    range.setEnd(textNode, idx + 1);
-    const rect = range.getBoundingClientRect();
-
-    // if the bottom goes further, we found the line break
-    if (rect.bottom - prevBottom > EPS) break;
-    idx++;
-    prevBottom = rect.bottom;
+  // handle word break: move split back to last whitespace
+  while (split > 0 && !/[\s\u00A0]/.test(originalText[split - 1])) {
+    split--;
   }
 
-  // Step:3 move back to the last whitespace
-  while (idx > 0 && !/[\s\u00A0]/.test(text[idx - 1])) idx--;
-
-  return idx > 0 ? idx : splitOffset;
+  return split;
 }
 
-function divideTextNode(node: Text, pageBottom: number): Node[] {
-  const splitOffset = binarySearchSplitIndex(node, pageBottom);
+function divideTextNode(node: Text, maxHeight: number): Node[] {
+  const splitIndex = binarySearchSplitIndex(node, maxHeight);
 
-  const firstPart = node.textContent?.slice(0, splitOffset) || "";
-  const secondPart = node.textContent?.slice(splitOffset) || "";
+  const firstText = node.textContent?.slice(0, splitIndex) || "";
+  const secondText = node.textContent?.slice(splitIndex) || "";
 
   const firstVNode: VNode = {
     type: "text",
     props: {},
     children: [],
-    text: firstPart,
+    text: firstText,
   };
 
   const secondVNode: VNode = {
     type: "text",
     props: {},
     children: [],
-    text: secondPart,
+    text: secondText,
   };
 
   return [vNodeToTextNode(firstVNode), vNodeToTextNode(secondVNode)];
@@ -180,17 +173,22 @@ function getProcessNode(
   pageBottom: { value: number },
   chunks: VNode[][],
   root: { value: VNode | null },
+  getBottom: (node: Node) => number,
 ) {
-  // The most important part. It keeps original element (Node) as the key, and as the value keeps the VNode, made from the original Node. It is used to take action, mutate or check VNodes.
-  let rootMap = new Map<Node, VNode>();
+  let rootMap = new WeakMap<Node, VNode>();
 
-  function closeCurrentPage() {
-    if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
-    chunks[pageIndex.value].push(root.value!);
-    pageIndex.value += 1;
-    pageBottom.value += PAGE_HEIGHT;
+  function closePage() {
+    if (root.value) {
+      chunks[pageIndex.value] ??= [];
+      chunks[pageIndex.value].push(root.value);
+    }
+    pageIndex.value++;
+    const nextPageIndex = pageIndex.value + 1;
+    pageBottom.value =
+      PAGE_HEIGHT * nextPageIndex - nextPageIndex * (PAGE_PADDING * 2);
+
     root.value = null;
-    rootMap = new Map();
+    rootMap = new WeakMap();
   }
 
   function markMarginRemove(
@@ -208,34 +206,53 @@ function getProcessNode(
     }
   }
 
-  function handle(node: Node, path: Node[], isLastChild: boolean) {
+  function handle(node: Node, path: Node[], isLeaf: boolean) {
     const bottom = getBottom(node);
-    if (isLastChild) {
-      if (bottom > pageBottom.value) {
-        closeCurrentPage();
-      }
+    if (isLeaf && bottom > pageBottom.value) {
+      closePage();
     }
-
     clonePathToVNode(rootMap, root, path, node);
   }
 
   const processNode = (node: Node, path: Node[] = []) => {
-    const isLastChild = (node as HTMLElement).childNodes.length === 0;
+    const isLeaf = (node as HTMLElement).childNodes.length === 0;
+
     if (node.nodeType === Node.TEXT_NODE) {
       const bottom = getBottom(node);
 
       if (bottom > pageBottom.value) {
-        const [firstNode, secondNode] = divideTextNode(
-          node as Text,
-          pageBottom.value,
-        );
+        const rect = processRect(node);
+        const textHeight = rect.height;
+        const localBottom = bottom;
+        const localTop = localBottom - textHeight;
+        const maxHeightForNode = pageBottom.value - localTop;
+
+        const [left, right] = divideTextNode(node as Text, maxHeightForNode);
+
+        /**
+         * IMPORTANT: We do NOT call processNode(left/right) after splitting a text node.
+         *
+         * Reason:
+         *   - When a text node overflows the page, we split it into two NEW text nodes:
+         *         left  → fits on the current page
+         *         right → should start the next page
+         *
+         *   - These new nodes DO NOT exist in the real DOM.
+         *     They are synthetic nodes created only for pagination.
+         *
+         *   - processNode() relies on DOM geometry (getBoundingClientRect) to detect overflow.
+         *     But synthetic nodes cannot be measured: their rect == 0 or == the rect of the
+         *     original text node. This causes the algorithm to think they still overflow.
+         *     - This leads to infinite splitting and broken pagination.
+         *
+         *   - We use clonePathToVNode() instead of processNode():
+         *       clonePathToVNode builds the virtual VNode tree WITHOUT checking geometry.
+         *       It simply inserts the split parts into the output pages.
+         **/
         markMarginRemove(path, "bottom", rootMap);
-        processNode(firstNode, path);
-
-        closeCurrentPage();
-
-        processNode(secondNode, path);
-        // Has to be here, because we don't have rootMap till upper line, as we renewed it with closeCurrentPage()
+        clonePathToVNode(rootMap, root, path, left);
+        closePage();
+        clonePathToVNode(rootMap, root, path, right);
         markMarginRemove(path, "top", rootMap);
         return;
       }
@@ -244,17 +261,16 @@ function getProcessNode(
       return;
     }
 
-    // Start process with leaves (deepest child)
-    for (const child of (node as HTMLElement).childNodes) {
+    for (const child of Array.from((node as HTMLElement).childNodes)) {
       processNode(child, [...path, node]);
     }
 
-    handle(node, path, isLastChild);
+    handle(node, path, isLeaf);
   };
+
   return processNode;
 }
 
-// TODO: Change "any" type to the specific one representing the form data
 const usePaginateDom = ({
   ref,
   data,
@@ -266,30 +282,38 @@ const usePaginateDom = ({
     if (!ref.current) return;
 
     const chunks: VNode[][] = [[]];
-    const currentIndex = { value: 0 };
-    const pageBottom = { value: PAGE_HEIGHT };
-    const root: { value: VNode | null } = { value: null };
+    const pageIndex = { value: 0 };
+    const pageBottom = {
+      value: PAGE_HEIGHT - (PAGE_PADDING + CONTAINER_MARGIN_BOTTOM),
+    };
+    const root = { value: null as VNode | null };
 
-    const processNode = getProcessNode(currentIndex, pageBottom, chunks, root);
+    console.log({ pageIndex });
 
-    for (const child of ref.current.childNodes) {
+    const containerTop = ref.current.getBoundingClientRect().top;
+    const getBottom = calculateBottom(containerTop);
+
+    const processNode = getProcessNode(
+      pageIndex,
+      pageBottom,
+      chunks,
+      root,
+      getBottom,
+    );
+
+    for (const child of Array.from(ref.current.childNodes)) {
       processNode(child);
 
       if (root.value) {
-        if (!chunks[currentIndex.value]) chunks[currentIndex.value] = [];
-
-        chunks[currentIndex.value].push(root.value);
+        chunks[pageIndex.value] ??= [];
+        chunks[pageIndex.value].push(root.value);
         root.value = null;
       }
     }
 
     const renderVNode = getRenderVNode();
 
-    const newPages: Page[] = chunks.map((chunk) =>
-      chunk.map((vNode) => renderVNode(vNode)),
-    );
-
-    setPages(newPages);
+    setPages(chunks.map((chunk) => chunk.map(renderVNode)));
   }, [ref, data, photo]);
 
   return pages;
@@ -298,10 +322,13 @@ const usePaginateDom = ({
 function vNodeToTextNode(vNode: VNode): Node {
   return document.createTextNode(vNode.text || "");
 }
+
 function getRenderVNode() {
   let keyCounter = 0;
 
   return function renderVNode(vNode: VNode): React.ReactNode {
+    if (!vNode) return null;
+
     keyCounter++;
 
     if (vNode.type === "text") return vNode.text;
@@ -315,10 +342,7 @@ function getRenderVNode() {
 
     return React.createElement(
       vNode.type,
-      {
-        ...reactProps,
-        key: keyCounter,
-      },
+      { ...reactProps, key: keyCounter },
       vNode.children.map(renderVNode),
     );
   };
