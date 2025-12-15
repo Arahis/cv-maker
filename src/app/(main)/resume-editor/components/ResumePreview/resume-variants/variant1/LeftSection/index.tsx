@@ -30,27 +30,42 @@ const Education = ({ educations }: { educations: any }) => {
   );
 };
 
+const Skills = ({ skills }: { skills: any }) => {
+  const skillsToArray = Object.entries(skills).map(([head, items]) => ({
+    head,
+    items,
+  }));
+
+  if (skills.personal.length === 0 && skills.technical.length === 0)
+    return null;
+
+  return (
+    <SectionItem
+      title="Skills"
+      items={skillsToArray}
+      renderItem={(item) => {
+        if (item.items.length === 0) return null;
+
+        return (
+          <React.Fragment key={item.head}>
+            <p className="font-bold">#{item.head}</p>
+            <p>{item.items.map((i) => i.name).join(", ")}</p>
+          </React.Fragment>
+        );
+      }}
+    />
+  );
+};
+
 const LeftSection = ({ data }: { data: any }) => {
   const { educations, skills } = data;
 
-  const skillsToArray = Object.entries(skills).map(([head, items]) => {
-    return { head, items };
-  });
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
       <Education educations={educations || []} />
       <div className="mb-6">
-        <SectionItem
-          title="Skills"
-          items={skillsToArray}
-          renderItem={(item) => (
-            <React.Fragment key={item.head}>
-              <p className="font-bold">#{item.head}</p>
-              <p>{item.items.map((i) => i.name).join(", ")}</p>
-            </React.Fragment>
-          )}
-        />
+        <Skills skills={skills || {}} />
       </div>
       {/* <div className="mb-6" datatype="left-section-wrapper">
         <p className="text-[16px] uppercase" datatype="left-section-text">

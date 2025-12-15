@@ -42,6 +42,8 @@ export function JobSection({ item }: { item: ExperienceItem }) {
 }
 
 const RightSection = ({ data }: { data: any }) => {
+  if (data.workExperiences.length === 0) return null;
+
   return (
     <Paginate.Section
       className="w-[70%] bg-gray-100 pt-8 pl-6"
