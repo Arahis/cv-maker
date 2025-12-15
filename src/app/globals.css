@@ -132,6 +132,31 @@
 }
 
 @page {
+  size: A4;
+  margin: 20mm 18mm 24mm 18mm;
   padding-top: 24px;
   padding-bottom: 24px;
+}
+
+.header {
+  break-inside: avoid;
+}
+
+p {
+  widows: 2;
+  orphans: 2;
+}
+
+.columns {
+  column-count: 2;
+  column-gap: 12mm;
+}
+
+.page-preview {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 16px auto;
+  padding: 20mm 18mm 24mm 18mm;
+  background: white;
+  box-shadow: 0 0 0 1px #ddd;
 }
