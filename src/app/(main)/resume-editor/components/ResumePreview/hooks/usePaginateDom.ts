@@ -1,5 +1,6 @@
 import React, { useLayoutEffect } from "react";
 import { convertDomAttributesToProps } from "./dom-attributes-to-react-props";
+import { divideTextNode } from "./manageText";
 
 type Page = React.ReactNode[];
 
@@ -8,7 +9,7 @@ type PaginatedDomProps = {
   photo?: string | null;
 };
 
-type VNode = {
+export type VNode = {
   type: string;
   props: Record<string, unknown>;
   children: VNode[];
@@ -17,7 +18,6 @@ type VNode = {
 
 const PAGE_HEIGHT = 1123;
 const PAGE_PADDING = 24;
-const CONTAINER_MARGIN_BOTTOM = 16;
 
 /* ---------------------------------------------------------
    GEOMETRY
@@ -38,6 +38,17 @@ function calculateBottom(containerTop: number) {
     const rect = processRect(input);
     return rect.bottom - containerTop;
   };
+}
+
+function calculateTop(containerTop: number) {
+  return (input: Node) => {
+    const rect = processRect(input);
+    return rect.top - containerTop;
+  };
+}
+
+function stringToTextNode(text: string): Text {
+  return document.createTextNode(text);
 }
 
 /* ---------------------------------------------------------
@@ -109,71 +120,13 @@ function clonePathToVNode(
   }
 }
 
-function binarySearchSplitIndex(textNode: Text, maxHeight: number): number {
-  const originalText = textNode.textContent || "";
-  if (!originalText.length) return 0;
-
-  function measure(idx: number): DOMRect {
-    const range = document.createRange();
-    range.setStart(textNode, 0);
-    range.setEnd(textNode, idx);
-    return range.getBoundingClientRect();
-  }
-
-  // Measure the text height instead of bottom to avoid issues with line-height
-  let left = 0;
-  let right = originalText.length;
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    const rect = measure(mid);
-
-    if (rect.height <= maxHeight) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-  }
-
-  let split = Math.max(0, left - 1);
-
-  // handle word break: move split back to last whitespace
-  while (split > 0 && !/[\s\u00A0]/.test(originalText[split - 1])) {
-    split--;
-  }
-
-  return split;
-}
-
-function divideTextNode(node: Text, maxHeight: number): Node[] {
-  const splitIndex = binarySearchSplitIndex(node, maxHeight);
-
-  const firstText = node.textContent?.slice(0, splitIndex) || "";
-  const secondText = node.textContent?.slice(splitIndex) || "";
-
-  const firstVNode: VNode = {
-    type: "text",
-    props: {},
-    children: [],
-    text: firstText,
-  };
-
-  const secondVNode: VNode = {
-    type: "text",
-    props: {},
-    children: [],
-    text: secondText,
-  };
-
-  return [vNodeToTextNode(firstVNode), vNodeToTextNode(secondVNode)];
-}
-
 function getProcessNode(
   pageIndex: { value: number },
   pageBottom: { value: number },
   chunks: VNode[][],
   root: { value: VNode | null },
   getBottom: (node: Node) => number,
+  getTop: (node: Node) => number,
 ) {
   let rootMap = new WeakMap<Node, VNode>();
 
@@ -218,42 +171,36 @@ function getProcessNode(
     const isLeaf = (node as HTMLElement).childNodes.length === 0;
 
     if (node.nodeType === Node.TEXT_NODE) {
+      // the real bottom of the text node
       const bottom = getBottom(node);
+      const top = getTop(node);
 
       if (bottom > pageBottom.value) {
-        const rect = processRect(node);
-        const textHeight = rect.height;
-        const localBottom = bottom;
-        const localTop = localBottom - textHeight;
-        const maxHeightForNode = pageBottom.value - localTop;
+        const maxHeightForNode = pageBottom.value - top;
 
-        const [left, right] = divideTextNode(node as Text, maxHeightForNode);
+        const textChunks = divideTextNode(node as Text, maxHeightForNode, 1075);
 
-        /**
-         * IMPORTANT: We do NOT call processNode(left/right) after splitting a text node.
-         *
-         * Reason:
-         *   - When a text node overflows the page, we split it into two NEW text nodes:
-         *         left  → fits on the current page
-         *         right → should start the next page
-         *
-         *   - These new nodes DO NOT exist in the real DOM.
-         *     They are synthetic nodes created only for pagination.
-         *
-         *   - processNode() relies on DOM geometry (getBoundingClientRect) to detect overflow.
-         *     But synthetic nodes cannot be measured: their rect == 0 or == the rect of the
-         *     original text node. This causes the algorithm to think they still overflow.
-         *     - This leads to infinite splitting and broken pagination.
-         *
-         *   - We use clonePathToVNode() instead of processNode():
-         *       clonePathToVNode builds the virtual VNode tree WITHOUT checking geometry.
-         *       It simply inserts the split parts into the output pages.
-         **/
-        markMarginRemove(path, "bottom", rootMap);
-        clonePathToVNode(rootMap, root, path, left);
-        closePage();
-        clonePathToVNode(rootMap, root, path, right);
-        markMarginRemove(path, "top", rootMap);
+        for (let i = 0; i < textChunks.length; i++) {
+          const chunk = textChunks[i];
+          clonePathToVNode(rootMap, root, path, stringToTextNode(chunk));
+
+          if (i === textChunks.length - 1) {
+            markMarginRemove(path, "top", rootMap);
+            continue;
+          }
+
+          if (i === 0) {
+            markMarginRemove(path, "bottom", rootMap);
+            closePage();
+
+            continue;
+          }
+
+          markMarginRemove(path, "bottom", rootMap);
+          markMarginRemove(path, "top", rootMap);
+
+          closePage();
+        }
         return;
       }
 
@@ -284,14 +231,13 @@ const usePaginateDom = ({
     const chunks: VNode[][] = [[]];
     const pageIndex = { value: 0 };
     const pageBottom = {
-      value: PAGE_HEIGHT - (PAGE_PADDING + CONTAINER_MARGIN_BOTTOM),
+      value: PAGE_HEIGHT - PAGE_PADDING * 2,
     };
     const root = { value: null as VNode | null };
 
-    console.log({ pageIndex });
-
     const containerTop = ref.current.getBoundingClientRect().top;
     const getBottom = calculateBottom(containerTop);
+    const getTop = calculateTop(containerTop);
 
     const processNode = getProcessNode(
       pageIndex,
@@ -299,6 +245,7 @@ const usePaginateDom = ({
       chunks,
       root,
       getBottom,
+      getTop,
     );
 
     for (const child of Array.from(ref.current.childNodes)) {
@@ -318,10 +265,6 @@ const usePaginateDom = ({
 
   return pages;
 };
-
-function vNodeToTextNode(vNode: VNode): Node {
-  return document.createTextNode(vNode.text || "");
-}
 
 function getRenderVNode() {
   let keyCounter = 0;

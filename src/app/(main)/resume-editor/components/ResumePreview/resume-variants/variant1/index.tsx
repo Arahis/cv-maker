@@ -15,20 +15,15 @@ const ResumeVariant1 = ({
   photo: string | null;
 }) => {
   return (
-    <>
-      <Paginate ref={ref}>
-        <HeaderSection data={data} photo={photo} />
-        <Summary data={data} />
+    <Paginate ref={ref}>
+      <HeaderSection data={data} photo={photo} />
+      <Summary data={data} />
 
-        <Paginate.Columns
-          className="columns flex w-full"
-          datatype="main-cv-info"
-        >
-          <LeftSection data={data} />
-          <RightSection data={data} />
-        </Paginate.Columns>
-      </Paginate>
-    </>
+      <Paginate.Columns className="columns flex w-full" datatype="main-cv-info">
+        <LeftSection data={data} />
+        <RightSection data={data} />
+      </Paginate.Columns>
+    </Paginate>
   );
 };
 
