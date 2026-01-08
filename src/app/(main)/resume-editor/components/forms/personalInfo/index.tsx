@@ -9,9 +9,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PersonalInfoForm, PersonalInfoKeys } from "@/lib/validation";
+import {
+  PersonalInfoForm,
+  PersonalInfoKeys,
+  ResumeForm,
+} from "@/lib/validation";
 import React from "react";
 import { Control, useFormContext } from "react-hook-form";
+import PhotoUploader from "./PhotoUploader";
 
 const TextFormField = ({
   name,
@@ -46,28 +51,18 @@ const TextFormField = ({
 };
 
 const PersonalInfo = () => {
-  const { control } = useFormContext();
+  const { control } = useFormContext<ResumeForm>();
 
   return (
     <div>
-      {/* TODO: Add immediate validation for the Photo field  */}
       <FormField
         control={control}
-        name="photo"
-        render={({ field: { value, ...fieldValues } }) => (
+        name="avatarCropData"
+        render={({ field }) => (
           <FormItem>
-            <FormLabel>Username</FormLabel>
+            <FormLabel>Photo</FormLabel>
             <FormControl>
-              <Input
-                {...fieldValues}
-                placeholder="firstName"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  fieldValues.onChange(file);
-                }}
-              />
+              <PhotoUploader {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -88,7 +83,7 @@ const PersonalInfo = () => {
       <TextFormField control={control} name="phone" title="Phone" />
       <TextFormField control={control} name="email" title="E-mail" />
 
-      <Button type="submit">Submit</Button>
+      <Button type="submit">Next step?</Button>
     </div>
   );
 };

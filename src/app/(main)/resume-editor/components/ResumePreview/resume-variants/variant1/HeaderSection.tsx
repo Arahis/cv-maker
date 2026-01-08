@@ -2,37 +2,58 @@ import React from "react";
 import Icon from "../../icons/Icon";
 import { Paginate } from "../../Paginate";
 
-const HeaderSection = () => {
+const HeaderSection = ({
+  data,
+  photo,
+}: {
+  data: any;
+  photo: string | null;
+}) => {
   return (
     <Paginate.Section className="flex">
-      <Paginate.Section className="mt-[-30px] w-[30%] bg-amber-300"></Paginate.Section>
+      <Paginate.Section
+        className="-mt-8 h-[240px] w-[30%] bg-amber-300 bg-cover bg-center"
+        style={{
+          backgroundImage: photo ? `url(${photo})` : undefined,
+        }}
+      ></Paginate.Section>
       <Paginate.Section className="w-[70%] px-8">
-        <Paginate.Section className="border-b border-gray-300 py-8 text-left">
-          <Paginate.Text className="mb-1 text-4xl">
-            Hello I&apos;m
+        <Paginate.Section className="border-b border-gray-300 py-6 text-left">
+          {/* <Paginate.Text className="text-3xl">Hello I&apos;m</Paginate.Text> */}
+          <Paginate.Text className="mb-2 text-4xl font-bold">
+            {`${data.firstName || "First"} ${data.lastName || "Last"}`}
           </Paginate.Text>
-          <Paginate.Text className="text-4xl font-bold">
-            Rosen Anderson
+          <Paginate.Text className="text-xl font-semibold">
+            {data.jobTitle || "Profession"}
           </Paginate.Text>
         </Paginate.Section>
         <Paginate.Section className="pt-2">
-          <Paginate.Section className="flex items-center gap-2">
-            <Icon name="location" size={16} />
-            <Paginate.Text>Address</Paginate.Text>
-          </Paginate.Section>
-          <Paginate.Section className="flex w-full">
-            <div className="flex flex-1 items-center gap-2">
-              <Icon name="phone" size={16} />
-              <Paginate.Text>Phone</Paginate.Text>
-            </div>
-            <div className="flex flex-1 items-center gap-2">
-              <Icon name="mail" size={16} />
-              <Paginate.Text>Mail</Paginate.Text>
-            </div>
-            <div className="flex flex-1 items-center gap-2">
-              <Icon name="web" size={16} />
-              <Paginate.Text>Website</Paginate.Text>
-            </div>
+          {(data.city || data.country) && (
+            <Paginate.Section className="mb-1 flex items-center gap-2">
+              <Icon name="location" size={16} />
+              <Paginate.Text>{`${data.city}, ${data.country}`}</Paginate.Text>
+            </Paginate.Section>
+          )}
+
+          <Paginate.Section className="flex items-center justify-start gap-2">
+            {data.phone && (
+              <div className="flex flex-1 items-center gap-2">
+                <Icon name="phone" size={16} />
+                <Paginate.Text>{data.phone}</Paginate.Text>
+              </div>
+            )}
+            {data.email && (
+              <div className="flex flex-1 items-center gap-2">
+                <Icon name="mail" size={16} />
+                <Paginate.Text>{data.email}</Paginate.Text>
+              </div>
+            )}
+            {data.website && (
+              <div className="flex flex-1 items-center gap-2">
+                <Icon name="web" size={16} />
+                <Paginate.Text>Website</Paginate.Text>
+              </div>
+            )}
           </Paginate.Section>
         </Paginate.Section>
       </Paginate.Section>

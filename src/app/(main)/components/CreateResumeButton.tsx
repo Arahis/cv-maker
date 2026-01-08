@@ -2,20 +2,22 @@
 
 import { Button } from "@/components/ui/button";
 import { defaultFormValues } from "@/lib/formUtils";
-import { saveFormData } from "@/lib/indexedDB";
+import { createResume } from "@/lib/indexedDB";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 const CreateResumeButton = () => {
   const router = useRouter();
 
-  const handleCreateResume = () => {
+  const handleCreateResume = async () => {
     const resumeId = crypto.randomUUID();
 
-    saveFormData(resumeId, {
-      createdAt: new Date(),
-      content: defaultFormValues,
-    });
+    try {
+      await createResume(resumeId, defaultFormValues);
+    } catch {
+      alert("Error while creating resume. Please try again.");
+      return;
+    }
 
     router.push(`/resume-editor/${resumeId}`);
   };

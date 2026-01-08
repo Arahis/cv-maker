@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
-import { loadFormData } from "@/lib/indexedDB";
+import { loadResume } from "@/lib/indexedDB";
 
 const useResumeForm = () =>
   useForm({
@@ -25,12 +25,11 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
   // If it doesn't exist, show a not found page
   useEffect(() => {
     const checkResumeExists = async () => {
-      const data = await loadFormData(resumeId);
-      if (!!data) {
-        console.log({ data });
-        f.reset(data.content);
+      const resume = await loadResume(resumeId);
+      if (!!resume) {
+        f.reset(resume.data);
       }
-      setValid(!!data);
+      setValid(!!resume);
     };
 
     checkResumeExists();
@@ -38,6 +37,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
 
   if (valid === null) return <p>Загрузка...</p>;
   if (!valid) return notFound();
+
   return (
     <div className="flex h-screen w-full">
       <Form {...f}>
@@ -45,7 +45,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
           <ResumeEditor resumeId={resumeId} />
         </div>
         <div className="hidden h-screen w-1/2 overflow-y-auto md:flex">
-          <ResumePreview />
+          <ResumePreview resumeId={resumeId} />
         </div>
       </Form>
     </div>

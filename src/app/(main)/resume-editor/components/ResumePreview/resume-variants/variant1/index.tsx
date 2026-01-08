@@ -2,23 +2,28 @@ import React from "react";
 import HeaderSection from "./HeaderSection";
 import Summary from "./Summary";
 import LeftSection from "./LeftSection";
-import RightSection, { JobSection, sections } from "./RightSection";
-import SectionItem from "./SectionItem";
+import RightSection from "./RightSection";
 import { Paginate } from "../../Paginate";
 
-const ResumeVariant1 = ({ ref }: { ref: React.Ref<HTMLDivElement> }) => {
+const ResumeVariant1 = ({
+  ref,
+  data,
+  photo,
+}: {
+  ref: React.Ref<HTMLDivElement>;
+  data: any;
+  photo: string | null;
+}) => {
   return (
-    <>
-      <Paginate ref={ref}>
-        <HeaderSection />
-        <Summary />
+    <Paginate ref={ref}>
+      <HeaderSection data={data} photo={photo} />
+      <Summary data={data} />
 
-        <Paginate.Columns className="flex w-full" datatype="main-cv-info">
-          <LeftSection />
-          <RightSection />
-        </Paginate.Columns>
-      </Paginate>
-    </>
+      <Paginate.Columns className="columns flex w-full" datatype="main-cv-info">
+        <LeftSection data={data} />
+        <RightSection data={data} />
+      </Paginate.Columns>
+    </Paginate>
   );
 };
 

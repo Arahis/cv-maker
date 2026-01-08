@@ -1,16 +1,18 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
-import PersonalInfo from "./forms/PersonalInfo";
+import PersonalInfo from "./forms/personalInfo";
 import ResumeDescription from "./forms/ResumeDescription";
 import WorkExperience from "./forms/WorkExperience";
 import Education from "./forms/Education";
-import Skills from "./forms/Skills";
+import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
+import { ResumeEditorProvider } from "../context/ResumeEditorContext";
+import { ResumeForm } from "@/lib/validation";
 
 const resumeSections: {
   title: string;
@@ -50,12 +52,14 @@ const resumeSections: {
 ];
 
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
-  const f = useFormContext();
+  const f = useFormContext<ResumeForm>();
+  const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
-  // ✅ Автосохранение в IndexedDB
-  useIndexedDBDebouncedSave(f.control, resumeId, 2000);
+  // Autosave в IndexedDB with debounce
+  // @ts-expect-error: useWatch doesn't infer the type of formData correctly
+  useIndexedDBDebouncedSave(resumeId, formData, 1000);
 
   return (
     <form onSubmit={f.handleSubmit((data) => console.log(data))}>
@@ -64,7 +68,9 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
         currentStep={currentEditorStep}
         setItem={setCurrentEditorStep}
       />
-      {resumeSections[currentEditorStep].item}
+      <ResumeEditorProvider value={{ resumeId }}>
+        {resumeSections[currentEditorStep].item}
+      </ResumeEditorProvider>
     </form>
   );
 };

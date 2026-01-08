@@ -1,30 +1,59 @@
 import React, { useLayoutEffect } from "react";
+import { convertDomAttributesToProps } from "./dom-attributes-to-react-props";
+import { divideTextNode } from "./manageText";
 
 type Page = React.ReactNode[];
 
 type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
+  photo?: string | null;
 };
 
-type VNode = {
+export type VNode = {
   type: string;
-  props: Record<string, string>;
+  props: Record<string, unknown>;
   children: VNode[];
   text?: string;
 };
 
-// TODO: Make it in a variable which excludes padding top and bottom from the page height.
-const PAGE_HEIGHT = 1123 - 24;
+const PAGE_HEIGHT = 1123;
+const PAGE_PADDING = 24;
 
-function getBottom(node: Node): number {
+/* ---------------------------------------------------------
+   GEOMETRY
+----------------------------------------------------------*/
+
+function processRect(node: Node): DOMRect {
   if (node.nodeType === Node.TEXT_NODE) {
     const range = document.createRange();
     range.selectNodeContents(node);
-    const rect = range.getBoundingClientRect();
-    return rect.bottom;
+    return range.getBoundingClientRect();
   }
-  return (node as HTMLElement).getBoundingClientRect().bottom;
+  return (node as HTMLElement).getBoundingClientRect();
 }
+
+// Returns real bottom value, computed from container top and node bottom, in viewport coordinates
+function calculateBottom(containerTop: number) {
+  return (input: Node) => {
+    const rect = processRect(input);
+    return rect.bottom - containerTop;
+  };
+}
+
+function calculateTop(containerTop: number) {
+  return (input: Node) => {
+    const rect = processRect(input);
+    return rect.top - containerTop;
+  };
+}
+
+function stringToTextNode(text: string): Text {
+  return document.createTextNode(text);
+}
+
+/* ---------------------------------------------------------
+   VNODE CREATION
+----------------------------------------------------------*/
 
 function elementToVNode(el: HTMLElement | Text): VNode {
   if (el.nodeType === Node.TEXT_NODE) {
@@ -48,6 +77,7 @@ function elementToVNode(el: HTMLElement | Text): VNode {
   };
 }
 
+// Create tree structure of VNodes from DOM nodes along the given path
 function clonePathToVNode(
   rootMap: WeakMap<Node, VNode>,
   root: { value: VNode | null },
@@ -57,120 +87,37 @@ function clonePathToVNode(
   let current: VNode | undefined;
 
   for (const parent of path) {
-    const isColumnContainer =
-      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
-
     const parentClone = rootMap.get(parent);
-
     if (parentClone) {
       current = parentClone;
       continue;
     }
 
-    const newParent: VNode = elementToVNode(parent as HTMLElement);
+    const newParent = elementToVNode(parent as HTMLElement);
 
+    const isColumnContainer =
+      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
     if (isColumnContainer) {
       for (const col of parent.childNodes) {
         const childClone = elementToVNode(col as HTMLElement);
-
         newParent.children.push(childClone);
         rootMap.set(col, childClone);
       }
     }
 
-    if (current) {
-      current.children.push(newParent);
-    }
+    if (current) current.children.push(newParent);
 
     rootMap.set(parent, newParent);
     current = newParent;
     root.value ??= newParent;
   }
 
-  // Child part check
   const newChildVNode = elementToVNode(newChild as HTMLElement | Text);
 
-  const childClone = rootMap.get(newChild);
-  if (!childClone) {
+  if (!rootMap.get(newChild)) {
     rootMap.set(newChild, newChildVNode);
-    if (current) {
-      current.children.push(newChildVNode);
-    }
+    current?.children.push(newChildVNode);
   }
-}
-
-function binarySearchSplitIndex(textNode: Text, pageBottom: number): number {
-  const text = textNode.textContent || "";
-  if (!text.length) return 0;
-
-  let left = 0;
-  let right = text.length;
-
-  // Step:1 find the maximum index that fits on the page
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-
-    const range = document.createRange();
-    range.setStart(textNode, 0);
-    range.setEnd(textNode, mid);
-
-    const rect = range.getBoundingClientRect();
-
-    if (rect.bottom <= pageBottom) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-  }
-
-  const splitOffset = Math.max(0, left - 1);
-
-  // Step:2 find the exact line break
-  const range = document.createRange();
-  range.setStart(textNode, 0);
-  range.setEnd(textNode, splitOffset);
-  let prevBottom = range.getBoundingClientRect().bottom;
-
-  let idx = splitOffset;
-  const EPS = 1;
-
-  while (idx < text.length) {
-    range.setEnd(textNode, idx + 1);
-    const rect = range.getBoundingClientRect();
-
-    // if the bottom goes further, we found the line break
-    if (rect.bottom - prevBottom > EPS) break;
-    idx++;
-    prevBottom = rect.bottom;
-  }
-
-  // Step:3 move back to the last whitespace
-  while (idx > 0 && !/[\s\u00A0]/.test(text[idx - 1])) idx--;
-
-  return idx > 0 ? idx : splitOffset;
-}
-
-function divideTextNode(node: Text, pageBottom: number): Node[] {
-  const splitOffset = binarySearchSplitIndex(node, pageBottom);
-
-  const firstPart = node.textContent?.slice(0, splitOffset) || "";
-  const secondPart = node.textContent?.slice(splitOffset) || "";
-
-  const firstVNode: VNode = {
-    type: "text",
-    props: {},
-    children: [],
-    text: firstPart,
-  };
-
-  const secondVNode: VNode = {
-    type: "text",
-    props: {},
-    children: [],
-    text: secondPart,
-  };
-
-  return [vNodeToTextNode(firstVNode), vNodeToTextNode(secondVNode)];
 }
 
 function getProcessNode(
@@ -178,17 +125,23 @@ function getProcessNode(
   pageBottom: { value: number },
   chunks: VNode[][],
   root: { value: VNode | null },
+  getBottom: (node: Node) => number,
+  getTop: (node: Node) => number,
 ) {
-  // The most important part. It keeps original element (Node) as the key, and as the value keeps the VNode, made from the original Node. It is used to take action, mutate or check VNodes.
-  let rootMap = new Map<Node, VNode>();
+  let rootMap = new WeakMap<Node, VNode>();
 
-  function closeCurrentPage() {
-    if (!chunks[pageIndex.value]) chunks[pageIndex.value] = [];
-    chunks[pageIndex.value].push(root.value!);
-    pageIndex.value += 1;
-    pageBottom.value += PAGE_HEIGHT;
+  function closePage() {
+    if (root.value) {
+      chunks[pageIndex.value] ??= [];
+      chunks[pageIndex.value].push(root.value);
+    }
+    pageIndex.value++;
+    const nextPageIndex = pageIndex.value + 1;
+    pageBottom.value =
+      PAGE_HEIGHT * nextPageIndex - nextPageIndex * (PAGE_PADDING * 2);
+
     root.value = null;
-    rootMap = new Map();
+    rootMap = new WeakMap();
   }
 
   function markMarginRemove(
@@ -206,35 +159,48 @@ function getProcessNode(
     }
   }
 
-  function handle(node: Node, path: Node[], isLastChild: boolean) {
+  function handle(node: Node, path: Node[], isLeaf: boolean) {
     const bottom = getBottom(node);
-    if (isLastChild) {
-      if (bottom > pageBottom.value) {
-        closeCurrentPage();
-      }
+    if (isLeaf && bottom > pageBottom.value) {
+      closePage();
     }
-
     clonePathToVNode(rootMap, root, path, node);
   }
 
   const processNode = (node: Node, path: Node[] = []) => {
-    const isLastChild = (node as HTMLElement).childNodes.length === 0;
+    const isLeaf = (node as HTMLElement).childNodes.length === 0;
+
     if (node.nodeType === Node.TEXT_NODE) {
+      // the real bottom of the text node
       const bottom = getBottom(node);
+      const top = getTop(node);
 
       if (bottom > pageBottom.value) {
-        const [firstNode, secondNode] = divideTextNode(
-          node as Text,
-          pageBottom.value,
-        );
-        markMarginRemove(path, "bottom", rootMap);
-        processNode(firstNode, path);
+        const maxHeightForNode = pageBottom.value - top;
 
-        closeCurrentPage();
+        const textChunks = divideTextNode(node as Text, maxHeightForNode, 1075);
 
-        processNode(secondNode, path);
-        // Has to be here, because we don't have rootMap till upper line, as we renewed it with closeCurrentPage()
-        markMarginRemove(path, "top", rootMap);
+        for (let i = 0; i < textChunks.length; i++) {
+          const chunk = textChunks[i];
+          clonePathToVNode(rootMap, root, path, stringToTextNode(chunk));
+
+          if (i === textChunks.length - 1) {
+            markMarginRemove(path, "top", rootMap);
+            continue;
+          }
+
+          if (i === 0) {
+            markMarginRemove(path, "bottom", rootMap);
+            closePage();
+
+            continue;
+          }
+
+          markMarginRemove(path, "bottom", rootMap);
+          markMarginRemove(path, "top", rootMap);
+
+          closePage();
+        }
         return;
       }
 
@@ -242,74 +208,84 @@ function getProcessNode(
       return;
     }
 
-    // Start process with leaves (deepest child)
-    for (const child of (node as HTMLElement).childNodes) {
+    for (const child of Array.from((node as HTMLElement).childNodes)) {
       processNode(child, [...path, node]);
     }
 
-    handle(node, path, isLastChild);
+    handle(node, path, isLeaf);
   };
+
   return processNode;
 }
 
-// TODO: Change "any" type to the specific one representing the form data
-const usePaginateDom = ({ ref, data }: PaginatedDomProps & { data: any }) => {
+const usePaginateDom = ({
+  ref,
+  data,
+  photo,
+}: PaginatedDomProps & { data: any }) => {
   const [pages, setPages] = React.useState<Page[]>([]);
 
   useLayoutEffect(() => {
     if (!ref.current) return;
 
     const chunks: VNode[][] = [[]];
-    const currentIndex = { value: 0 };
-    const pageBottom = { value: PAGE_HEIGHT };
-    const root: { value: VNode | null } = { value: null };
+    const pageIndex = { value: 0 };
+    const pageBottom = {
+      value: PAGE_HEIGHT - PAGE_PADDING * 2,
+    };
+    const root = { value: null as VNode | null };
 
-    const processNode = getProcessNode(currentIndex, pageBottom, chunks, root);
+    const containerTop = ref.current.getBoundingClientRect().top;
+    const getBottom = calculateBottom(containerTop);
+    const getTop = calculateTop(containerTop);
 
-    for (const child of ref.current.childNodes) {
+    const processNode = getProcessNode(
+      pageIndex,
+      pageBottom,
+      chunks,
+      root,
+      getBottom,
+      getTop,
+    );
+
+    for (const child of Array.from(ref.current.childNodes)) {
       processNode(child);
 
       if (root.value) {
-        if (!chunks[currentIndex.value]) chunks[currentIndex.value] = [];
-
-        chunks[currentIndex.value].push(root.value);
+        chunks[pageIndex.value] ??= [];
+        chunks[pageIndex.value].push(root.value);
         root.value = null;
       }
     }
 
     const renderVNode = getRenderVNode();
 
-    const newPages: Page[] = chunks.map((chunk) =>
-      chunk.map((vNode) => renderVNode(vNode)),
-    );
-
-    setPages(newPages);
-  }, [ref, data]);
+    setPages(chunks.map((chunk) => chunk.map(renderVNode)));
+  }, [ref, data, photo]);
 
   return pages;
 };
 
-function vNodeToTextNode(vNode: VNode): Node {
-  return document.createTextNode(vNode.text || "");
-}
 function getRenderVNode() {
   let keyCounter = 0;
 
   return function renderVNode(vNode: VNode): React.ReactNode {
+    if (!vNode) return null;
+
     keyCounter++;
 
     if (vNode.type === "text") return vNode.text;
 
-    // Remove "class" property conflict with React
-    const { class: className, ...props } = vNode.props;
+    const reactProps = convertDomAttributesToProps({
+      attributes: Object.entries(vNode.props).map(([name, value]) => ({
+        name,
+        value,
+      })),
+    } as any);
 
     return React.createElement(
       vNode.type,
-      {
-        ...props,
-        className,
-        key: keyCounter,
-      },
+      { ...reactProps, key: keyCounter },
       vNode.children.map(renderVNode),
     );
   };

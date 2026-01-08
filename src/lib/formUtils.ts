@@ -2,7 +2,7 @@ export const defaultFormValues = {
   title: "My resume",
   description: "",
 
-  photo: undefined,
+  avatarCropData: { x: 0, y: 0, zoom: 1, rotation: 0 },
   firstName: "",
   lastName: "",
   jobTitle: "",
@@ -13,6 +13,6 @@ export const defaultFormValues = {
 
   workExperiences: [],
   educations: [],
-  skills: [],
+  skills: { technical: [], personal: [] },
   summary: "",
 };
