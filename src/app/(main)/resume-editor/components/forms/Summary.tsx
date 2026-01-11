@@ -4,8 +4,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import React from "react";
+import { TextEditor } from "@/components/editor";
 import { useFormContext } from "react-hook-form";
 
 const Summary = () => {
@@ -20,7 +19,7 @@ const Summary = () => {
           <FormItem>
             <FormLabel>Summary</FormLabel>
             <FormControl>
-              <Textarea placeholder="Summary" {...field} />
+              <TextEditor placeholder="Summary" {...field} />
             </FormControl>
           </FormItem>
         )}
