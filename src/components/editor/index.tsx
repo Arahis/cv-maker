@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -15,11 +15,11 @@ type RichTextEditorProps = {
   value: string;
 };
 
+const theme = {};
+
 function onError(error: Error): void {
   console.error(error);
 }
-
-const theme = {};
 
 const GetEditorState = ({
   onChange,
@@ -42,12 +42,11 @@ const GetEditorState = ({
 
 function ApplySerializedStatePlugin({ value }: { value: string }) {
   const [editor] = useLexicalComposerContext();
+  const lastAppliedRef = React.useRef<string>("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!value) return;
-
-    const current = JSON.stringify(editor.getEditorState().toJSON());
-    if (current === value) return;
+    if (lastAppliedRef.current === value) return;
 
     editor.update(
       () => {
@@ -55,20 +54,16 @@ function ApplySerializedStatePlugin({ value }: { value: string }) {
       },
       { discrete: true },
     );
+
+    lastAppliedRef.current = value;
   }, [editor, value]);
 
   return null;
 }
 
-const config = {
-  namespace: "MyEditor",
-  theme,
-  onError,
-};
-
 export function TextReader({ value }: { value: string }) {
   const initialConfig = {
-    namespace: "ResumePreview",
+    namespace: "EditorPreview",
     editable: false,
     theme,
     onError,
@@ -92,7 +87,9 @@ export function TextEditor({
   value,
 }: RichTextEditorProps) {
   const initialConfig = {
-    ...config,
+    namespace: "Editor",
+    theme,
+    onError,
     editorState: value,
   };
 

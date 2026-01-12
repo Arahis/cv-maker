@@ -224,43 +224,53 @@ const usePaginateDom = ({
   photo,
 }: PaginatedDomProps & { data: any }) => {
   const [pages, setPages] = React.useState<Page[]>([]);
+  const rafId = React.useRef<number | null>(null);
 
   useLayoutEffect(() => {
     if (!ref.current) return;
+    if (rafId.current != null) cancelAnimationFrame(rafId.current);
 
-    const chunks: VNode[][] = [[]];
-    const pageIndex = { value: 0 };
-    const pageBottom = {
-      value: PAGE_HEIGHT - PAGE_PADDING * 2,
-    };
-    const root = { value: null as VNode | null };
+    rafId.current = requestAnimationFrame(() => {
+      if (!ref.current) return;
 
-    const containerTop = ref.current.getBoundingClientRect().top;
-    const getBottom = calculateBottom(containerTop);
-    const getTop = calculateTop(containerTop);
+      const chunks: VNode[][] = [[]];
+      const pageIndex = { value: 0 };
+      const pageBottom = {
+        value: PAGE_HEIGHT - PAGE_PADDING * 2,
+      };
+      const root = { value: null as VNode | null };
 
-    const processNode = getProcessNode(
-      pageIndex,
-      pageBottom,
-      chunks,
-      root,
-      getBottom,
-      getTop,
-    );
+      const containerTop = ref.current.getBoundingClientRect().top;
+      const getBottom = calculateBottom(containerTop);
+      const getTop = calculateTop(containerTop);
 
-    for (const child of Array.from(ref.current.childNodes)) {
-      processNode(child);
+      const processNode = getProcessNode(
+        pageIndex,
+        pageBottom,
+        chunks,
+        root,
+        getBottom,
+        getTop,
+      );
 
-      if (root.value) {
-        chunks[pageIndex.value] ??= [];
-        chunks[pageIndex.value].push(root.value);
-        root.value = null;
+      for (const child of Array.from(ref.current.childNodes)) {
+        processNode(child);
+
+        if (root.value) {
+          chunks[pageIndex.value] ??= [];
+          chunks[pageIndex.value].push(root.value);
+          root.value = null;
+        }
       }
-    }
 
-    const renderVNode = getRenderVNode();
+      const renderVNode = getRenderVNode();
 
-    setPages(chunks.map((chunk) => chunk.map(renderVNode)));
+      setPages(chunks.map((chunk) => chunk.map(renderVNode)));
+
+      return () => {
+        if (rafId.current != null) cancelAnimationFrame(rafId.current);
+      };
+    });
   }, [ref, data, photo]);
 
   return pages;
