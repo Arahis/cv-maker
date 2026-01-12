@@ -266,6 +266,8 @@ const usePaginateDom = ({
   return pages;
 };
 
+const VOID_TAGS = new Set(["br", "img", "hr", "input", "meta", "link"]);
+
 function getRenderVNode() {
   let keyCounter = 0;
 
@@ -282,6 +284,13 @@ function getRenderVNode() {
         value,
       })),
     } as any);
+
+    if (VOID_TAGS.has(vNode.type)) {
+      return React.createElement(vNode.type, {
+        ...reactProps,
+        key: keyCounter,
+      });
+    }
 
     return React.createElement(
       vNode.type,
