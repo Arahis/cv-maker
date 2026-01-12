@@ -1,13 +1,17 @@
-import React, { useEffect, useLayoutEffect } from "react";
-
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { ListItemNode, ListNode } from "@lexical/list";
+
+import { ParagraphNode, TextNode } from "lexical";
 
 import "./editor.css";
+import ToolbarPlugin from "./plugins/Toolbar";
+import ApplySerializedStatePlugin from "./plugins/ApplySerializedState";
+import GetEditorStatePlugin from "./plugins/GetTextEditor";
 
 type RichTextEditorProps = {
   placeholder?: string;
@@ -15,56 +19,32 @@ type RichTextEditorProps = {
   value: string;
 };
 
-const theme = {};
+const nodes = [ParagraphNode, TextNode, ListNode, ListItemNode];
+
+const theme = {
+  list: {
+    ol: "editor-list-ol",
+    ul: "editor-list-ul",
+    listitem: "editor-listItem",
+  },
+  text: {
+    bold: "editor-text-bold",
+    italic: "editor-text-italic",
+    strikethrough: "editor-text-strikethrough",
+    underline: "editor-text-underline",
+    underlineStrikethrough: "editor-text-underlineStrikethrough",
+  },
+};
 
 function onError(error: Error): void {
   console.error(error);
-}
-
-const GetEditorState = ({
-  onChange,
-}: {
-  onChange: (lexicalJson: string) => void;
-}) => {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      const lexicalJson = JSON.stringify(editorState.toJSON());
-
-      editorState.read(() => {
-        onChange(lexicalJson);
-      });
-    });
-  }, [editor, onChange]);
-  return null;
-};
-
-function ApplySerializedStatePlugin({ value }: { value: string }) {
-  const [editor] = useLexicalComposerContext();
-  const lastAppliedRef = React.useRef<string>("");
-
-  useLayoutEffect(() => {
-    if (!value) return;
-    if (lastAppliedRef.current === value) return;
-
-    editor.update(
-      () => {
-        editor.setEditorState(editor.parseEditorState(value));
-      },
-      { discrete: true },
-    );
-
-    lastAppliedRef.current = value;
-  }, [editor, value]);
-
-  return null;
 }
 
 export function TextReader({ value }: { value: string }) {
   const initialConfig = {
     namespace: "EditorPreview",
     editable: false,
+    nodes,
     theme,
     onError,
   };
@@ -89,6 +69,7 @@ export function TextEditor({
   const initialConfig = {
     namespace: "Editor",
     theme,
+    nodes,
     onError,
     editorState: value,
   };
@@ -99,6 +80,7 @@ export function TextEditor({
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
+      <ToolbarPlugin />
       <div className="relative">
         <RichTextPlugin
           contentEditable={
@@ -114,7 +96,8 @@ export function TextEditor({
         />
       </div>
       <HistoryPlugin />
-      <GetEditorState onChange={onEditorChange} />
+      <ListPlugin />
+      <GetEditorStatePlugin onChange={onEditorChange} />
     </LexicalComposer>
   );
 }
