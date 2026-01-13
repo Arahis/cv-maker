@@ -108,7 +108,7 @@ const ToolbarPlugin = () => {
           variant="outline"
           size="icon"
           onClick={() => formatText("bold")}
-          className={"toolbar-item spaced " + (isBold ? "bg-accent" : "")}
+          className={isBold ? "bg-accent" : ""}
           aria-label="Format Bold"
         >
           <Bold />
@@ -117,7 +117,7 @@ const ToolbarPlugin = () => {
           variant="outline"
           size="icon"
           onClick={() => formatText("italic")}
-          className={"toolbar-item spaced " + (isItalic ? "bg-accent" : "")}
+          className={isItalic ? "bg-accent" : ""}
           aria-label="Format Italic"
         >
           <Italic />
@@ -126,7 +126,7 @@ const ToolbarPlugin = () => {
           variant="outline"
           size="icon"
           onClick={() => formatText("underline")}
-          className={"toolbar-item spaced " + (isUnderline ? "bg-accent" : "")}
+          className={isUnderline ? "bg-accent" : ""}
           aria-label="Format Underline"
         >
           <Underline />
@@ -135,27 +135,36 @@ const ToolbarPlugin = () => {
           variant="outline"
           size="icon"
           onClick={() => formatText("strikethrough")}
-          className={
-            "toolbar-item spaced " + (isStrikethrough ? "bg-accent" : "")
-          }
+          className={isStrikethrough ? "bg-accent" : ""}
           aria-label="Format Strikethrough"
         >
           <Strikethrough />
         </Button>
       </ButtonGroup>
       <ButtonGroup className="mr-2">
-        <Button variant="outline" size="icon" onClick={formatUlList}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={formatUlList}
+          className={blockType === "ul" ? "bg-accent" : ""}
+        >
           <List />
         </Button>
-        <Button variant="outline" size="icon" onClick={formatOlList}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={formatOlList}
+          className={blockType === "ol" ? "bg-accent" : ""}
+        >
           <ListOrdered />
         </Button>
       </ButtonGroup>
-      <ButtonGroup>
+      {/*TODO: Implement link button later*/}
+      {/* <ButtonGroup>
         <Button variant="outline" size="icon">
           <Link />
         </Button>
-      </ButtonGroup>
+      </ButtonGroup> */}
     </div>
   );
 };
