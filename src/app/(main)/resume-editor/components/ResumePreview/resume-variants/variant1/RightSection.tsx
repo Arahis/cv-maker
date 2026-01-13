@@ -2,6 +2,7 @@ import React from "react";
 import SectionItem from "./SectionItem";
 import { Paginate } from "../../Paginate";
 import { formatDate } from "../../utils/formatDate";
+import { TextReader } from "@/components/editor";
 
 type ExperienceItem = {
   position: string;
@@ -35,7 +36,7 @@ export function JobSection({ item }: { item: ExperienceItem }) {
       </Paginate.Section>
       <Paginate.Section className="w-[70%]">
         <p className="mb-1 font-bold uppercase">{company}</p>
-        <Paginate.Text>{description}</Paginate.Text>
+        <TextReader value={description || ""} />
       </Paginate.Section>
     </Paginate.Columns>
   );

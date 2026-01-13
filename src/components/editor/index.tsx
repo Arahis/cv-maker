@@ -16,7 +16,7 @@ import GetEditorStatePlugin from "./plugins/GetTextEditor";
 type RichTextEditorProps = {
   placeholder?: string;
   onChange: (json: string) => void;
-  value: string;
+  value: string | undefined;
 };
 
 const nodes = [ParagraphNode, TextNode, ListNode, ListItemNode];
@@ -71,7 +71,8 @@ export function TextEditor({
     theme,
     nodes,
     onError,
-    editorState: value,
+    // editor will not accept empty string as valid state
+    editorState: value?.trim() ? value : undefined,
   };
 
   const onEditorChange = (lexicalJson: string) => {
