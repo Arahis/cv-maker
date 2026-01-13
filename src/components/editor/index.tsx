@@ -81,14 +81,17 @@ export function TextEditor({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <ToolbarPlugin />
-      <div className="relative">
+      <div className="group/input-group border-input dark:bg-input/30 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 relative h-auto w-full min-w-0 rounded-md border shadow-xs transition-[color,box-shadow] outline-none has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]">
         <RichTextPlugin
           contentEditable={
             <ContentEditable
-              className="contenteditable"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive field-sizing-content min-h-16 w-full resize-none rounded-none border-0 bg-transparent px-3 py-3 text-base shadow-none transition-[color,box-shadow] outline-none focus-visible:ring-0 md:text-sm dark:bg-transparent"
               aria-placeholder={"Enter some text..."}
+              data-slot="input-group-control"
               placeholder={
-                <div className="editorPlaceholder">{placeholder}</div>
+                <div className="editorPlaceholder text-muted-foreground top-3 left-3">
+                  {placeholder}
+                </div>
               }
             />
           }

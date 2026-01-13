@@ -1,13 +1,11 @@
-.contenteditable {
-  border: 1px solid #000;
-  height: 300px;
-  padding: 1em;
-}
-
 .editorPlaceholder {
   position: absolute;
-  top: 1em;
-  left: 1em;
+  pointer-events: none;
+  font-size: 14px !important;
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
 }
 
 .editor-text-bold {

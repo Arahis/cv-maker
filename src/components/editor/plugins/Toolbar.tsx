@@ -27,7 +27,7 @@ import { Underline } from "lucide-react";
 import { Strikethrough } from "lucide-react";
 import { List } from "lucide-react";
 import { ListOrdered } from "lucide-react";
-import { Link } from "lucide-react";
+// import { Link } from "lucide-react";
 
 const ToolbarPlugin = () => {
   const [editor] = useLexicalComposerContext();
