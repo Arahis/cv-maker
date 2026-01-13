@@ -59,7 +59,7 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
 
   // Autosave в IndexedDB with debounce
   // @ts-expect-error: useWatch doesn't infer the type of formData correctly
-  useIndexedDBDebouncedSave(resumeId, formData, 1000);
+  useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
   return (
     <form onSubmit={f.handleSubmit((data) => console.log(data))}>

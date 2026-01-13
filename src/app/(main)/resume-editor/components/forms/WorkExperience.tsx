@@ -10,11 +10,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { WorkExperienceForm } from "@/lib/validation";
-import React from "react";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 import { SortableList } from "../SortableList";
+import { TextEditor } from "@/components/editor";
 
 const WorkExperienceItem = ({
   index,
@@ -123,7 +122,6 @@ const WorkExperienceItem = ({
       )}
     />
 
-    {/* TODO: Change textarea to reach-text editor */}
     <FormField
       control={control}
       name={`workExperiences.${index}.description`}
@@ -131,7 +129,7 @@ const WorkExperienceItem = ({
         <FormItem>
           <FormLabel>Description</FormLabel>
           <FormControl>
-            <Textarea {...field} placeholder="Description" />
+            <TextEditor {...field} />
           </FormControl>
         </FormItem>
       )}
