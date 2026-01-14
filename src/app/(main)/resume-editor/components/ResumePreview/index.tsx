@@ -9,6 +9,7 @@ import ResumeVariant1 from "./resume-variants/variant1";
 import usePaginateDom from "./hooks/usePaginateDom";
 import { useReactToPrint } from "react-to-print";
 import useAvatar from "../../store/hooks/useAvatar";
+import ResumeVariant2 from "./resume-variants/variant2";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
@@ -71,7 +72,7 @@ const ResumePreview = ({ resumeId }: { resumeId: string }) => {
         )}
       >
         <ResumeWrapper scale={scale} width={width} height={height}>
-          <ResumeVariant1 ref={ref} data={formData} photo={cropped} />
+          <ResumeVariant2 ref={ref} data={formData} photo={cropped} />
         </ResumeWrapper>
       </button>
       {pages.map((page, idx) => (

@@ -42,7 +42,7 @@ export const workExperienceSchema = z.object({
         city: optionalString,
         startDate: optionalString,
         endDate: optionalString,
-        isFullDate: z.boolean().optional(),
+        isFullDate: z.boolean(),
         description: optionalString,
       }),
     )
@@ -61,7 +61,7 @@ export const educationSchema = z.object({
         startDate: optionalString,
         endDate: optionalString,
         city: optionalString,
-        isFullDate: z.boolean().optional(),
+        isFullDate: z.boolean(),
       }),
     )
     .optional(),

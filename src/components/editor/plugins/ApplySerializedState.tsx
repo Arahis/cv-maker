@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-function ApplySerializedStatePlugin({ value }: { value: string }) {
+function ApplySerializedStatePlugin({ value }: { value: string | undefined }) {
   const [editor] = useLexicalComposerContext();
   const lastAppliedRef = useRef<string>("");
 
