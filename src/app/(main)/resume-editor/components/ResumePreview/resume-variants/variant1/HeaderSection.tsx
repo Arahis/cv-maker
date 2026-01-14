@@ -1,12 +1,13 @@
 import React from "react";
 import Icon from "../../icons/Icon";
 import { Paginate } from "../../Paginate";
+import { ResumeForm } from "@/lib/validation";
 
 const HeaderSection = ({
   data,
   photo,
 }: {
-  data: any;
+  data: ResumeForm;
   photo: string | null;
 }) => {
   return (
@@ -48,12 +49,12 @@ const HeaderSection = ({
                 <Paginate.Text>{data.email}</Paginate.Text>
               </div>
             )}
-            {data.website && (
+            {/* {data.website && (
               <div className="flex flex-1 items-center gap-2">
                 <Icon name="web" size={16} />
                 <Paginate.Text>Website</Paginate.Text>
               </div>
-            )}
+            )} */}
           </Paginate.Section>
         </Paginate.Section>
       </Paginate.Section>

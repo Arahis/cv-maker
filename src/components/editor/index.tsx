@@ -40,7 +40,7 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export function TextReader({ value }: { value: string }) {
+export function TextReader({ value }: { value: string | undefined }) {
   const initialConfig = {
     namespace: "EditorPreview",
     editable: false,
