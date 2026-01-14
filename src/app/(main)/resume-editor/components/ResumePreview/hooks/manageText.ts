@@ -63,9 +63,11 @@ export function divideTextNode(
   blockHeight: number,
   pageHeight: number,
 ): string[] {
+  // The space that remained for the first chunk
   let fittingHeight = blockHeight;
 
   const text = textNode.textContent;
+  console.log({ text });
   if (!text) return [];
 
   // Get all rendered line rectangles at once
@@ -73,6 +75,7 @@ export function divideTextNode(
   fullRange.selectNodeContents(textNode);
   const lineRects = Array.from(fullRange.getClientRects());
 
+  // The CSS line height
   const lineHeight = getLineHeightPx(textNode.parentElement!);
 
   const chunks: string[] = [];

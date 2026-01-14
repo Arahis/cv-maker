@@ -180,6 +180,13 @@ function getProcessNode(
 
         const textChunks = divideTextNode(node as Text, maxHeightForNode, 1075);
 
+        // if the text is only one line, and it doesn't fit, move it to the next page
+        if (textChunks.length === 1) {
+          closePage();
+          processNode(node, path);
+          return;
+        }
+
         for (let i = 0; i < textChunks.length; i++) {
           const chunk = textChunks[i];
           clonePathToVNode(rootMap, root, path, stringToTextNode(chunk));
