@@ -5,12 +5,13 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { ListItemNode, ListNode } from "@lexical/list";
+import { $generateHtmlFromNodes } from "@lexical/html";
+import parse from "html-react-parser";
 
-import { ParagraphNode, TextNode } from "lexical";
+import { createEditor, ParagraphNode, TextNode } from "lexical";
 
 import "./editor.css";
 import ToolbarPlugin from "./plugins/Toolbar";
-import ApplySerializedStatePlugin from "./plugins/ApplySerializedState";
 import GetEditorStatePlugin from "./plugins/GetTextEditor";
 
 type RichTextEditorProps = {
@@ -40,25 +41,24 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export function TextReader({ value }: { value: string | undefined }) {
+export function TextReader({ value }: { value: string }) {
   const initialConfig = {
     namespace: "EditorPreview",
-    editable: false,
     nodes,
     theme,
     onError,
   };
 
-  return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <ApplySerializedStatePlugin value={value} />
-      <RichTextPlugin
-        contentEditable={<ContentEditable className="outline-none" />}
-        placeholder={null}
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-    </LexicalComposer>
-  );
+  const editor = createEditor(initialConfig);
+  const editorState = editor.parseEditorState(value);
+  editor.setEditorState(editorState);
+
+  let html = "";
+  editorState.read(() => {
+    html = $generateHtmlFromNodes(editor);
+  });
+
+  return <div>{parse(html)}</div>;
 }
 
 export function TextEditor({
