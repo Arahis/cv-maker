@@ -77,6 +77,19 @@ function elementToVNode(el: HTMLElement | Text): VNode {
   };
 }
 
+function isColumnsContainer(node: Node): node is HTMLElement {
+  return (
+    node.nodeType === Node.ELEMENT_NODE &&
+    (node as HTMLElement).getAttribute("data-paginate") === "columns"
+  );
+}
+
+function isLeaf(node: Node): boolean {
+  return node.nodeType === Node.TEXT_NODE
+    ? true
+    : (node as HTMLElement).childNodes.length === 0;
+}
+
 // Create tree structure of VNodes from DOM nodes along the given path
 function clonePathToVNode(
   rootMap: WeakMap<Node, VNode>,
@@ -95,9 +108,7 @@ function clonePathToVNode(
 
     const newParent = elementToVNode(parent as HTMLElement);
 
-    const isColumnContainer =
-      (parent as HTMLElement).getAttribute("data-paginate") === "columns";
-    if (isColumnContainer) {
+    if (isColumnsContainer(parent)) {
       for (const col of parent.childNodes) {
         const childClone = elementToVNode(col as HTMLElement);
         newParent.children.push(childClone);
@@ -122,23 +133,22 @@ function clonePathToVNode(
 
 function getProcessNode(
   pageIndex: { value: number },
-  pageBottom: { value: number },
+  workingPageHeight: number,
   chunks: VNode[][],
   root: { value: VNode | null },
   getBottom: (node: Node) => number,
   getTop: (node: Node) => number,
 ) {
   let rootMap = new WeakMap<Node, VNode>();
+  const pageBottom = () => workingPageHeight * (pageIndex.value + 1);
 
   function closePage() {
     if (root.value) {
       chunks[pageIndex.value] ??= [];
+      // Bug: Если value из двух колонок, и первая колонка переполняется, до парсинга второй колонки дело даже не доходит.
       chunks[pageIndex.value].push(root.value);
     }
     pageIndex.value++;
-    const nextPageIndex = pageIndex.value + 1;
-    pageBottom.value =
-      PAGE_HEIGHT * nextPageIndex - nextPageIndex * (PAGE_PADDING * 2);
 
     root.value = null;
     rootMap = new WeakMap();
@@ -161,31 +171,29 @@ function getProcessNode(
 
   function handle(node: Node, path: Node[], isLeaf: boolean) {
     const bottom = getBottom(node);
-    if (isLeaf && bottom > pageBottom.value) {
+    if (isLeaf && bottom > pageBottom()) {
       closePage();
     }
     clonePathToVNode(rootMap, root, path, node);
   }
 
   const processNode = (node: Node, path: Node[] = []) => {
-    const isLeaf = (node as HTMLElement).childNodes.length === 0;
-
     if (node.nodeType === Node.TEXT_NODE) {
       // the real bottom of the text node
       const bottom = getBottom(node);
       const top = getTop(node);
 
-      if (bottom > pageBottom.value) {
-        const maxHeightForNode = pageBottom.value - top;
+      if (bottom > pageBottom()) {
+        const maxHeightForNode = pageBottom() - top;
 
-        const textChunks = divideTextNode(node as Text, maxHeightForNode, 1075);
-
-        // if the text is only one line, and it doesn't fit, move it to the next page
-        if (textChunks.length === 1) {
+        // if the text node begins on the division height (potential bug)
+        if (maxHeightForNode <= 0) {
           closePage();
           processNode(node, path);
           return;
         }
+
+        const textChunks = divideTextNode(node as Text, maxHeightForNode, 1075);
 
         for (let i = 0; i < textChunks.length; i++) {
           const chunk = textChunks[i];
@@ -219,7 +227,7 @@ function getProcessNode(
       processNode(child, [...path, node]);
     }
 
-    handle(node, path, isLeaf);
+    handle(node, path, isLeaf(node));
   };
 
   return processNode;
@@ -242,18 +250,19 @@ const usePaginateDom = ({
 
       const chunks: VNode[][] = [[]];
       const pageIndex = { value: 0 };
-      const pageBottom = {
-        value: PAGE_HEIGHT - PAGE_PADDING * 2,
-      };
+      const workingPageHeight = PAGE_HEIGHT - PAGE_PADDING * 2;
+
       const root = { value: null as VNode | null };
 
       const containerTop = ref.current.getBoundingClientRect().top;
+
+      // Functions to get real bottom and top values of nodes
       const getBottom = calculateBottom(containerTop);
       const getTop = calculateTop(containerTop);
 
       const processNode = getProcessNode(
         pageIndex,
-        pageBottom,
+        workingPageHeight,
         chunks,
         root,
         getBottom,
