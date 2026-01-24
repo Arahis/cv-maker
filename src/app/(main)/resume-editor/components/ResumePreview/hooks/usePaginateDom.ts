@@ -1,19 +1,13 @@
-import React, { useLayoutEffect } from "react";
+import React, { ReactNode, useLayoutEffect } from "react";
 import { convertDomAttributesToProps } from "./dom-attributes-to-react-props";
 import { divideTextNode } from "./manageText";
+import { LeafMeta, PageRenderer, VNodeBuilder } from "./paginator";
 
-type Page = React.ReactNode[];
+type Page = ReactNode[];
 
 type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
   photo?: string | null;
-};
-
-export type VNode = {
-  type: string;
-  props: Record<string, unknown>;
-  children: VNode[];
-  text?: string;
 };
 
 const PAGE_HEIGHT = 1123;
@@ -54,41 +48,6 @@ function stringToTextNode(text: string): Text {
 /* ---------------------------------------------------------
    VNODE CREATION
 ----------------------------------------------------------*/
-
-function elementToVNode(el: HTMLElement | Text): VNode {
-  if (el.nodeType === Node.TEXT_NODE) {
-    return {
-      type: "text",
-      props: {},
-      children: [],
-      text: el.textContent || "",
-    };
-  }
-
-  const props: Record<string, string> = {};
-  for (const { name, value } of (el as HTMLElement).attributes) {
-    props[name] = value;
-  }
-
-  return {
-    type: (el as HTMLElement).tagName.toLowerCase(),
-    props,
-    children: [],
-  };
-}
-
-function isColumnsContainer(node: Node): node is HTMLElement {
-  return (
-    node.nodeType === Node.ELEMENT_NODE &&
-    (node as HTMLElement).getAttribute("data-paginate") === "columns"
-  );
-}
-
-function isLeaf(node: Node): boolean {
-  return node.nodeType === Node.TEXT_NODE
-    ? true
-    : (node as HTMLElement).childNodes.length === 0;
-}
 
 // Create tree structure of VNodes from DOM nodes along the given path
 function clonePathToVNode(
@@ -233,12 +192,24 @@ function getProcessNode(
   return processNode;
 }
 
+const calculatePages = (leafMeta: Map<Node, LeafMeta>) => {
+  let maxPageIndex = 0;
+
+  leafMeta.forEach((meta) => {
+    if (meta.endPage > maxPageIndex) {
+      maxPageIndex = meta.endPage;
+    }
+  });
+
+  return maxPageIndex;
+};
+
 const usePaginateDom = ({
   ref,
   data,
   photo,
 }: PaginatedDomProps & { data: any }) => {
-  const [pages, setPages] = React.useState<Page[]>([]);
+  const [pages, setPages] = React.useState<ReactNode[]>([]);
   const rafId = React.useRef<number | null>(null);
 
   useLayoutEffect(() => {
@@ -248,11 +219,7 @@ const usePaginateDom = ({
     rafId.current = requestAnimationFrame(() => {
       if (!ref.current) return;
 
-      const chunks: VNode[][] = [[]];
-      const pageIndex = { value: 0 };
       const workingPageHeight = PAGE_HEIGHT - PAGE_PADDING * 2;
-
-      const root = { value: null as VNode | null };
 
       const containerTop = ref.current.getBoundingClientRect().top;
 
@@ -260,28 +227,29 @@ const usePaginateDom = ({
       const getBottom = calculateBottom(containerTop);
       const getTop = calculateTop(containerTop);
 
-      const processNode = getProcessNode(
-        pageIndex,
+      const rootBuilder = new VNodeBuilder(
+        ref.current,
         workingPageHeight,
-        chunks,
-        root,
         getBottom,
         getTop,
       );
+      const vNodeTree = rootBuilder.buildVNodeTree(ref.current);
+      const renderer = new PageRenderer(
+        rootBuilder.leafMeta,
+        rootBuilder.vNodeToDom,
+        rootBuilder.textChunks,
+        rootBuilder.spacingRules,
+      );
 
-      for (const child of Array.from(ref.current.childNodes)) {
-        processNode(child);
+      const totalPages = calculatePages(rootBuilder.leafMeta);
 
-        if (root.value) {
-          chunks[pageIndex.value] ??= [];
-          chunks[pageIndex.value].push(root.value);
-          root.value = null;
-        }
+      const pagesArray: ReactNode[] = [];
+      for (let pageIndex = 0; pageIndex <= totalPages; pageIndex++) {
+        const page = renderer.renderPage(vNodeTree, pageIndex);
+        console.log({ page });
+        pagesArray.push(page);
       }
-
-      const renderVNode = getRenderVNode();
-
-      setPages(chunks.map((chunk) => chunk.map(renderVNode)));
+      setPages(pagesArray);
 
       return () => {
         if (rafId.current != null) cancelAnimationFrame(rafId.current);
@@ -291,39 +259,5 @@ const usePaginateDom = ({
 
   return pages;
 };
-
-const VOID_TAGS = new Set(["br", "img", "hr", "input", "meta", "link"]);
-
-function getRenderVNode() {
-  let keyCounter = 0;
-
-  return function renderVNode(vNode: VNode): React.ReactNode {
-    if (!vNode) return null;
-
-    keyCounter++;
-
-    if (vNode.type === "text") return vNode.text;
-
-    const reactProps = convertDomAttributesToProps({
-      attributes: Object.entries(vNode.props).map(([name, value]) => ({
-        name,
-        value,
-      })),
-    } as any);
-
-    if (VOID_TAGS.has(vNode.type)) {
-      return React.createElement(vNode.type, {
-        ...reactProps,
-        key: keyCounter,
-      });
-    }
-
-    return React.createElement(
-      vNode.type,
-      { ...reactProps, key: keyCounter },
-      vNode.children.map(renderVNode),
-    );
-  };
-}
 
 export default usePaginateDom;
