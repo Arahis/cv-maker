@@ -4,7 +4,7 @@ import { TextReader } from "@/components/editor";
 
 const HeaderSection = ({ data }: { data: ResumeForm }) => {
   return (
-    <Paginate.Section className="mb-8 flex border-b border-gray-500 pb-8">
+    <Paginate.Columns className="mb-8 border-b border-gray-500 pb-8">
       <div className="flex w-full items-center">
         <div className="w-[70%] flex-1">
           <div className="mb-4 flex">
@@ -29,7 +29,7 @@ const HeaderSection = ({ data }: { data: ResumeForm }) => {
           <Paginate.Text>{data.email}</Paginate.Text>
         </div>
       </div>
-    </Paginate.Section>
+    </Paginate.Columns>
   );
 };
 

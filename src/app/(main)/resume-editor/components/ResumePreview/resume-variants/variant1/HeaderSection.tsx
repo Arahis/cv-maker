@@ -11,7 +11,7 @@ const HeaderSection = ({
   photo: string | null;
 }) => {
   return (
-    <Paginate.Section className="flex">
+    <Paginate.Columns>
       <Paginate.Section
         className="-mt-8 h-[240px] w-[30%] bg-amber-300 bg-cover bg-center"
         style={{
@@ -58,7 +58,7 @@ const HeaderSection = ({
           </Paginate.Section>
         </Paginate.Section>
       </Paginate.Section>
-    </Paginate.Section>
+    </Paginate.Columns>
   );
 };
 
