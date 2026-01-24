@@ -4,6 +4,7 @@ import Summary from "./Summary";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
 import { Paginate } from "../../Paginate";
+import { ResumeForm } from "@/lib/validation";
 
 const ResumeVariant1 = ({
   ref,
@@ -11,7 +12,7 @@ const ResumeVariant1 = ({
   photo,
 }: {
   ref: React.Ref<HTMLDivElement>;
-  data: any;
+  data: ResumeForm;
   photo: string | null;
 }) => {
   return (

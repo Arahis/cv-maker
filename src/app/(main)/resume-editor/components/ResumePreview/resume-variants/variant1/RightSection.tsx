@@ -3,19 +3,14 @@ import SectionItem from "./SectionItem";
 import { Paginate } from "../../Paginate";
 import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
-
-type ExperienceItem = {
-  position: string;
-  city: string;
-  startDate: string;
-  endDate: string;
-  company: string;
-  description: string;
-  isFullDate: boolean;
-};
+import { ResumeForm } from "@/lib/validation";
 
 // TODO add proper type for item so it could see item fields
-export function JobSection({ item }: { item: ExperienceItem }) {
+export function JobSection({
+  item,
+}: {
+  item: NonNullable<ResumeForm["workExperiences"]>[number];
+}) {
   const {
     position,
     city,
@@ -42,8 +37,8 @@ export function JobSection({ item }: { item: ExperienceItem }) {
   );
 }
 
-const RightSection = ({ data }: { data: any }) => {
-  if (data.workExperiences.length === 0) return null;
+const RightSection = ({ data }: { data: ResumeForm }) => {
+  if (data.workExperiences?.length === 0) return null;
 
   return (
     <Paginate.Section

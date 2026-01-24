@@ -47,7 +47,7 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
   if (data.workExperiences?.length === 0) return;
 
   return (
-    <Paginate.Section className="">
+    <Paginate.Section>
       <SectionItem
         title={"Job Experience"}
         items={data.workExperiences || []}
