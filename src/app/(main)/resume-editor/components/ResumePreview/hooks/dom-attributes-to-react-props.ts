@@ -28,6 +28,8 @@ const HTML_ATTR_NAME_MAP: Record<string, string> = {
   tabindex: "tabIndex",
   colspan: "colSpan",
   rowspan: "rowSpan",
+  contenteditable: "contentEditable",
+  spellcheck: "spellCheck",
 };
 
 /** SVG → JSX attribute name mapping (React requires camelCase) */

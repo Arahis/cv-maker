@@ -58,21 +58,34 @@ function findLineEndOffset(
   return left - 1;
 }
 
+function cleanClientRects(rects: DOMRectList | DOMRect[]) {
+  const arr = Array.from(rects);
+
+  const finalRects = arr
+    .filter((r) => r.width > 0.5 && r.height > 0.5)
+    .filter((r) => r.width >= 5);
+
+  return finalRects;
+}
+
 export function divideTextNode(
   textNode: Text,
   blockHeight: number,
   pageHeight: number,
 ): string[] {
+  // The space that remained for the first chunk
   let fittingHeight = blockHeight;
 
   const text = textNode.textContent;
+  console.log({ text });
   if (!text) return [];
 
   // Get all rendered line rectangles at once
   const fullRange = document.createRange();
   fullRange.selectNodeContents(textNode);
-  const lineRects = Array.from(fullRange.getClientRects());
+  const lineRects = cleanClientRects(fullRange.getClientRects());
 
+  // The CSS line height
   const lineHeight = getLineHeightPx(textNode.parentElement!);
 
   const chunks: string[] = [];
