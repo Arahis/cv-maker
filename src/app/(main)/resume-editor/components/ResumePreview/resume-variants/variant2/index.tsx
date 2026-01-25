@@ -1,35 +1,31 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
 import { Paginate } from "../../Paginate";
-import { ResumeForm } from "@/lib/validation";
 import HeaderSection from "./HeaderSection";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
+import { ResumeVariantProps } from "../../../ResumeApp";
 
-const ResumeVariant2 = ({
-  ref,
-  data,
-}: {
-  ref: React.Ref<HTMLDivElement>;
-  data: ResumeForm;
-}) => {
-  return (
-    <Paginate ref={ref}>
-      <HeaderSection data={data} />
+export const ResumeVariant2 = forwardRef<HTMLDivElement, ResumeVariantProps>(
+  ({ data }, ref) => {
+    return (
+      <Paginate ref={ref}>
+        <HeaderSection data={data} />
 
-      <Paginate.Columns
-        className="columns flex w-full gap-2"
-        datatype="main-cv-info"
-      >
-        <div className="w-[60%]">
-          <LeftSection data={data} />
-        </div>
-        <div className="w-[40%]">
-          <RightSection data={data} />
-        </div>
-      </Paginate.Columns>
-    </Paginate>
-  );
-};
+        <Paginate.Columns
+          className="columns flex w-full gap-8"
+          datatype="main-cv-info"
+        >
+          <div className="w-[60%]">
+            <LeftSection data={data} />
+          </div>
+          <div className="w-[40%]">
+            <RightSection data={data} />
+          </div>
+        </Paginate.Columns>
+      </Paginate>
+    );
+  },
+);
 
-export default ResumeVariant2;
+ResumeVariant2.displayName = "ResumeVariant2";
