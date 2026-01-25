@@ -122,8 +122,6 @@ const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
         videoRefCurrent.srcObject = null;
       }
       streamRef.current = null;
-
-      console.log("Stopping camera");
     };
   }, []);
 

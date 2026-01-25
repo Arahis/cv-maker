@@ -77,7 +77,6 @@ export function divideTextNode(
   let fittingHeight = blockHeight;
 
   const text = textNode.textContent;
-  console.log({ text });
   if (!text) return [];
 
   // Get all rendered line rectangles at once
