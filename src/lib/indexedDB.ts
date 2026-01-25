@@ -6,7 +6,7 @@ import { ResumeForm } from "./validation";
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
 
-interface ResumeRecord {
+export interface ResumeRecord {
   id: string;
   updatedAt: number; // ??????
 
@@ -31,6 +31,11 @@ async function getDB() {
       }
     },
   });
+}
+
+export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
+  const db = await getDB();
+  return await db.getAll(STORE_NAME);
 }
 
 export async function loadResume(

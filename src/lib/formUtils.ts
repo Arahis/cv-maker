@@ -1,3 +1,6 @@
+export const EMPTY_LEXICAL_STATE =
+  '{"root":{"type":"root","version":1,"children":[{"type":"paragraph","version":1,"direction":"ltr","format":"","indent":0,"children":[]} ]}}';
+
 export const defaultFormValues = {
   title: "My resume",
   description: "",
@@ -14,5 +17,5 @@ export const defaultFormValues = {
   workExperiences: [],
   educations: [],
   skills: { technical: [], personal: [] },
-  summary: "",
+  summary: EMPTY_LEXICAL_STATE,
 };
