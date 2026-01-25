@@ -5,22 +5,14 @@ import { cn } from "@/lib/utils";
 import { ResumeForm } from "@/lib/validation";
 import React, { useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import ResumeVariant1 from "./resume-variants/variant1";
 import usePaginateDom from "./hooks/usePaginateDom";
-import { useReactToPrint } from "react-to-print";
 import useAvatar from "../../store/hooks/useAvatar";
-import ResumeVariant2 from "./resume-variants/variant2";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
   scale: number;
   width: number;
   height: number;
-};
-
-const resumeVariants = {
-  variant1: ResumeVariant1,
-  variant2: ResumeVariant2,
 };
 
 const ResumeWrapperPages = ({
@@ -57,11 +49,11 @@ const ResumeWrapper = ({ children }: ResumeWrapperProps) => {
 
 const ResumePreview = ({
   resumeId,
-  resumeVar,
+  resumeComponent,
   ref: contentRef,
 }: {
   resumeId: string;
-  resumeVar: number;
+  resumeComponent: React.ElementType;
   ref: React.RefObject<HTMLDivElement | null>;
 }) => {
   const { control } = useFormContext();
@@ -76,6 +68,8 @@ const ResumePreview = ({
   const { scale, width, height, handleZoomInAndOut } =
     useStageScale(containerRef);
 
+  const Variant = resumeComponent;
+
   return (
     <div
       ref={containerRef}
@@ -86,7 +80,7 @@ const ResumePreview = ({
         className="pointer-events-none absolute mb-4 cursor-none text-left text-[14px] opacity-0"
       >
         <div className="w-[794px] bg-pink-100 p-6">
-          <ResumeVariant2 ref={ref} data={formData} photo={cropped} />
+          <Variant ref={ref} data={formData} photo={cropped} />
         </div>
       </div>
       <div ref={contentRef}>
