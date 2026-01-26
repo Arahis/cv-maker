@@ -1,7 +1,6 @@
 "use client";
 
 import { useStageScale } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
 import { ResumeForm } from "@/lib/validation";
 import React, { useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -15,23 +14,23 @@ type ResumeWrapperProps = {
   height: number;
 };
 
-const ResumeWrapperPages = ({
-  children,
-  scale,
-  width,
-  height,
-}: ResumeWrapperProps) => {
-  return (
-    <div
-      className="h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-      style={{ width: 794, height: 1123 }}
-    >
-      <div className="p-[24px]" style={{ zoom: scale }}>
-        {children}
-      </div>
-    </div>
-  );
-};
+// const ResumeWrapperPages = ({
+//   children,
+//   scale,
+//   width,
+//   height,
+// }: ResumeWrapperProps) => {
+//   return (
+//     <div
+//       className="h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
+//       style={{ width: 794, height: 1123 }}
+//     >
+//       <div className="p-[24px]" style={{ zoom: scale }}>
+//         {children}
+//       </div>
+//     </div>
+//   );
+// };
 
 const ResumeWrapper = ({ children }: ResumeWrapperProps) => {
   return (
