@@ -14,6 +14,7 @@ import { WorkExperienceForm } from "@/lib/validation";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 import { SortableList } from "../SortableList";
 import { TextEditor } from "@/components/editor";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
 
 const WorkExperienceItem = ({
   index,
@@ -175,7 +176,7 @@ const WorkExperience = () => {
             city: "",
             startDate: "",
             endDate: "",
-            description: "",
+            description: EMPTY_LEXICAL_STATE,
             isFullDate: false,
           })
         }
