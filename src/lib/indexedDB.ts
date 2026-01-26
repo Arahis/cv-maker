@@ -2,15 +2,17 @@ import { openDB } from "idb";
 import { useEffect, useRef } from "react";
 import { debounce } from "./debounce";
 import { ResumeForm } from "./validation";
+import { ResumeVariantKey } from "@/components/resume/variants";
 
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
 
-interface ResumeRecord {
+export interface ResumeRecord {
   id: string;
-  updatedAt: number; // ??????
+  updatedAt: number;
 
   data: ResumeForm;
+  variant: ResumeVariantKey;
 
   media: {
     avatar?: {
@@ -33,6 +35,11 @@ async function getDB() {
   });
 }
 
+export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
+  const db = await getDB();
+  return await db.getAll(STORE_NAME);
+}
+
 export async function loadResume(
   resumeId: string,
 ): Promise<ResumeRecord | null> {
@@ -43,6 +50,7 @@ export async function loadResume(
 export async function createResume(
   resumeId: string,
   data: ResumeRecord["data"],
+  variant: ResumeRecord["variant"] = "variant1",
 ) {
   const db = await getDB();
 
@@ -51,6 +59,7 @@ export async function createResume(
     updatedAt: Date.now(),
     data,
     media: {},
+    variant,
   };
   await db.put(STORE_NAME, record);
 }
@@ -93,6 +102,24 @@ export async function saveMediaData(
         ...data,
       },
     },
+  };
+
+  await db.put(STORE_NAME, updated);
+}
+
+export async function saveResumeVariant(
+  resumeId: string,
+  variant: ResumeRecord["variant"],
+) {
+  const db = await getDB();
+  const current = await db.get(STORE_NAME, resumeId);
+
+  if (!current) return;
+
+  const updated: ResumeRecord = {
+    ...current,
+    updatedAt: Date.now(),
+    variant,
   };
 
   await db.put(STORE_NAME, updated);

@@ -9,12 +9,14 @@ export const generalFormSchema = z.object({
 
 export type GeneralResumeForm = z.infer<typeof generalFormSchema>;
 
-const avatarCropDataSchema = z.object({
-  x: z.number().min(0).max(100),
-  y: z.number().min(0).max(100),
-  zoom: z.number().min(1).max(4),
-  rotation: z.number().min(0).max(360),
-});
+const avatarCropDataSchema = z
+  .object({
+    x: z.number().min(0).max(100),
+    y: z.number().min(0).max(100),
+    zoom: z.number().min(1).max(4),
+    rotation: z.number().min(0).max(360),
+  })
+  .optional();
 
 export type AvatarCropDataForm = z.infer<typeof avatarCropDataSchema>;
 
