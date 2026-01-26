@@ -1,9 +1,9 @@
-import CreateResumeButton from "./(main)/components/CreateResumeButton";
+import CreateNewResumeButton from "./(main)/resumes/CreateNewResumeButton";
 
 export default function Home() {
   return (
     <main>
-      <CreateResumeButton />
+      <CreateNewResumeButton />
     </main>
   );
 }

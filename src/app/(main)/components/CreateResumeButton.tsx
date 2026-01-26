@@ -1,28 +1,34 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState, JSX } from "react";
 import { defaultFormValues } from "@/lib/formUtils";
 import { createResume } from "@/lib/indexedDB";
 import { useRouter } from "next/navigation";
-import React from "react";
 
-const CreateResumeButton = () => {
+const CreateResumeButton = ({
+  button,
+}: {
+  button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
+}) => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateResume = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
     const resumeId = crypto.randomUUID();
 
     try {
       await createResume(resumeId, defaultFormValues);
+      router.push(`/resume-editor/${resumeId}`);
     } catch {
       alert("Error while creating resume. Please try again.");
-      return;
+      setIsLoading(false);
     }
-
-    router.push(`/resume-editor/${resumeId}`);
   };
 
-  return <Button onClick={handleCreateResume}>Create Resume</Button>;
+  return button(handleCreateResume, isLoading);
 };
 
 export default CreateResumeButton;
