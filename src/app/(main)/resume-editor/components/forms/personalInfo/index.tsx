@@ -1,5 +1,12 @@
 "use client";
 
+import { Control, useFormContext } from "react-hook-form";
+import {
+  PersonalInfoForm,
+  PersonalInfoKeys,
+  ResumeForm,
+} from "@/lib/validation";
+import PhotoUploader from "./PhotoUploader";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -9,14 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  PersonalInfoForm,
-  PersonalInfoKeys,
-  ResumeForm,
-} from "@/lib/validation";
-import React from "react";
-import { Control, useFormContext } from "react-hook-form";
-import PhotoUploader from "./PhotoUploader";
 
 const TextFormField = ({
   name,

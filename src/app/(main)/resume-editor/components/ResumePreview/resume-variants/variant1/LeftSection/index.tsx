@@ -2,8 +2,15 @@ import React from "react";
 import SectionItem from "../SectionItem";
 import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
+import { ResumeForm } from "@/lib/validation";
 
-const Education = ({ educations }: { educations: any }) => {
+const Education = ({
+  educations = [],
+}: {
+  educations: ResumeForm["educations"];
+}) => {
+  if (educations.length === 0) return null;
+
   return (
     <SectionItem
       title="Education"
@@ -30,13 +37,13 @@ const Education = ({ educations }: { educations: any }) => {
   );
 };
 
-const Skills = ({ skills }: { skills: any }) => {
+const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   const skillsToArray = Object.entries(skills).map(([head, items]) => ({
     head,
     items,
   }));
 
-  if (skills.personal.length === 0 && skills.technical.length === 0)
+  if (skills.personal?.length === 0 && skills.technical?.length === 0)
     return null;
 
   return (
@@ -44,7 +51,7 @@ const Skills = ({ skills }: { skills: any }) => {
       title="Skills"
       items={skillsToArray}
       renderItem={(item) => {
-        if (item.items.length === 0) return null;
+        if (item?.items?.length === 0) return null;
 
         return (
           <React.Fragment key={item.head}>
@@ -57,15 +64,15 @@ const Skills = ({ skills }: { skills: any }) => {
   );
 };
 
-const LeftSection = ({ data }: { data: any }) => {
+const LeftSection = ({ data }: { data: ResumeForm }) => {
   const { educations, skills } = data;
 
   // TODO: refactor later the rest with Paginate
   return (
     <Paginate.Section className="w-[30%]" datatype="left-section">
-      <Education educations={educations || []} />
+      <Education educations={educations} />
       <div className="mb-6">
-        <Skills skills={skills || {}} />
+        <Skills skills={skills} />
       </div>
       {/* <div className="mb-6" datatype="left-section-wrapper">
         <p className="text-[16px] uppercase" datatype="left-section-text">

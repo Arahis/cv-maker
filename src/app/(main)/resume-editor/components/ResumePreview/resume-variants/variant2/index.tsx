@@ -4,7 +4,7 @@ import { Paginate } from "../../Paginate";
 import HeaderSection from "./HeaderSection";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
-import { ResumeVariantProps } from "../../../ResumeApp";
+import { ResumeVariantProps } from "@/lib/types/resume/variants.types";
 
 export const ResumeVariant2 = forwardRef<HTMLDivElement, ResumeVariantProps>(
   ({ data }, ref) => {

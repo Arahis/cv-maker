@@ -4,6 +4,7 @@ import { Paginate } from "../../Paginate";
 import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
 
 // TODO add proper type for item so it could see item fields
 export function JobSection({
@@ -31,7 +32,7 @@ export function JobSection({
       </Paginate.Section>
       <Paginate.Section className="w-[70%]">
         <p className="mb-1 font-bold uppercase">{company}</p>
-        <TextReader value={description || ""} />
+        <TextReader value={description || EMPTY_LEXICAL_STATE} />
       </Paginate.Section>
     </Paginate.Columns>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { PhotoCropperProps } from "./PhotoUploadModal";
 import { AvatarCropDataForm } from "@/lib/validation";
+import { avatarCropInitialValues } from "@/lib/formUtils";
 
 const PhotoCropper = ({
   src,
@@ -23,7 +24,7 @@ const PhotoCropper = ({
     rotation: initialRotation,
     x: initialX,
     y: initialY,
-  } = cropValue;
+  } = cropValue || avatarCropInitialValues;
 
   const [zoom, setZoom] = useState(initialZoom);
   const [rotation, setRotation] = useState(initialRotation);
@@ -43,7 +44,7 @@ const PhotoCropper = ({
     if (croppedPixels) {
       onSave({
         croppedPixels,
-        cropped: { x: crop.x, y: crop.y },
+        cropped: crop,
         zoom,
         rotation,
       });

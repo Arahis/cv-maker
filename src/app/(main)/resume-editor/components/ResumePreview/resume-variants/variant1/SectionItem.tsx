@@ -4,7 +4,7 @@ import { Paginate } from "../../Paginate";
 type SectionProps<T> = {
   title: string;
   renderItem: (item: T, idx: number) => React.ReactNode;
-  items: T[];
+  items?: T[];
   className?: string;
 };
 
@@ -14,7 +14,7 @@ const SectionItem = <T,>({
   items,
   className = "",
 }: SectionProps<T>) => {
-  if (items.length === 0) {
+  if (items?.length === 0) {
     return null;
   }
 
@@ -22,7 +22,7 @@ const SectionItem = <T,>({
     <Paginate.Section className={className} datatype="cv_info-section-item">
       <p className="mb-4 text-[16px] uppercase">{title}</p>
 
-      {items.map((item, idx) => (
+      {items?.map((item, idx) => (
         <React.Fragment key={idx}>{renderItem(item, idx)}</React.Fragment>
       ))}
     </Paginate.Section>

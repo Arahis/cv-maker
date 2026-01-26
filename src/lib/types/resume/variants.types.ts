@@ -3,7 +3,7 @@ import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
 export type ResumeVariantProps = {
   data: ResumeForm;
-  photo: string | null;
+  photo?: string;
 };
 
 export type ResumeVariantComponent = ForwardRefExoticComponent<
