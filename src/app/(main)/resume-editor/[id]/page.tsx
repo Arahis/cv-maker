@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import ResumeApp from "../components/ResumeApp";
 
 export const metadata = {
