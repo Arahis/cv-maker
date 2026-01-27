@@ -60,7 +60,7 @@ const ResumePreviewWrapper = ({
   );
 };
 
-const ResumeApp = ({ resumeId }: { resumeId: string }) => {
+const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   const [valid, setValid] = useState<null | boolean>(null);
   const [resumeVariant, setResumeVariant] = useState<ResumeVariantKey>();
   const f = useResumeForm();
@@ -70,6 +70,8 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
   // If it doesn't exist, show a not found page
   useEffect(() => {
     const checkResumeExists = async () => {
+      if (!resumeId) return;
+
       const resume = await loadResume(resumeId);
       if (resume) {
         f.reset(resume.data);
@@ -82,7 +84,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string }) => {
   }, [resumeId, f]);
 
   if (valid === null) return <p>Загрузка...</p>;
-  if (!valid) return notFound();
+  if (!valid || !resumeId) return notFound();
 
   return (
     <div className="flex h-screen w-full">

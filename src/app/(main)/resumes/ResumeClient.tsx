@@ -77,7 +77,10 @@ const ResumeClient = () => {
 
         return (
           <div key={r.id}>
-            <Link href={`/resume-editor/${r.id}`}>
+            <Link
+              prefetch={false}
+              href={`/resume-editor?id=${encodeURIComponent(r.id)}`}
+            >
               <div
                 className={cn(
                   "flex rounded-md border-2 p-1 hover:border-blue-300",

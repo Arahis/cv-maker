@@ -21,7 +21,7 @@ const CreateResumeButton = ({
 
     try {
       await createResume(resumeId, defaultFormValues);
-      router.push(`/resume-editor/${resumeId}`);
+      router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
     } catch {
       alert("Error while creating resume. Please try again.");
       setIsLoading(false);
