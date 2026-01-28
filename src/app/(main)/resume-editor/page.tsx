@@ -9,7 +9,7 @@ export const metadata = {
 
 const Page = async () => {
   return (
-    <main className="">
+    <main>
       <ResumeEditorPageClient />
     </main>
   );
