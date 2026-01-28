@@ -17,10 +17,20 @@ const Navbar = () => {
         </div>
 
         {/* Links */}
+        <div>
+          <a
+            href="https://paypal.me/cvoop"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-hover mr-2 px-4 py-2 font-bold"
+          >
+            Donation
+          </a>
 
-        <Link href="/resumes" className="link-hover px-4 py-2 font-semibold">
-          {"Your resumes here".toUpperCase()}
-        </Link>
+          <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
+            Your resumes here
+          </Link>
+        </div>
       </nav>
     </header>
   );
