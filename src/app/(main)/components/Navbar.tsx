@@ -24,7 +24,7 @@ const Navbar = () => {
             rel="noopener noreferrer"
             className="link-hover mr-2 px-4 py-2 font-bold"
           >
-            Donation
+            Support us
           </a>
 
           <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
