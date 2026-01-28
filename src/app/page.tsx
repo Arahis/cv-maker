@@ -84,7 +84,7 @@ const Hero = () => {
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-300 text-center">
+    <main className="mx-auto w-full max-w-400 text-center">
       <Hero />
     </main>
   );

@@ -9,7 +9,6 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useFormContext } from "react-hook-form";
 
 const ResumeDescription = ({}) => {
@@ -17,7 +16,7 @@ const ResumeDescription = ({}) => {
   const { control } = useFormContext();
 
   return (
-    <div>
+    <div className="grid gap-4">
       <FormField
         control={control}
         name="title"
@@ -45,7 +44,6 @@ const ResumeDescription = ({}) => {
           </FormItem>
         )}
       />
-      <Button type="submit">Submit</Button>
     </div>
   );
 };

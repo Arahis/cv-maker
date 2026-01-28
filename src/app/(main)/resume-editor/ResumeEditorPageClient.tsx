@@ -8,7 +8,7 @@ const ResumeEditorPageClient = () => {
   const id = searchParams.get("id");
 
   return (
-    <div className="flex w-full">
+    <div className="mx-auto flex w-full max-w-400">
       <ResumeApp resumeId={id} />
     </div>
   );
