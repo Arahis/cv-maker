@@ -1,6 +1,5 @@
 import Logo from "@/assets/logo";
 import Link from "next/link";
-import "./navbar.css";
 
 const Navbar = () => {
   return (

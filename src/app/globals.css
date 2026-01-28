@@ -46,6 +46,10 @@
 }
 
 :root {
+  --brand-blue: hsl(221 91% 59%);
+  --brand-red: hsl(6 71% 57%);
+  --brand-pink: hsl(316 66% 60%);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
@@ -53,7 +57,7 @@
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: hsl(221 91 59);
+  --primary: var(--brand-blue);
   --primary-foreground: oklch(0.984 0.003 247.858);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
@@ -120,6 +124,15 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  :root {
+    --brand-gradient: linear-gradient(
+      45deg,
+      var(--brand-pink),
+      var(--brand-blue),
+      var(--brand-red)
+    );
   }
 }
 
