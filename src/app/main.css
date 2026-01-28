@@ -1,0 +1,49 @@
+.link-hover {
+  --borderWidth: 2px;
+  --radius: 0.5em;
+
+  border: var(--borderWidth) solid transparent;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(#fff 0 0) padding-box,
+    var(--brand-gradient) border-box;
+
+  background-size:
+    100% 100%,
+    0% 100%;
+  background-repeat: no-repeat;
+  transition: background-size 200ms ease;
+}
+
+.link-hover:hover {
+  background-size:
+    100% 100%,
+    100% 100%;
+}
+.gradient-underline {
+  position: relative;
+}
+
+.gradient-underline::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background: var(--brand-gradient);
+  left: 0;
+  bottom: 0;
+}
+
+.gradient-separator {
+  position: relative;
+}
+
+.gradient-separator::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 4px;
+  background: var(--brand-gradient);
+  left: 0;
+  bottom: 0;
+}
