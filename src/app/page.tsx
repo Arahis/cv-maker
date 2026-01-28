@@ -36,9 +36,16 @@ const Highlights = () => (
       <HighlightsItem item={item} count={i + 1} key={i} />
     ))}
     <div className="gradient-separator py-4 pl-20 text-left">
-      <p className="text-2xl font-semibold">Like it?</p>
+      <p className="mb-2 text-2xl font-semibold">Like it?</p>
       <p>Support us with a</p>
-      donation or a review 💙
+      <a
+        href="https://paypal.me/cvoop"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-bold"
+      >
+        donation💙
+      </a>
     </div>
   </div>
 );
