@@ -68,7 +68,7 @@ const Skills = () => {
   const { control } = useFormContext();
 
   return (
-    <div>
+    <div className="grid gap-2">
       <HardSkills control={control} />
       <SoftSkills control={control} />
     </div>

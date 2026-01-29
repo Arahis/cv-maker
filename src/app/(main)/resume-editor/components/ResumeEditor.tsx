@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import PersonalInfo from "./forms/personalInfo";
@@ -13,6 +13,7 @@ import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm } from "@/lib/validation";
+import { Button } from "@/components/ui/button";
 
 const resumeSections: {
   title: string;
@@ -51,34 +52,82 @@ const resumeSections: {
   },
 ];
 
+type ResumeStepsControlProps = {
+  titles: string[];
+  currentStep: number;
+  setStep: (item: number) => void;
+  setNextStep: () => void;
+  setPrevStep: () => void;
+};
+
+const ResumeStepsControl = ({
+  titles,
+  currentStep,
+  setStep,
+  setNextStep,
+  setPrevStep,
+}: ResumeStepsControlProps) => (
+  <div className="mb-6">
+    <ResumeSteps
+      items={titles}
+      currentStep={currentStep}
+      setItem={setStep}
+      className="mb-4"
+    />
+    <div className="flex justify-between">
+      <Button
+        variant="secondary"
+        onClick={setPrevStep}
+        disabled={currentStep === 0}
+      >
+        Prev Step
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={setNextStep}
+        disabled={currentStep === titles.length - 1}
+      >
+        Next Step
+      </Button>
+    </div>
+  </div>
+);
+
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const f = useFormContext<ResumeForm>();
   const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
+  const handleGoToNextItem = () => {
+    setCurrentEditorStep((prev) =>
+      Math.min(prev + 1, sectionTitles.length - 1),
+    );
+  };
+
+  const handleGoToPrevItem = () => {
+    setCurrentEditorStep((prev) => Math.max(0, prev - 1));
+  };
+
   // Autosave в IndexedDB with debounce
   // @ts-expect-error: useWatch doesn't infer the type of formData correctly
   useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
   return (
-    <form
-    // onSubmit={f.handleSubmit((data) => console.log(data))}
-    >
-      <div className="mx-12">
-        <ResumeSteps
-          items={sectionTitles}
-          currentStep={currentEditorStep}
-          setItem={setCurrentEditorStep}
-          className="mb-4"
-        />
-        <ResumeEditorProvider value={{ resumeId }}>
-          <div className="rounded-2xl border-2 border-gray-100 p-8">
-            {resumeSections[currentEditorStep].item}
-          </div>
-        </ResumeEditorProvider>
-      </div>
-    </form>
+    <div className="mx-12">
+      <ResumeStepsControl
+        titles={sectionTitles}
+        currentStep={currentEditorStep}
+        setStep={setCurrentEditorStep}
+        setNextStep={handleGoToNextItem}
+        setPrevStep={handleGoToPrevItem}
+      />
+      <ResumeEditorProvider value={{ resumeId }}>
+        <div className="rounded-2xl border-2 border-gray-100 p-6">
+          {resumeSections[currentEditorStep].item}
+        </div>
+      </ResumeEditorProvider>
+    </div>
   );
 };
 
