@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import PersonalInfo from "./forms/personalInfo";
@@ -123,7 +123,7 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
         setPrevStep={handleGoToPrevItem}
       />
       <ResumeEditorProvider value={{ resumeId }}>
-        <div className="rounded-2xl border-2 border-gray-100 p-8">
+        <div className="rounded-2xl border-2 border-gray-100 p-6">
           {resumeSections[currentEditorStep].item}
         </div>
       </ResumeEditorProvider>

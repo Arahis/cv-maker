@@ -70,7 +70,7 @@ const PersonalInfo = () => {
             </FormItem>
           )}
         />
-        <div className="grid w-full gap-2">
+        <div className="grid w-full gap-4">
           <div className="grid grid-cols-2 gap-4">
             <TextFormField
               control={control}
@@ -102,26 +102,28 @@ const PersonalInfo = () => {
         </div>
       </div>
 
-      <TextFormField
-        control={control}
-        name="jobTitle"
-        title="Job title"
-        label="Position"
-      />
+      <div className="grid gap-4">
+        <TextFormField
+          control={control}
+          name="jobTitle"
+          title="Job title"
+          label="Position"
+        />
 
-      <div className="grid grid-cols-2 gap-4">
-        <TextFormField
-          control={control}
-          name="phone"
-          title="Phone"
-          label="Phone"
-        />
-        <TextFormField
-          control={control}
-          name="email"
-          title="E-mail"
-          label="E-mail"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <TextFormField
+            control={control}
+            name="phone"
+            title="Phone"
+            label="Phone"
+          />
+          <TextFormField
+            control={control}
+            name="email"
+            title="E-mail"
+            label="E-mail"
+          />
+        </div>
       </div>
     </div>
   );
