@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 const ResumeSteps = ({
   items,
@@ -18,19 +18,15 @@ const ResumeSteps = ({
 }: {
   items: string[];
   currentStep: number;
-  setItem: (item: number) => void;
+  setItem: React.Dispatch<React.SetStateAction<number>>;
   className: string;
 }) => {
-  const handleGoToNextItem = () => {
-    const nextStep = currentStep + 1;
-    if (nextStep > items.length - 1) return;
-    setItem(nextStep);
-  };
-  const handleGoToPrevItem = () => {
-    const prevStep = currentStep - 1;
-    if (prevStep < 0) return;
-    setItem(prevStep);
-  };
+  // const handleGoToNextItem = () => {
+  //   setItem((prev) => Math.max(prev + 1, items.length - 1));
+  // };
+  // const handleGoToPrevItem = () => {
+  //   setItem((prev) => Math.min(0, prev - 1));
+  // };
 
   return (
     <div className="mb-4">
@@ -52,14 +48,14 @@ const ResumeSteps = ({
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="flex justify-between">
+      {/* <div className="flex justify-between">
         <Button variant="secondary" onClick={handleGoToPrevItem}>
           Prev Step
         </Button>
         <Button variant="secondary" onClick={handleGoToNextItem}>
           Next Step
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };
