@@ -1,6 +1,6 @@
 "use client";
 
-import { useStageScale } from "@/lib/hooks";
+import { useStageScale } from "@/lib/hooks/useStageScale";
 import { ResumeForm } from "@/lib/validation";
 import React, { useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -14,31 +14,23 @@ type ResumeWrapperProps = {
   height: number;
 };
 
-// const ResumeWrapperPages = ({
-//   children,
-//   scale,
-//   width,
-//   height,
-// }: ResumeWrapperProps) => {
-//   return (
-//     <div
-//       className="h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-//       style={{ width: 794, height: 1123 }}
-//     >
-//       <div className="p-[24px]" style={{ zoom: scale }}>
-//         {children}
-//       </div>
-//     </div>
-//   );
-// };
-
-const ResumeWrapper = ({ children }: ResumeWrapperProps) => {
+const ResumeWrapperPages = ({
+  children,
+  scale,
+  width,
+  height,
+}: ResumeWrapperProps) => {
   return (
     <div
-      className="relative h-fit w-full bg-white"
-      style={{ width: 794, height: 1123 }}
+      className="relative h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
+      style={{ width, height }}
     >
-      <div className="p-[24px]">{children}</div>
+      <div
+        className="p-[24px]"
+        style={{ zoom: scale, width: 794, height: 1123 }}
+      >
+        {children}
+      </div>
       <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
         resume created with <strong>cvoop.com</strong>
       </p>
@@ -64,8 +56,9 @@ const ResumePreview = ({
   const pages = usePaginateDom({ ref, data: formData, photo: cropped });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const { scale, width, height, handleZoomInAndOut } =
-    useStageScale(containerRef);
+  const scaleControls = useStageScale(containerRef);
+
+  console.log({ scaleControls });
 
   const Variant = resumeComponent;
 
@@ -78,20 +71,25 @@ const ResumePreview = ({
         id="printableArea"
         className="pointer-events-none absolute mb-4 cursor-none text-left text-[14px] opacity-0"
       >
-        <div className="w-[794px] bg-pink-100 p-6">
+        <div className="bg-pink-100 p-6" style={{ width: "794" }}>
           <Variant ref={ref} data={formData} photo={cropped} />
         </div>
       </div>
-      <div ref={contentRef}>
+      <div ref={contentRef} className="flex flex-col">
         {pages.map((page, idx) => (
           <div
             key={idx}
-            onClick={handleZoomInAndOut}
+            onClick={scaleControls.handleZoomInAndOut}
             className="mb-4 text-left text-[14px]"
+            // style={{ width: scaleControls.width, height: scaleControls.height }}
           >
-            <ResumeWrapper scale={scale} width={width} height={height}>
+            <ResumeWrapperPages
+              scale={scaleControls.scale}
+              width={scaleControls.width}
+              height={scaleControls.height}
+            >
               {page}
-            </ResumeWrapper>
+            </ResumeWrapperPages>
           </div>
         ))}
       </div>

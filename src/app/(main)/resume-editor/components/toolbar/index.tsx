@@ -56,7 +56,7 @@ const Toolbar = ({
             </Button>
           </PopoverTrigger>
         </ToolbarTooltip>
-        <PopoverContent side="right" align="end" className="z-50 w-[100%]">
+        <PopoverContent side="right" align="end" className="z-50 w-full">
           <ResumeVarsPanel
             variant={variant}
             onChange={onResumeVarChange}
