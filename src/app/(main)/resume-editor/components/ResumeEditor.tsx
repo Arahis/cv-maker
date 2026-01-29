@@ -13,7 +13,6 @@ import ResumeSteps from "./CreateResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm } from "@/lib/validation";
-import { Button } from "@/components/ui/button";
 
 const resumeSections: {
   title: string;
@@ -63,23 +62,22 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
   return (
-    <form onSubmit={f.handleSubmit((data) => console.log(data))}>
-      <div className="mb-8">
+    <form
+    // onSubmit={f.handleSubmit((data) => console.log(data))}
+    >
+      <div className="mx-12">
         <ResumeSteps
           items={sectionTitles}
           currentStep={currentEditorStep}
           setItem={setCurrentEditorStep}
+          className="mb-4"
         />
-        <div className="flex justify-between">
-          <Button>Prev Step</Button>
-          <Button>Next Step</Button>
-        </div>
+        <ResumeEditorProvider value={{ resumeId }}>
+          <div className="rounded-2xl border-2 border-gray-100 p-8">
+            {resumeSections[currentEditorStep].item}
+          </div>
+        </ResumeEditorProvider>
       </div>
-      <ResumeEditorProvider value={{ resumeId }}>
-        <div className="mx-12 rounded-2xl border-2 border-gray-100 p-8">
-          {resumeSections[currentEditorStep].item}
-        </div>
-      </ResumeEditorProvider>
     </form>
   );
 };
