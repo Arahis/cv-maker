@@ -13,13 +13,13 @@ export const resumeMock: ResumeForm = {
 
   avatarCropData: { x: 42, y: 20, zoom: 1.5, rotation: 0 },
 
-  firstName: "Daria",
-  lastName: "Arahis",
+  firstName: "Sara",
+  lastName: "Connor",
   jobTitle: "Frontend Developer (React / TypeScript)",
-  city: "Chișinău",
-  country: "Moldova",
-  phone: "+373 69 000 000",
-  email: "daria@example.com",
+  city: "Philadelphia",
+  country: "United States",
+  phone: "+495 69 000 000",
+  email: "sarah@example.com",
 
   summary: summaryLexicalString,
 
