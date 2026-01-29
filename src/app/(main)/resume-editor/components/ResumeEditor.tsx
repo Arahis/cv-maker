@@ -62,15 +62,22 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
   return (
-    <form onSubmit={f.handleSubmit((data) => console.log(data))}>
-      <ResumeSteps
-        items={sectionTitles}
-        currentStep={currentEditorStep}
-        setItem={setCurrentEditorStep}
-      />
-      <ResumeEditorProvider value={{ resumeId }}>
-        {resumeSections[currentEditorStep].item}
-      </ResumeEditorProvider>
+    <form
+    // onSubmit={f.handleSubmit((data) => console.log(data))}
+    >
+      <div className="mx-12">
+        <ResumeSteps
+          items={sectionTitles}
+          currentStep={currentEditorStep}
+          setItem={setCurrentEditorStep}
+          className="mb-4"
+        />
+        <ResumeEditorProvider value={{ resumeId }}>
+          <div className="rounded-2xl border-2 border-gray-100 p-8">
+            {resumeSections[currentEditorStep].item}
+          </div>
+        </ResumeEditorProvider>
+      </div>
     </form>
   );
 };

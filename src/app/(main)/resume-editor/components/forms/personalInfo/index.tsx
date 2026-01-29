@@ -7,7 +7,6 @@ import {
   ResumeForm,
 } from "@/lib/validation";
 import PhotoUploader from "./PhotoUploader";
-import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormField,
@@ -34,15 +33,18 @@ const TextFormField = ({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label ? label : name}</FormLabel>
-          <FormControl>
-            <Input
-              placeholder={title}
-              {...field}
-              //  to skip the error with photo field
-              value={typeof field.value === "string" ? field.value : ""}
-            />
-          </FormControl>
+          {/* Additional DIV container to resolve issue with LastPass breaking layout in FormItem */}
+          <div>
+            <FormLabel className="mb-2">{label ? label : name}</FormLabel>
+            <FormControl>
+              <Input
+                placeholder={title}
+                {...field}
+                //  to skip the error with photo field
+                value={typeof field.value === "string" ? field.value : ""}
+              />
+            </FormControl>
+          </div>
         </FormItem>
       )}
     />
@@ -53,22 +55,52 @@ const PersonalInfo = () => {
   const { control } = useFormContext<ResumeForm>();
 
   return (
-    <div>
-      <FormField
-        control={control}
-        name="avatarCropData"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Photo</FormLabel>
-            <FormControl>
-              <PhotoUploader {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <TextFormField control={control} name="firstName" title="First name" />
-      <TextFormField control={control} name="lastName" title="Last name" />
+    <div className="grid gap-2">
+      <div className="flex gap-6">
+        <FormField
+          control={control}
+          name="avatarCropData"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Photo</FormLabel>
+              <FormControl>
+                <PhotoUploader {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid w-full gap-2">
+          <div className="grid grid-cols-2 gap-4">
+            <TextFormField
+              control={control}
+              name="firstName"
+              title="First name"
+              label="First name"
+            />
+            <TextFormField
+              control={control}
+              name="lastName"
+              title="Last name"
+              label="Last name"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TextFormField
+              control={control}
+              name="city"
+              title="City"
+              label="City"
+            />
+            <TextFormField
+              control={control}
+              name="country"
+              title="Country"
+              label="Country"
+            />
+          </div>
+        </div>
+      </div>
 
       <TextFormField
         control={control}
@@ -77,12 +109,20 @@ const PersonalInfo = () => {
         label="Position"
       />
 
-      <TextFormField control={control} name="city" title="City" />
-      <TextFormField control={control} name="country" title="Country" />
-      <TextFormField control={control} name="phone" title="Phone" />
-      <TextFormField control={control} name="email" title="E-mail" />
-
-      <Button type="submit">Next step?</Button>
+      <div className="grid grid-cols-2 gap-4">
+        <TextFormField
+          control={control}
+          name="phone"
+          title="Phone"
+          label="Phone"
+        />
+        <TextFormField
+          control={control}
+          name="email"
+          title="E-mail"
+          label="E-mail"
+        />
+      </div>
     </div>
   );
 };

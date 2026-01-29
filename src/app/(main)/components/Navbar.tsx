@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <header className="bg-background sticky top-0 z-50">
       <nav
-        className="mx-auto flex h-18 max-w-300 items-center justify-between"
+        className="mx-auto flex h-18 max-w-400 items-center justify-between"
         aria-label="Main navigation"
       >
         {/* Logo */}
