@@ -7,28 +7,44 @@ import { useFormContext, useWatch } from "react-hook-form";
 import usePaginateDom from "./hooks/usePaginateDom";
 import useAvatar from "../../store/hooks/useAvatar";
 
-type ResumeWrapperProps = {
-  children: React.ReactNode;
-  scale: number;
-  width: number;
-  height: number;
-};
+// type ResumeWrapperProps = {
+//   children: React.ReactNode;
+//   scale: number;
+//   width: number;
+//   height: number;
+// };
 
-const ResumeWrapperPages = ({
-  children,
-  scale,
-  width,
-  height,
-}: ResumeWrapperProps) => {
+// const ResumeWrapperPages = ({
+//   children,
+//   scale,
+//   width,
+//   height,
+// }: ResumeWrapperProps) => {
+//   return (
+//     <div
+//       className="relative h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
+//       style={{ width, height }}
+//     >
+//       <div
+//         className="relative p-[24px]"
+//         style={{ zoom: scale, width: 794, height: 1123 }}
+//       >
+//         {children}
+//         <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
+//           resume created with <strong>cvoop.com</strong>
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+const ResumeWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className="relative h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-      style={{ width, height }}
+      style={{ width: 794, height: 1123 }}
     >
-      <div
-        className="relative p-[24px]"
-        style={{ zoom: scale, width: 794, height: 1123 }}
-      >
+      <div className="relative p-[24px]" style={{ width: 794, height: 1123 }}>
         {children}
         <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
           resume created with <strong>cvoop.com</strong>
@@ -71,13 +87,9 @@ const ResumePreview = ({
         id="printableArea"
         className="pointer-events-none absolute mb-4 cursor-none text-left text-[14px] opacity-0"
       >
-        <ResumeWrapperPages
-          scale={scaleControls.scale}
-          width={scaleControls.width}
-          height={scaleControls.height}
-        >
+        <ResumeWrapper>
           <Variant ref={ref} data={formData} photo={cropped} />
-        </ResumeWrapperPages>
+        </ResumeWrapper>
       </div>
       <div ref={contentRef} className="flex flex-col">
         {pages.map((page, idx) => (
@@ -86,13 +98,7 @@ const ResumePreview = ({
             onClick={scaleControls.handleZoomInAndOut}
             className="mb-4 text-left text-[14px]"
           >
-            <ResumeWrapperPages
-              scale={scaleControls.scale}
-              width={scaleControls.width}
-              height={scaleControls.height}
-            >
-              {page}
-            </ResumeWrapperPages>
+            <ResumeWrapper>{page}</ResumeWrapper>
           </div>
         ))}
       </div>
