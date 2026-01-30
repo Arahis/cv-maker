@@ -26,14 +26,14 @@ const ResumeWrapperPages = ({
       style={{ width, height }}
     >
       <div
-        className="p-[24px]"
+        className="relative p-[24px]"
         style={{ zoom: scale, width: 794, height: 1123 }}
       >
         {children}
+        <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
+          resume created with <strong>cvoop.com</strong>
+        </p>
       </div>
-      <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
-        resume created with <strong>cvoop.com</strong>
-      </p>
     </div>
   );
 };
@@ -65,15 +65,19 @@ const ResumePreview = ({
   return (
     <div
       ref={containerRef}
-      className="scrollable-div relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50"
+      className="scrollable-div relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
     >
       <div
         id="printableArea"
         className="pointer-events-none absolute mb-4 cursor-none text-left text-[14px] opacity-0"
       >
-        <div className="bg-pink-100 p-6" style={{ width: "794" }}>
+        <ResumeWrapperPages
+          scale={scaleControls.scale}
+          width={scaleControls.width}
+          height={scaleControls.height}
+        >
           <Variant ref={ref} data={formData} photo={cropped} />
-        </div>
+        </ResumeWrapperPages>
       </div>
       <div ref={contentRef} className="flex flex-col">
         {pages.map((page, idx) => (
