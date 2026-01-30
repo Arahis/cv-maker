@@ -4,9 +4,14 @@ import Link from "next/link";
 
 const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
   return (
-    <header className={cn("bg-background top-0 z-50", isSticky && "sticky")}>
+    <header
+      className={cn(
+        "bg-background top-0 z-50 border-b-2 border-blue-50",
+        isSticky && "sticky",
+      )}
+    >
       <nav
-        className="mx-auto flex h-18 max-w-400 items-center justify-between border border-blue-50"
+        className="mx-auto flex h-18 max-w-400 items-center justify-between"
         aria-label="Main navigation"
       >
         {/* Logo */}

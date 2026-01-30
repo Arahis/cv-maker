@@ -6,7 +6,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="flex h-dvh flex-col overflow-hidden">
       <Navbar />
       {children}
     </div>
