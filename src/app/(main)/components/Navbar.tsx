@@ -1,9 +1,15 @@
 import Logo from "@/assets/logo";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const Navbar = () => {
+const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
   return (
-    <header className="bg-background sticky top-0 z-50">
+    <header
+      className={cn(
+        "bg-background top-0 z-50 border-b-2 border-blue-50",
+        isSticky && "sticky",
+      )}
+    >
       <nav
         className="mx-auto flex h-18 max-w-400 items-center justify-between"
         aria-label="Main navigation"

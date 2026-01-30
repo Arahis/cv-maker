@@ -124,6 +124,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* overflow: hidden; */
+    /* height: 100%;
+    scrollbar-width: none; */
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
   }
 
   :root {
@@ -133,6 +140,7 @@
       var(--brand-blue),
       var(--brand-red)
     );
+    --nav-h: 4rem;
   }
 }
 

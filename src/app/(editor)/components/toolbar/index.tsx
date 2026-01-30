@@ -41,29 +41,31 @@ const Toolbar = ({
   variant: string;
 }) => {
   return (
-    <div className="absolute bottom-4 z-100 ml-4 flex translate-y-[-25%] flex-col gap-1">
-      <ToolbarTooltip text="Print resume">
-        <Button onClick={onPrintClick}>
-          <Printer />
-        </Button>
-      </ToolbarTooltip>
-
-      <Popover>
-        <ToolbarTooltip text="Resume variants">
-          <PopoverTrigger asChild>
-            <Button>
-              <FileStack />
-            </Button>
-          </PopoverTrigger>
+    <div className="absolute z-10 flex h-full items-end">
+      <div className="mb-4 ml-2 flex flex-col gap-1">
+        <ToolbarTooltip text="Print resume">
+          <Button onClick={onPrintClick}>
+            <Printer />
+          </Button>
         </ToolbarTooltip>
-        <PopoverContent side="right" align="end" className="z-50 w-full">
-          <ResumeVarsPanel
-            variant={variant}
-            onChange={onResumeVarChange}
-            resumeVariants={resumeVariants}
-          />
-        </PopoverContent>
-      </Popover>
+
+        <Popover>
+          <ToolbarTooltip text="Resume variants">
+            <PopoverTrigger asChild>
+              <Button>
+                <FileStack />
+              </Button>
+            </PopoverTrigger>
+          </ToolbarTooltip>
+          <PopoverContent side="right" align="end" className="z-50 w-full">
+            <ResumeVarsPanel
+              variant={variant}
+              onChange={onResumeVarChange}
+              resumeVariants={resumeVariants}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 };

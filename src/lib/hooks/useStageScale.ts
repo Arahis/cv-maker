@@ -32,7 +32,6 @@ export const useStageScale = (
   targetWidth = 794,
   targetHeight = 1123,
 ) => {
-  console.log({ container });
   const [stageSize, setStageSize] = useState<StageSize>({
     scale: maxScale,
     width: targetWidth,

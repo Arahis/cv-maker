@@ -1,5 +1,5 @@
-import { ResumeVariant1 } from "@/app/(main)/resume-editor/components/ResumePreview/resume-variants/variant1";
-import { ResumeVariant2 } from "@/app/(main)/resume-editor/components/ResumePreview/resume-variants/variant2";
+import { ResumeVariant1 } from "@/app/(editor)/components/ResumePreview/resume-variants/variant1";
+import { ResumeVariant2 } from "@/app/(editor)/components/ResumePreview/resume-variants/variant2";
 import { ResumeVariantComponent } from "@/lib/types/resume/variants.types";
 
 export const resumeVariants = {

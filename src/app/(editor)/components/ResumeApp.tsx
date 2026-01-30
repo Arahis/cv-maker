@@ -87,7 +87,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   if (!valid || !resumeId) return notFound();
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-full min-h-0 w-full">
       <Form {...f}>
         <div className="w-full overflow-y-auto border-r md:w-1/2">
           <ResumeEditor resumeId={resumeId} />

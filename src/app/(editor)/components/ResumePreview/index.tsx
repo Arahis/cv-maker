@@ -81,7 +81,6 @@ const ResumePreview = ({
             key={idx}
             onClick={scaleControls.handleZoomInAndOut}
             className="mb-4 text-left text-[14px]"
-            // style={{ width: scaleControls.width, height: scaleControls.height }}
           >
             <ResumeWrapperPages
               scale={scaleControls.scale}
