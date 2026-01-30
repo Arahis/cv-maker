@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import ResumeApp from "./components/ResumeApp";
+import ResumeApp from "../components/ResumeApp";
 
 const ResumeEditorPageClient = () => {
   const searchParams = useSearchParams();

@@ -1,4 +1,4 @@
-import MainCreateNewResumeButton from "./(main)/components/MainCreateNewResumeButton";
+import MainCreateNewResumeButton from "./components/MainCreateNewResumeButton";
 
 type HighlightsItem = { text: string; color: "pink" | "blue" | "red" };
 

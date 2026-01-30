@@ -1,9 +1,14 @@
-import Navbar from "./components/Navbar";
+import Navbar from "../(main)/components/Navbar";
 
 export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div>{children}</div>;
+  return (
+    <div>
+      <Navbar isSticky />
+      {children}
+    </div>
+  );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Outfit, Source_Code_Pro } from "next/font/google";
-import Navbar from "./(main)/components/Navbar";
 import "./globals.css";
 import "./main.css";
 
@@ -45,7 +44,6 @@ export default function RootLayout({
       <body
         className={`${inter.className} ${outfit.variable} ${tech.variable} antialiased`}
       >
-        <Navbar />
         {children}
       </body>
     </html>
