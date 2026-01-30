@@ -27,19 +27,19 @@ type StageSize = {
 
 export const useStageScale = (
   container: RefObject<HTMLDivElement | null>,
-  maxScale = 0.8,
+  maxScale = 0.7,
   minScale = 0.5,
   targetWidth = 794,
   targetHeight = 1123,
 ) => {
   const [stageSize, setStageSize] = useState<StageSize>({
-    scale: maxScale,
+    scale: 1,
     width: targetWidth,
     height: targetHeight,
   });
 
-  const [zoomIn, setZoomIn] = useState(false);
-  const [isZoomDisabled, setIsZoomDisabled] = useState(false);
+  const [zoomIn, setZoomIn] = useState(true);
+  // const [isZoomDisabled, setIsZoomDisabled] = useState(false);
 
   const handleZoomInAndOut = () => {
     setZoomIn((prev) => !prev);
@@ -50,19 +50,18 @@ export const useStageScale = (
 
     const observer = new ResizeObserver((items) => {
       const item = items[0];
-      const { width, height } = item.contentRect;
+      const { width } = item.contentRect;
 
       const scaleByWidth = width / targetWidth;
-      const scaleByHeight = height / targetHeight;
+      // const scaleByHeight = height / targetHeight;
 
-      const clampedScaleByWidth = Math.min(scaleByWidth, maxScale);
-      const clampedScaleByHeight = Math.max(scaleByHeight, minScale);
+      const scaleByMax = Math.min(scaleByWidth, maxScale);
+      const scaleByMin = Math.min(scaleByWidth, minScale);
+      // const clampedScaleByHeight = Math.max(scaleByHeight, minScale);
 
-      const scale = zoomIn
-        ? Math.min(scaleByHeight, scaleByWidth)
-        : scaleByWidth;
+      const scale = zoomIn ? scaleByMax : scaleByMin;
 
-      setIsZoomDisabled(clampedScaleByHeight >= clampedScaleByWidth);
+      // setIsZoomDisabled();
 
       setStageSize({
         scale,
@@ -78,5 +77,5 @@ export const useStageScale = (
     };
   }, [container, maxScale, minScale, targetWidth, targetHeight, zoomIn]);
 
-  return { handleZoomInAndOut, zoomIn, isZoomDisabled, ...stageSize };
+  return { handleZoomInAndOut, zoomIn, ...stageSize };
 };
