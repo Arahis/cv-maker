@@ -41,8 +41,8 @@ const Toolbar = ({
   variant: string;
 }) => {
   return (
-    <div className="absolute h-full bg-amber-200">
-      <div className="bottom-4 z-100 ml-4 flex translate-y-[-25%] flex-col gap-1">
+    <div className="absolute z-10 flex h-full items-end">
+      <div className="mb-4 ml-2 flex flex-col gap-1">
         <ToolbarTooltip text="Print resume">
           <Button onClick={onPrintClick}>
             <Printer />

@@ -92,7 +92,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
         <div className="w-full overflow-y-auto border-r md:w-1/2">
           <ResumeEditor resumeId={resumeId} />
         </div>
-        <div className="hidden w-1/2 overflow-y-auto md:flex">
+        <div className="relative hidden w-1/2 overflow-y-auto md:flex">
           <ResumePreviewWrapper
             resumeId={resumeId}
             resumeVariant={resumeVariant}
