@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useRef } from "react";
 import { useStageScale } from "@/lib/hooks/useStageScale";
 import { ResumeForm } from "@/lib/validation";
-import React, { useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import usePaginateDom from "./hooks/usePaginateDom";
 import useAvatar from "../../store/hooks/useAvatar";
@@ -41,7 +41,8 @@ import useAvatar from "../../store/hooks/useAvatar";
 const ResumeWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
-      className="relative h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
+      data-page-style
+      className="relative mb-4 h-fit w-full overflow-hidden rounded-md bg-white text-[14px] shadow-xl"
       style={{ width: 794, height: 1123 }}
     >
       <div className="relative p-[24px]" style={{ width: 794, height: 1123 }}>
@@ -57,7 +58,7 @@ const ResumeWrapper = ({ children }: { children: React.ReactNode }) => {
 const ResumePreview = ({
   resumeId,
   resumeComponent,
-  ref: contentRef,
+  ref: contentRefForPrint,
 }: {
   resumeId: string;
   resumeComponent: React.ElementType;
@@ -81,7 +82,7 @@ const ResumePreview = ({
   return (
     <div
       ref={containerRef}
-      className="scrollable-div relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
+      className="relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
     >
       <div
         id="printableArea"
@@ -91,15 +92,17 @@ const ResumePreview = ({
           <Variant ref={ref} data={formData} photo={cropped} />
         </ResumeWrapper>
       </div>
-      <div ref={contentRef} className="flex flex-col">
+      <div
+        ref={contentRefForPrint}
+        className="print-content scrollable-div flex flex-col"
+      >
         {pages.map((page, idx) => (
-          <div
+          <ResumeWrapper
             key={idx}
-            onClick={scaleControls.handleZoomInAndOut}
-            className="mb-4 text-left text-[14px]"
+            // onClick={scaleControls.handleZoomInAndOut}
           >
-            <ResumeWrapper>{page}</ResumeWrapper>
-          </div>
+            {page}
+          </ResumeWrapper>
         ))}
       </div>
     </div>

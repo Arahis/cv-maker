@@ -164,6 +164,35 @@
     height: auto !important; /* Allow div to expand to full content height */
     overflow: visible !important; /* Ensure all content is visible */
   }
+
+  [data-page-style] {
+    margin-bottom: 0;
+
+    transform: none !important;
+    zoom: 1 !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+
+    filter: none !important;
+    -webkit-filter: none !important;
+
+    /* Tailwind shadow/ring vars */
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-shadow-colored: 0 0 #0000 !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+  }
+
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .print-page:not(:last-of-type) {
+    break-after: page;
+    page-break-after: always;
+  }
 }
 
 .header {
