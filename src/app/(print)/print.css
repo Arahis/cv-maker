@@ -6,6 +6,11 @@
     overflow: visible !important; /* Ensure all content is visible */
   }
 
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   p,
   li,
   blockquote {
