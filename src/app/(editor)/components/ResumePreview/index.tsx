@@ -7,49 +7,51 @@ import { useFormContext, useWatch } from "react-hook-form";
 import usePaginateDom from "./hooks/usePaginateDom";
 import useAvatar from "../../store/hooks/useAvatar";
 
-// type ResumeWrapperProps = {
-//   children: React.ReactNode;
-//   scale: number;
-//   width: number;
-//   height: number;
-// };
+type ResumeWrapperProps = {
+  children: React.ReactNode;
+  scale?: number;
+  width?: number;
+  height?: number;
+};
 
-// const ResumeWrapperPages = ({
-//   children,
-//   scale,
-//   width,
-//   height,
-// }: ResumeWrapperProps) => {
-//   return (
-//     <div
-//       className="relative h-fit w-full overflow-hidden rounded-md bg-white shadow-xl"
-//       style={{ width, height }}
-//     >
-//       <div
-//         className="relative p-[24px]"
-//         style={{ zoom: scale, width: 794, height: 1123 }}
-//       >
-//         {children}
-//         <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
-//           resume created with <strong>cvoop.com</strong>
-//         </p>
-//       </div>
-//     </div>
-//   );
-// };
-
-const ResumeWrapper = ({ children }: { children: React.ReactNode }) => {
+const ResumeWrapperPages = ({
+  children,
+  scale = 1,
+  width = 794,
+  height = 1123,
+}: ResumeWrapperProps) => {
   return (
     <div
       data-page-style
-      className="relative mb-4 h-fit w-full overflow-hidden rounded-md bg-white text-[14px] shadow-xl"
-      style={{ width: 794, height: 1123 }}
+      className="relative overflow-hidden rounded-md bg-white text-[14px] shadow-xl"
+      style={{ width, height }}
     >
-      <div className="relative p-[24px]" style={{ width: 794, height: 1123 }}>
+      <div
+        data-page-scale
+        className="relative p-[24px]"
+        style={{ zoom: scale, width: 794, height: 1123 }}
+      >
         {children}
         <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
           resume created with <strong>cvoop.com</strong>
         </p>
+      </div>
+    </div>
+  );
+};
+
+const ResumeWrapperDOM = ({
+  children,
+  width,
+  scale,
+}: Omit<ResumeWrapperProps, "height">) => {
+  return (
+    <div
+      className="mb-4 h-fit w-full overflow-hidden rounded-md bg-pink-200 text-[14px] shadow-xl"
+      style={{ width }}
+    >
+      <div className="p-6" style={{ width: 794, zoom: scale }}>
+        {children}
       </div>
     </div>
   );
@@ -75,8 +77,6 @@ const ResumePreview = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scaleControls = useStageScale(containerRef);
 
-  console.log({ scaleControls });
-
   const Variant = resumeComponent;
 
   return (
@@ -86,23 +86,27 @@ const ResumePreview = ({
     >
       <div
         id="printableArea"
-        className="pointer-events-none absolute mb-4 cursor-none text-left text-[14px] opacity-0"
+        className="pointer-events-none absolute z-40 mb-4 cursor-none opacity-0"
       >
-        <ResumeWrapper>
+        {/* START */}
+
+        <ResumeWrapperDOM>
           <Variant ref={ref} data={formData} photo={cropped} />
-        </ResumeWrapper>
+        </ResumeWrapperDOM>
+
+        {/* END */}
       </div>
-      <div
-        ref={contentRefForPrint}
-        className="print-content scrollable-div flex flex-col"
-      >
+      <div ref={contentRefForPrint} className="flex flex-col gap-4">
         {pages.map((page, idx) => (
-          <ResumeWrapper
+          <ResumeWrapperPages
+            scale={scaleControls.scale}
+            width={scaleControls.width}
+            height={scaleControls.height}
             key={idx}
             // onClick={scaleControls.handleZoomInAndOut}
           >
             {page}
-          </ResumeWrapper>
+          </ResumeWrapperPages>
         ))}
       </div>
     </div>
