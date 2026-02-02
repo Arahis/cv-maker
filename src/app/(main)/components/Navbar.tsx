@@ -11,7 +11,7 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
       )}
     >
       <nav
-        className="mx-auto flex h-18 max-w-400 items-center justify-between"
+        className="mx-auto flex h-18 max-w-400 items-center justify-between p-4 lg:p-2"
         aria-label="Main navigation"
       >
         {/* Logo */}
@@ -23,12 +23,12 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
         </div>
 
         {/* Links */}
-        <div>
+        <div className="flex items-center gap-4">
           <a
             href="https://paypal.me/cvoop"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover mr-2 px-4 py-2 font-bold"
+            className="link-hover mr-2 hidden px-4 py-2 font-bold md:block"
           >
             Support us
           </a>
