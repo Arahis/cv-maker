@@ -12,6 +12,7 @@ import { loadResume, saveResumeVariant } from "@/lib/indexedDB";
 import Toolbar from "./toolbar";
 import { useReactToPrint } from "react-to-print";
 import { ResumeVariantKey, resumeVariants } from "@/components/resume/variants";
+import { isDesktopLike } from "@/lib/utils";
 
 const useResumeForm = () =>
   useForm({
@@ -32,13 +33,8 @@ const ResumePreviewWrapper = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
     contentRef,
-    pageStyle: `
-    @page { size: A4; margin: 12mm; }
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  `,
   });
+
   const onResumeVarChange = async (newVar: ResumeVariantKey) => {
     setResumeVar(newVar);
     try {
@@ -48,12 +44,21 @@ const ResumePreviewWrapper = ({
     }
   };
 
+  const handlePrintClick = () => {
+    if (isDesktopLike()) {
+      reactToPrintFn();
+      return;
+    }
+    const url = `/print?id=${encodeURIComponent(resumeId)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   if (!resumeVar) return <p>Loading preview...</p>;
 
   return (
     <>
       <Toolbar
-        onPrintClick={reactToPrintFn}
+        onPrintClick={handlePrintClick}
         onResumeVarChange={onResumeVarChange}
         resumeVariants={resumeVariants}
         variant={resumeVar}

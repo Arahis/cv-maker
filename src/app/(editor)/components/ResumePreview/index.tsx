@@ -100,13 +100,9 @@ const ResumePreview = ({
         id="printableArea"
         className="pointer-events-none absolute z-40 mb-4 cursor-none opacity-0"
       >
-        {/* START */}
-
         <ResumeWrapperDOM>
           <Variant ref={ref} data={formData} photo={cropped} />
         </ResumeWrapperDOM>
-
-        {/* END */}
       </div>
       <div ref={contentRefForPrint} className="flex flex-col gap-4">
         {pages.map((page, idx) => (
