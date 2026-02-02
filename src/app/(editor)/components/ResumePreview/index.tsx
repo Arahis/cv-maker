@@ -28,8 +28,13 @@ const ResumeWrapperPages = ({
     >
       <div
         data-page-scale
-        className="relative p-[24px]"
-        style={{ zoom: scale, width: 794, height: 1123 }}
+        className="relative p-6"
+        style={{
+          width: 794,
+          height: 1123,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
       >
         {children}
         <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
@@ -50,7 +55,14 @@ const ResumeWrapperDOM = ({
       className="mb-4 h-fit w-full overflow-hidden rounded-md bg-pink-200 text-[14px] shadow-xl"
       style={{ width }}
     >
-      <div className="p-6" style={{ width: 794, zoom: scale }}>
+      <div
+        className="p-6"
+        style={{
+          width: 794,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
         {children}
       </div>
     </div>
