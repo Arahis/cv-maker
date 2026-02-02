@@ -30,7 +30,15 @@ const ResumePreviewWrapper = ({
     resumeVariant,
   );
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+    pageStyle: `
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  `,
+  });
   const onResumeVarChange = async (newVar: ResumeVariantKey) => {
     setResumeVar(newVar);
     try {
