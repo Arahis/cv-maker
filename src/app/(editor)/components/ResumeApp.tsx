@@ -1,77 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ResumeEditor from "./ResumeEditor";
-import ResumePreview from "./ResumePreview";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
-import { loadResume, saveResumeVariant } from "@/lib/indexedDB";
-import Toolbar from "./toolbar";
-import { useReactToPrint } from "react-to-print";
-import { ResumeVariantKey, resumeVariants } from "@/components/resume/variants";
-import { isDesktopLike } from "@/lib/utils";
+import { loadResume } from "@/lib/indexedDB";
+import { ResumeVariantKey } from "@/components/resume/variants";
+import ResumePreviewWrapper from "./ResumePreviewWrapper";
 
 const useResumeForm = () =>
   useForm({
     resolver: zodResolver(resumeSchema),
     // defaultValues,
   });
-
-const ResumePreviewWrapper = ({
-  resumeId,
-  resumeVariant,
-}: {
-  resumeId: string;
-  resumeVariant: ResumeVariantKey | undefined;
-}) => {
-  const [resumeVar, setResumeVar] = useState<ResumeVariantKey | undefined>(
-    resumeVariant,
-  );
-  const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({
-    contentRef,
-  });
-
-  const onResumeVarChange = async (newVar: ResumeVariantKey) => {
-    setResumeVar(newVar);
-    try {
-      await saveResumeVariant(resumeId, newVar);
-    } catch (e) {
-      console.error("Failed to save resume variant", e);
-    }
-  };
-
-  const handlePrintClick = () => {
-    if (isDesktopLike()) {
-      reactToPrintFn();
-      return;
-    }
-    const url = `/print?id=${encodeURIComponent(resumeId)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  if (!resumeVar) return <p>Loading preview...</p>;
-
-  return (
-    <>
-      <Toolbar
-        onPrintClick={handlePrintClick}
-        onResumeVarChange={onResumeVarChange}
-        resumeVariants={resumeVariants}
-        variant={resumeVar}
-      />
-      <ResumePreview
-        key={resumeVar}
-        resumeId={resumeId}
-        ref={contentRef}
-        resumeComponent={resumeVariants[resumeVar]}
-      />
-    </>
-  );
-};
 
 const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   const [valid, setValid] = useState<null | boolean>(null);
@@ -105,12 +49,11 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
         <div className="w-full overflow-y-auto border-r md:w-1/2">
           <ResumeEditor resumeId={resumeId} />
         </div>
-        <div className="relative hidden w-1/2 overflow-y-auto md:flex">
-          <ResumePreviewWrapper
-            resumeId={resumeId}
-            resumeVariant={resumeVariant}
-          />
-        </div>
+
+        <ResumePreviewWrapper
+          resumeId={resumeId}
+          resumeVariant={resumeVariant}
+        />
       </Form>
     </div>
   );
