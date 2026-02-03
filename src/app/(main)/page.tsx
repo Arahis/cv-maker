@@ -16,7 +16,7 @@ const HighlightsItem = ({
   count: number;
 }) => {
   return (
-    <div className="relative flex items-center">
+    <div className="relative mx-auto flex items-center py-8">
       <div
         className="font-brand absolute z-[-1] text-8xl font-bold opacity-50"
         style={{ color: `var(--brand-${item.color})` }}
@@ -31,11 +31,8 @@ const HighlightsItem = ({
 };
 
 const Highlights = () => (
-  <div className="grid grid-cols-4">
-    {highlightsItems.map((item, i) => (
-      <HighlightsItem item={item} count={i + 1} key={i} />
-    ))}
-    <div className="gradient-separator py-4 pl-20 text-left">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-0">
+    <div className="gradient-separator md:gradient-separator-left gradient-separator-bottom order-first mx-auto px-12 py-8 text-center md:order-last md:text-left">
       <p className="mb-2 text-2xl font-semibold">Like it?</p>
       <p>Support us with a</p>
       <a
@@ -47,14 +44,18 @@ const Highlights = () => (
         donation💙
       </a>
     </div>
+
+    {highlightsItems.map((item, i) => (
+      <HighlightsItem item={item} count={i + 1} key={i} />
+    ))}
   </div>
 );
 
 const Hero = () => {
   return (
     <div>
-      <div className="py-16">
-        <p className="font-tech mb-2 text-lg font-semibold text-gray-500">
+      <div className="py-8">
+        <p className="font-tech text-lg font-semibold text-gray-500 md:mb-2">
           <span className="pr-2 font-bold text-red-700">[</span>
           <span className="bg-blue-100">
             We’re still building this site, but you’re welcome to use it.
@@ -62,17 +63,17 @@ const Hero = () => {
           <span className="pl-2 font-bold text-red-700">]</span>
         </p>
       </div>
-      <div className="flex h-[64vh] flex-col items-center justify-center">
-        <div className="font-brand mb-12">
-          <h1 className="mb-4 text-6xl font-bold">Make your resume go WOOP!</h1>
-          <h2 className="mb-16 text-4xl font-bold">
+      <div className="flex h-[50vh] flex-col items-center justify-center md:h-[60vh]">
+        <div className="font-brand mb-8 md:mb-12">
+          <h1 className="mb-4 text-4xl font-bold md:text-6xl">
+            Make your resume go WOOP!
+          </h1>
+          <h2 className="mb-8 text-2xl font-bold md:mb-16 md:text-4xl">
             Build a resume that gets you hired —{" "}
             <span className="gradient-underline">for free</span>.
           </h2>
-          <h3 className="font-tech text-xl font-semibold">
-            An indie resume builder made by people who couldn’t find free
-            templates they actually liked.
-            <br /> So we built our own.
+          <h3 className="font-tech font-semibold md:text-xl">
+            Free resume templates that actually look good.
           </h3>
         </div>
         <MainCreateNewResumeButton />
@@ -84,7 +85,7 @@ const Hero = () => {
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-400 text-center">
+    <main className="mx-auto w-full max-w-400 px-4 text-center">
       <Hero />
     </main>
   );

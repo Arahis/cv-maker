@@ -118,6 +118,65 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+@utility gradient-separator {
+  position: relative;
+
+  --gs-top: 0;
+  --gs-bottom: 0;
+  --gs-left: 0;
+  --gs-right: auto;
+  --gs-width: 4px;
+  --gs-height: auto;
+  &::after {
+    content: "";
+    position: absolute;
+    top: var(--gs-top);
+    bottom: var(--gs-bottom);
+    left: var(--gs-left);
+    right: var(--gs-right);
+
+    height: var(--gs-height);
+    width: var(--gs-width);
+    background: var(--brand-gradient);
+  }
+}
+
+@utility gradient-separator-left {
+  --gs-left: 0;
+  --gs-right: auto;
+  --gs-top: 0;
+  --gs-bottom: 0;
+  --gs-width: 4px;
+  --gs-height: auto;
+}
+
+@utility gradient-separator-right {
+  --gs-left: auto;
+  --gs-right: 0;
+  --gs-top: 0;
+  --gs-bottom: 0;
+  --gs-width: 4px;
+  --gs-height: auto;
+}
+
+@utility gradient-separator-top {
+  --gs-left: 0;
+  --gs-right: 0;
+  --gs-top: 0;
+  --gs-bottom: auto;
+  --gs-width: 100%;
+  --gs-height: 4px;
+}
+
+@utility gradient-separator-bottom {
+  --gs-top: auto;
+  --gs-bottom: 0;
+  --gs-left: 0;
+  --gs-right: 0;
+  --gs-width: 100%;
+  --gs-height: 4px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
