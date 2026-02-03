@@ -114,7 +114,7 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
   return (
-    <div className="mx-12">
+    <div className="mx-4 py-4 md:mx-12">
       <ResumeStepsControl
         titles={sectionTitles}
         currentStep={currentEditorStep}

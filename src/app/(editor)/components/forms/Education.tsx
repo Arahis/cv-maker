@@ -65,12 +65,12 @@ const EducationItem = ({
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="City" {...field} className="w-[70%]" />
+                <Input placeholder="City" {...field} className="md:w-[70%]" />
               </FormControl>
             </FormItem>
           )}
         />
-        <div className="grid w-[70%] grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:w-[70%]">
           <FormField
             control={control}
             name={`educations.${index}.startDate`}

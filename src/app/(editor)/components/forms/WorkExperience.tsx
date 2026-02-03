@@ -77,7 +77,7 @@ const WorkExperienceItem = ({
           )}
         />
       </div>
-      <div className="grid w-[70%] grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:w-[70%]">
         <FormField
           control={control}
           name={`workExperiences.${index}.startDate`}

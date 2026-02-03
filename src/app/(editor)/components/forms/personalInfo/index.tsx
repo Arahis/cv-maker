@@ -56,7 +56,7 @@ const PersonalInfo = () => {
 
   return (
     <div className="grid gap-2">
-      <div className="flex gap-6">
+      <div className="mb-2 flex flex-col gap-6 md:flex-row">
         <FormField
           control={control}
           name="avatarCropData"
