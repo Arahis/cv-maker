@@ -16,6 +16,7 @@ import { SortableList } from "../SortableList";
 import { TextEditor } from "@/components/editor";
 import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
 import { Trash2 } from "lucide-react";
+import { DatePickerInput } from "@/components/DatePicker";
 
 const WorkExperienceItem = ({
   index,
@@ -77,7 +78,7 @@ const WorkExperienceItem = ({
           )}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4 md:w-[70%]">
+      <div className="grid grid-cols-2 gap-4">
         <FormField
           control={control}
           name={`workExperiences.${index}.startDate`}
@@ -85,13 +86,7 @@ const WorkExperienceItem = ({
             <FormItem>
               <FormLabel>Start Date</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Start date"
-                  type="date"
-                  // TODO: try to remove this line and see what will happen
-                  value={field.value?.slice(0, 10)}
-                />
+                <DatePickerInput {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -103,13 +98,7 @@ const WorkExperienceItem = ({
             <FormItem>
               <FormLabel>End Date</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="End date"
-                  type="date"
-                  // TODO: try to remove this line and see what will happen
-                  value={field.value?.slice(0, 10)}
-                />
+                <DatePickerInput {...field} />
               </FormControl>
             </FormItem>
           )}
