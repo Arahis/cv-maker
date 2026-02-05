@@ -61,7 +61,8 @@ const Toolbar = ({
             side="right"
             align="end"
             sideOffset={8}
-            className="pointer-events-auto z-50 max-h-[var(--radix-popover-content-available-height)] w-max max-w-[var(--radix-popover-content-available-width)] overflow-auto overflow-x-auto"
+            avoidCollisions={false}
+            className="pointer-events-auto z-50 w-max max-w-(--radix-popover-content-available-width) overflow-auto overflow-x-auto"
           >
             <ResumeVarsPanel
               variant={variant}
