@@ -115,7 +115,7 @@ const ResumeVarsPanel = ({
             style={{ width: scaledWidth, height: scaledHeight }}
           >
             <div
-              className="origin-top-left transform"
+              className="pointer-events-none origin-top-left transform"
               style={{ width: width, height: height, scale }}
             >
               <Variant data={resumeMock} />
