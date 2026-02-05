@@ -49,7 +49,7 @@ const Toolbar = ({
           </Button>
         </ToolbarTooltip>
 
-        <Popover>
+        <Popover modal={true}>
           <ToolbarTooltip text="Resume variants">
             <PopoverTrigger asChild>
               <Button>
@@ -57,7 +57,12 @@ const Toolbar = ({
               </Button>
             </PopoverTrigger>
           </ToolbarTooltip>
-          <PopoverContent side="right" align="end" className="z-50 w-full">
+          <PopoverContent
+            side="right"
+            align="end"
+            sideOffset={8}
+            className="pointer-events-auto z-50 max-h-[var(--radix-popover-content-available-height)] w-max max-w-[var(--radix-popover-content-available-width)] overflow-auto overflow-x-auto"
+          >
             <ResumeVarsPanel
               variant={variant}
               onChange={onResumeVarChange}

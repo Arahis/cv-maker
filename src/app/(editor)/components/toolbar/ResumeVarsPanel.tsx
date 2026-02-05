@@ -115,7 +115,51 @@ const ResumeVarsPanel = ({
             style={{ width: scaledWidth, height: scaledHeight }}
           >
             <div
-              className="origin-top-left transform"
+              className="pointer-events-none origin-top-left transform"
+              style={{ width: width, height: height, scale }}
+            >
+              <Variant data={resumeMock} />
+            </div>
+          </div>
+        </div>
+      ))}
+      {Object.entries(resumeVariants).map(([key, Variant]) => (
+        <div
+          key={key}
+          className={cn(
+            "flex rounded-md border p-1 hover:border-blue-300",
+            variant === key && "border-2 border-blue-300",
+          )}
+        >
+          <div
+            onClick={() => onVarChange(key)}
+            className="cursor-pointer overflow-hidden"
+            style={{ width: scaledWidth, height: scaledHeight }}
+          >
+            <div
+              className="pointer-events-none origin-top-left transform"
+              style={{ width: width, height: height, scale }}
+            >
+              <Variant data={resumeMock} />
+            </div>
+          </div>
+        </div>
+      ))}
+      {Object.entries(resumeVariants).map(([key, Variant]) => (
+        <div
+          key={key}
+          className={cn(
+            "flex rounded-md border p-1 hover:border-blue-300",
+            variant === key && "border-2 border-blue-300",
+          )}
+        >
+          <div
+            onClick={() => onVarChange(key)}
+            className="cursor-pointer overflow-hidden"
+            style={{ width: scaledWidth, height: scaledHeight }}
+          >
+            <div
+              className="pointer-events-none origin-top-left transform"
               style={{ width: width, height: height, scale }}
             >
               <Variant data={resumeMock} />
