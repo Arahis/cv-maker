@@ -15,10 +15,25 @@
   transition: background-size 200ms ease;
 }
 
-.link-hover:hover {
+@media (hover: hover) and (pointer: fine) {
+  .link-hover:hover {
+    background-size:
+      100% 100%,
+      100% 100%;
+  }
+}
+
+.link-hover:active {
   background-size:
     100% 100%,
     100% 100%;
+}
+
+.link-hover:focus-visible {
+  background-size:
+    100% 100%,
+    100% 100%;
+  outline: none;
 }
 .gradient-underline {
   position: relative;
