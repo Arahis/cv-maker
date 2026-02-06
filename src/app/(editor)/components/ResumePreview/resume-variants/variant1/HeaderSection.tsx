@@ -10,7 +10,6 @@ const HeaderSection = ({
   data: ResumeForm;
   photo?: string;
 }) => {
-  console.log({ photo });
   return (
     <Paginate.Columns className="gap-8">
       {photo && (
