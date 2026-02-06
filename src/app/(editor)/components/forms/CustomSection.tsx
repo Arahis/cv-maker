@@ -139,7 +139,7 @@ const CustomSection = () => {
     <div className="pb-6">
       <div className="mb-4">
         <SortableList
-          className="grid gap-4"
+          className="grid gap-8"
           items={fields}
           onMove={move}
           renderItem={(item, index) => (
