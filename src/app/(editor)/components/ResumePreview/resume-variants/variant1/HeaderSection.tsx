@@ -14,14 +14,14 @@ const HeaderSection = ({
     <Paginate.Columns className="gap-8">
       {photo && (
         <Paginate.Section
-          className="-mt-8 h-60 w-[30%] bg-gray-50 bg-cover bg-center"
+          className="-mt-8 h-60 w-[30%] shrink-0 bg-gray-50 bg-cover bg-center"
           style={{
             backgroundImage: photo ? `url(${photo})` : undefined,
           }}
         ></Paginate.Section>
       )}
 
-      <Paginate.Section className="w-[70%]">
+      <Paginate.Section className="w-full">
         <Paginate.Section className="border-b border-gray-300 py-6 text-left">
           {/* <Paginate.Text className="text-3xl">Hello I&apos;m</Paginate.Text> */}
           <Paginate.Text className="mb-2 text-4xl font-bold">

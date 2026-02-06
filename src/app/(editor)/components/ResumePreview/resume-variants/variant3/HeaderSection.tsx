@@ -20,30 +20,36 @@ const HeaderSection = ({
           </div>
           <p className="text-4xl font-bold">{data.jobTitle}</p>
         </div>
-
-        <Paginate.Section
-          className="aspect-square w-[20%] rounded-full bg-gray-50 bg-cover bg-center outline-1 outline-offset-4 outline-yellow-400"
-          style={{
-            backgroundImage: photo ? `url(${photo})` : undefined,
-          }}
-        ></Paginate.Section>
+        {photo && (
+          <Paginate.Section
+            className="aspect-square w-[20%] rounded-full bg-gray-50 bg-cover bg-center outline-1 outline-offset-4 outline-yellow-400"
+            style={{
+              backgroundImage: photo ? `url(${photo})` : undefined,
+            }}
+          ></Paginate.Section>
+        )}
       </Paginate.Columns>
       <div className="grid grid-cols-3">
-        <div>
-          <p className="font-semibold">Phone</p>
-          <p className="text-[16px]">{data.phone}</p>
-        </div>
-        <div>
-          <p className="font-semibold">Email</p>
-          <p className="text-[16px]">{data.email}</p>
-        </div>
-        <div>
-          <p className="font-semibold">Location</p>
-          <p className="text-[16px]">
-            {data.country}, {data.city}
-          </p>
-        </div>
-        <div></div>
+        {data.phone && (
+          <div>
+            <p className="font-semibold">Phone</p>
+            <p className="text-[16px]">{data.phone}</p>
+          </div>
+        )}
+        {data.email && (
+          <div>
+            <p className="font-semibold">Email</p>
+            <p className="text-[16px]">{data.email}</p>
+          </div>
+        )}
+        {(data.country || data.city) && (
+          <div>
+            <p className="font-semibold">Location</p>
+            <p className="text-[16px]">
+              {data.country}, {data.city}
+            </p>
+          </div>
+        )}
       </div>
     </Paginate.Section>
   );

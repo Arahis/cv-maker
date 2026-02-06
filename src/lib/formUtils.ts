@@ -19,5 +19,5 @@ export const defaultFormValues = {
   workExperiences: [],
   educations: [],
   skills: { technical: [], personal: [] },
-  summary: EMPTY_LEXICAL_STATE,
+  summary: "",
 };

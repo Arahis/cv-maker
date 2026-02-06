@@ -3,9 +3,12 @@ import { Paginate } from "../../Paginate";
 import { TextReader } from "@/components/editor";
 import SectionItem from "./SectionItem";
 import { ResumeForm } from "@/lib/validation";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
 
 const Summary = ({ data }: { data: ResumeForm }) => {
   if (!data.summary) return;
+
+  const summary = data.summary || EMPTY_LEXICAL_STATE;
   return (
     <Paginate.Section
       datatype="main-summary"
@@ -13,7 +16,7 @@ const Summary = ({ data }: { data: ResumeForm }) => {
     >
       <SectionItem
         title="Summary"
-        items={[data.summary]}
+        items={[summary]}
         renderItem={(item) => <TextReader value={item} />}
       />
     </Paginate.Section>
