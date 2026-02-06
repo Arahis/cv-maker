@@ -14,6 +14,7 @@ import ResumePreviewWrapper from "./ResumePreviewWrapper";
 const useResumeForm = () =>
   useForm({
     resolver: zodResolver(resumeSchema),
+    shouldUnregister: false,
     // defaultValues,
   });
 
