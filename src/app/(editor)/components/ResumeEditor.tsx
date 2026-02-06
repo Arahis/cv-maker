@@ -15,6 +15,7 @@ import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import OtherInfo from "./forms/OtherInfo";
+import { cn } from "@/lib/utils";
 
 const resumeSections: {
   title: string;
@@ -84,14 +85,14 @@ const ResumeStepsControl = ({
       <Button
         variant="secondary"
         onClick={setPrevStep}
-        disabled={currentStep === 0}
+        className={cn(currentStep === 0 && "opacity-0")}
       >
         Prev Step
       </Button>
       <Button
         variant="secondary"
         onClick={setNextStep}
-        disabled={currentStep === titles.length - 1}
+        className={cn(currentStep === titles.length - 1 && "opacity-0")}
       >
         Next Step
       </Button>
@@ -106,12 +107,14 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const sectionTitles = resumeSections.map((section) => section.title);
 
   const handleGoToNextItem = () => {
+    if (currentEditorStep === sectionTitles.length - 1) return;
     setCurrentEditorStep((prev) =>
       Math.min(prev + 1, sectionTitles.length - 1),
     );
   };
 
   const handleGoToPrevItem = () => {
+    if (currentEditorStep === 0) return;
     setCurrentEditorStep((prev) => Math.max(0, prev - 1));
   };
 
