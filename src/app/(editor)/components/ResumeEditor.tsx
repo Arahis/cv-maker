@@ -31,6 +31,11 @@ const resumeSections: {
     item: <PersonalInfo />,
   },
   {
+    title: "Summary",
+    slug: "summary",
+    item: <Summary />,
+  },
+  {
     title: "Work experience",
     slug: "work-experience",
     item: <WorkExperience />,
@@ -46,9 +51,9 @@ const resumeSections: {
     item: <Skills />,
   },
   {
-    title: "Summary",
-    slug: "summary",
-    item: <Summary />,
+    title: "Other Info",
+    slug: "other-info",
+    item: <div />,
   },
 ];
 
