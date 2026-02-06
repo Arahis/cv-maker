@@ -43,7 +43,7 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
 
   return (
     <Paginate.Section
-      className="w-[70%] bg-gray-100 pt-8 pl-6"
+      className="w-[70%] bg-gray-50 pt-8 pl-6"
       datatype="cv_info-right-section"
     >
       <SectionItem
