@@ -2,13 +2,10 @@ import { formatDate } from "../../utils/formatDate";
 import { Paginate } from "../../Paginate";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
+import React from "react";
 
-const Education = ({
-  educations,
-}: {
-  educations: ResumeForm["educations"];
-}) => {
-  if (!educations?.length) return;
+const Education = ({ items }: { items: ResumeForm["educations"] }) => {
+  if (!items?.length) return;
 
   return (
     <SectionItem
@@ -21,7 +18,7 @@ const Education = ({
         endDate,
         isFullDate,
       }) => (
-        <div className="mb-4">
+        <div>
           <p className="mb-2 text-[16px] font-bold">{degree}</p>
           <p className="text-[16px]">{institution}</p>
           <div className="mb-0.5">
@@ -32,18 +29,72 @@ const Education = ({
           </div>
         </div>
       )}
-      items={educations || []}
-      className="mb-12"
+      items={items || []}
     />
   );
 };
 
-const RightSection = ({ data }: { data: ResumeForm }) => {
-  const { educations } = data;
+const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
+  if (!items?.length) return;
 
   return (
-    <Paginate.Section className="w-[30%] py-8 pl-6">
-      <Education educations={educations || []} />
+    <SectionItem
+      title="Languages"
+      items={items}
+      renderItem={(item) => {
+        return (
+          <React.Fragment key={item.id}>
+            <p className="font-bold">{item.languageName}</p>
+            <p>{item.languageLevel}</p>
+          </React.Fragment>
+        );
+      }}
+    />
+  );
+};
+
+const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
+  if (!items?.length) return;
+
+  return (
+    <React.Fragment>
+      {items.map((item, idx) => {
+        const title = item.sectionName?.trim();
+        const sectionItems = item.sectionItems ?? [];
+
+        if (!title) return null;
+        if (sectionItems.length === 0) return null;
+
+        return (
+          <SectionItem
+            key={item.id ?? `${title}-${idx}`}
+            title={title}
+            items={sectionItems}
+            renderItem={(i) => {
+              return (
+                <React.Fragment key={i.id}>
+                  <p className="font-bold">{i.title}</p>
+                  <p>{i.value}</p>
+                </React.Fragment>
+              );
+            }}
+          />
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const RightSection = ({ data }: { data: ResumeForm }) => {
+  const { educations, languages, customSections } = data;
+
+  return (
+    <Paginate.Section className="grid w-[30%] gap-6 py-8 pl-6">
+      <Education items={educations || []} />
+
+      <Languages items={languages} />
+
+      <CustomSections items={customSections} />
     </Paginate.Section>
   );
 };

@@ -4,12 +4,8 @@ import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 import { ResumeForm } from "@/lib/validation";
 
-const Education = ({
-  educations = [],
-}: {
-  educations: ResumeForm["educations"];
-}) => {
-  if (educations.length === 0) return null;
+const Education = ({ items }: { items: ResumeForm["educations"] }) => {
+  if (items?.length === 0) return null;
 
   return (
     <SectionItem
@@ -31,19 +27,18 @@ const Education = ({
           )}
         </div>
       )}
-      items={educations}
-      className="mb-6"
+      items={items}
     />
   );
 };
 
-const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
-  const skillsToArray = Object.entries(skills).map(([head, items]) => ({
+const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
+  const skillsToArray = Object.entries(items).map(([head, items]) => ({
     head,
     items,
   }));
 
-  if (skills.personal?.length === 0 && skills.technical?.length === 0)
+  if (items.personal?.length === 0 && items.technical?.length === 0)
     return null;
 
   return (
@@ -64,25 +59,70 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   );
 };
 
-const LeftSection = ({ data }: { data: ResumeForm }) => {
-  const { educations, skills } = data;
+const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
+  if (!items?.length) return;
 
-  // TODO: refactor later the rest with Paginate
   return (
-    <Paginate.Section className="w-[30%]" datatype="left-section">
-      <Education educations={educations} />
-      <div className="mb-6">
-        <Skills skills={skills} />
-      </div>
-      {/* <div className="mb-6" datatype="left-section-wrapper">
-        <p className="text-[16px] uppercase" datatype="left-section-text">
-          Social
-        </p>
-        <div className="">
-          <p className="font-serif">LinkedIn</p>
-          <p className="">Years of education</p>
-        </div>
-      </div> */}
+    <SectionItem
+      title="Languages"
+      items={items}
+      renderItem={(item) => {
+        if (!item.languageName) return;
+        return (
+          <React.Fragment key={item.id}>
+            <p className="font-bold">{item.languageName}</p>
+            <p>{item.languageLevel}</p>
+          </React.Fragment>
+        );
+      }}
+    />
+  );
+};
+
+const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
+  if (items?.length === 0) return;
+
+  return (
+    <React.Fragment>
+      {items?.map((item, idx) => {
+        const title = item.sectionName?.trim();
+        const sectionItems = item.sectionItems ?? [];
+
+        if (!title) return null;
+        if (sectionItems.length === 0) return null;
+
+        return (
+          <SectionItem
+            key={item.id ?? `${title}-${idx}`}
+            title={title}
+            items={sectionItems}
+            renderItem={(i) => {
+              return (
+                <React.Fragment key={i.id}>
+                  <p className="font-bold">{i.title}</p>
+                  <p>{i.value}</p>
+                </React.Fragment>
+              );
+            }}
+          />
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const LeftSection = ({ data }: { data: ResumeForm }) => {
+  const { educations, skills, languages, customSections } = data;
+
+  return (
+    <Paginate.Section className="grid w-[30%] gap-6" datatype="left-section">
+      <Education items={educations} />
+
+      <Skills items={skills} />
+
+      <Languages items={languages} />
+
+      <CustomSections items={customSections} />
     </Paginate.Section>
   );
 };
