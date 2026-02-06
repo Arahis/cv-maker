@@ -10,15 +10,19 @@ const HeaderSection = ({
   data: ResumeForm;
   photo?: string;
 }) => {
+  console.log({ photo });
   return (
-    <Paginate.Columns>
-      <Paginate.Section
-        className="-mt-8 h-[240px] w-[30%] bg-amber-300 bg-cover bg-center"
-        style={{
-          backgroundImage: photo ? `url(${photo})` : undefined,
-        }}
-      ></Paginate.Section>
-      <Paginate.Section className="w-[70%] px-8">
+    <Paginate.Columns className="gap-8">
+      {photo && (
+        <Paginate.Section
+          className="-mt-8 h-60 w-[30%] bg-gray-50 bg-cover bg-center"
+          style={{
+            backgroundImage: photo ? `url(${photo})` : undefined,
+          }}
+        ></Paginate.Section>
+      )}
+
+      <Paginate.Section className="w-[70%]">
         <Paginate.Section className="border-b border-gray-300 py-6 text-left">
           {/* <Paginate.Text className="text-3xl">Hello I&apos;m</Paginate.Text> */}
           <Paginate.Text className="mb-2 text-4xl font-bold">

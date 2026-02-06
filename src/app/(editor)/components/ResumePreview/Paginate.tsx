@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 type PaginateProps = React.HTMLAttributes<HTMLDivElement>;
@@ -19,8 +20,8 @@ export const Paginate = Object.assign(
         {children}
       </div>
     ),
-    Columns: ({ children, ...props }: PaginateProps) => (
-      <div data-paginate="columns" className="flex" {...props}>
+    Columns: ({ children, className, ...props }: PaginateProps) => (
+      <div data-paginate="columns" className={cn("flex", className)} {...props}>
         {children}
       </div>
     ),
