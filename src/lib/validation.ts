@@ -108,19 +108,19 @@ export const summarySchema = z.object({
 export type SummaryForm = z.infer<typeof summarySchema>;
 
 const customSectionItemFieldsSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   title: optionalString,
   value: optionalString,
 });
 
 const customSectionItemSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   sectionName: optionalString,
   sectionItems: z.array(customSectionItemFieldsSchema).optional(),
 });
 
 export const customSectionSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   customSections: z.array(customSectionItemSchema).optional(),
 });
 
