@@ -3,9 +3,14 @@ import { Paginate } from "../../Paginate";
 import { TextReader } from "@/components/editor";
 import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
 
-const HeaderSection = ({ data }: { data: ResumeForm }) => {
-  const summary = data.summary || EMPTY_LEXICAL_STATE;
+const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
+  if (!data) return;
 
+  const summary = data || EMPTY_LEXICAL_STATE;
+  return <TextReader value={summary} />;
+};
+
+const HeaderSection = ({ data }: { data: ResumeForm }) => {
   return (
     <Paginate.Columns className="mb-8 border-b border-gray-500 pb-8">
       <div className="flex w-full items-center">
@@ -21,7 +26,7 @@ const HeaderSection = ({ data }: { data: ResumeForm }) => {
             </div>
           </div>
           <div className="w-[80%]">
-            <TextReader value={summary} />
+            <Summary data={data.summary} />
           </div>
         </div>
         <div className="w-[30%] pl-4">
