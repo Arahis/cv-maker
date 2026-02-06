@@ -21,4 +21,5 @@ export const defaultFormValues = {
   languages: [],
   skills: { technical: [], personal: [] },
   summary: "",
+  customSections: [],
 };

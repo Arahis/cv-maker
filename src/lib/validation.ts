@@ -107,6 +107,25 @@ export const summarySchema = z.object({
 
 export type SummaryForm = z.infer<typeof summarySchema>;
 
+const customSectionItemFieldsSchema = z.object({
+  id: z.string().optional(),
+  title: optionalString,
+  value: optionalString,
+});
+
+const customSectionItemSchema = z.object({
+  id: z.string().optional(),
+  sectionName: optionalString,
+  sectionItems: z.array(customSectionItemFieldsSchema).optional(),
+});
+
+export const customSectionSchema = z.object({
+  id: z.string().optional(),
+  customSections: z.array(customSectionItemSchema).optional(),
+});
+
+export type CustomSectionForm = z.infer<typeof customSectionSchema>;
+
 export const resumeSchema = z.object({
   ...generalFormSchema.shape,
   ...personalInfoSchema.shape,
@@ -114,6 +133,8 @@ export const resumeSchema = z.object({
   ...educationSchema.shape,
   ...skillsSchema.shape,
   ...summarySchema.shape,
+  ...languagesSchema.shape,
+  ...customSectionSchema.shape,
 });
 
 export type ResumeForm = z.infer<typeof resumeSchema>;
