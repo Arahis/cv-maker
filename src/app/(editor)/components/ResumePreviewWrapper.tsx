@@ -55,7 +55,7 @@ const ResumePreviewWrapper = ({
             <Eye />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-screen">
+        <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-dvh">
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
           <div className="relative flex overflow-y-auto">
             <Toolbar
