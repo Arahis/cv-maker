@@ -12,6 +12,7 @@ import PhotoCropper from "./PhotoCropper";
 import { getCroppedImg } from "./cropImage";
 import { Area } from "react-easy-crop";
 import { AvatarCropDataForm } from "@/lib/validation";
+import { avatarCropInitialValues } from "@/lib/formUtils";
 
 export type PhotoCropperProps = {
   croppedPixels: Area;
@@ -160,9 +161,11 @@ const DialogInner = ({
   value, // Cropped data
   onChange,
   originalPhoto,
+  onModalClose,
 }: {
   value: AvatarCropDataForm;
   originalPhoto: string | null;
+  onModalClose: (v: boolean) => void;
   onChange: (
     originalPhoto: string,
     croppedPhoto: string,
@@ -197,14 +200,17 @@ const DialogInner = ({
   if (src) {
     // We have original image SRC, we have cropData for cropping and saving into the main form in DB, and we get cropped image
     const handleResetChosenFile = () => setSrc(null);
+    const handleDeleteFile = () => {
+      onChange("", "", { ...avatarCropInitialValues });
+      onModalClose(false);
+    };
     const handleSaveFiles = async (cropData: PhotoCropperProps) => {
       const { croppedPixels, cropped, zoom, rotation } = cropData;
       const croppedImage = await getCroppedImg(src, croppedPixels, rotation);
-      // TODO: handleResetChosenFile needs to be replaced we a function that resets the local state and closes the modal
-      handleResetChosenFile();
       if (croppedImage) {
         onChange(src, croppedImage, { ...cropped, zoom, rotation });
       }
+      onModalClose(false);
     };
 
     return (
@@ -213,6 +219,7 @@ const DialogInner = ({
         cropValue={value}
         onReset={handleResetChosenFile}
         onSave={handleSaveFiles}
+        onDelete={handleDeleteFile}
         shouldReset={shouldResetCrop}
       />
     );
@@ -261,6 +268,7 @@ const PhotoUploadModal = ({
           value={value}
           onChange={onChange}
           originalPhoto={originalPhoto}
+          onModalClose={onModalChange}
         />
       </DialogContent>
     </Dialog>

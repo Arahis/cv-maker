@@ -5,17 +5,20 @@ import Cropper, { Area } from "react-easy-crop";
 import { PhotoCropperProps } from "./PhotoUploadModal";
 import { AvatarCropDataForm } from "@/lib/validation";
 import { avatarCropInitialValues } from "@/lib/formUtils";
+import { Trash2 } from "lucide-react";
 
 const PhotoCropper = ({
   src,
   onReset,
   onSave,
+  onDelete,
   cropValue,
   shouldReset,
 }: {
   src: string;
   onReset: () => void;
   onSave: (v: PhotoCropperProps) => void;
+  onDelete: () => void;
   cropValue: AvatarCropDataForm;
   shouldReset: boolean;
 }) => {
@@ -61,7 +64,7 @@ const PhotoCropper = ({
 
   return (
     <div>
-      <div className="bg relative mb-8 h-[300px] w-full">
+      <div className="bg relative mb-8 h-75 w-full">
         <Cropper
           image={src}
           crop={crop}
@@ -103,9 +106,15 @@ const PhotoCropper = ({
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onReset}>
-          Use another photo
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onReset}>
+            Use another photo
+          </Button>
+          <Button variant="ghost" onClick={onDelete}>
+            <Trash2 />
+          </Button>
+        </div>
+
         <Button onClick={handleSave}>Save</Button>
       </div>
     </div>
