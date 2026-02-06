@@ -60,40 +60,48 @@ const CustomItem = ({
           name={`customSections.${index}.sectionName`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Custom section</FormLabel>
+              <FormLabel>Section title</FormLabel>
               <FormControl>
-                <Input placeholder="Section title" {...field} />
+                <Input placeholder="e.g. Achievements" {...field} />
               </FormControl>
             </FormItem>
           )}
         />
         {fields.map((item, idx) => {
           return (
-            <div key={idx} className="flex w-full items-end gap-4">
-              <FormField
-                control={control}
-                name={`customSections.${index}.sectionItems.${idx}.title`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Item title" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name={`customSections.${index}.sectionItems.${idx}.value`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Item value" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <div
+              key={idx}
+              className="flex flex-col items-end gap-4 md:flex-row"
+            >
+              <div className="flex w-full flex-col gap-4 pl-6 md:ml-0 md:flex-row md:pl-0">
+                <FormField
+                  control={control}
+                  name={`customSections.${index}.sectionItems.${idx}.title`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Label</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Certification" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name={`customSections.${index}.sectionItems.${idx}.value`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. AWS Certified Developer"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="secondary"

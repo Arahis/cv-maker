@@ -6,7 +6,7 @@ const OtherInfo = () => {
     <div className="grid divide-y">
       <Languages />
       <div className="pt-6">
-        <p>More section</p>
+        <p className="font-semibold">Additional information</p>
 
         <CustomSection />
       </div>
