@@ -14,6 +14,7 @@ import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
+import OtherInfo from "./forms/OtherInfo";
 
 const resumeSections: {
   title: string;
@@ -53,7 +54,7 @@ const resumeSections: {
   {
     title: "Other Info",
     slug: "other-info",
-    item: <div />,
+    item: <OtherInfo />,
   },
 ];
 

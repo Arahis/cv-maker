@@ -7,6 +7,7 @@ import type {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripHorizontal } from "lucide-react";
+import { GripVertical } from "lucide-react";
 
 interface Props {
   id: UniqueIdentifier;
@@ -57,12 +58,28 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
   );
 }
 
-export function DragHandle() {
+const grips = {
+  vertical: GripVertical,
+  horizontal: GripHorizontal,
+} as const;
+
+export function DragHandle({
+  variant = "horizontal",
+}: {
+  variant?: "vertical" | "horizontal";
+}) {
   const { attributes, listeners, ref } = useContext(SortableItemContext);
 
+  const Grip = grips[variant];
+
   return (
-    <button className="DragHandle" {...attributes} {...listeners} ref={ref}>
-      <GripHorizontal />
+    <button
+      className="DragHandle h-8 cursor-move"
+      {...attributes}
+      {...listeners}
+      ref={ref}
+    >
+      <Grip />
     </button>
   );
 }

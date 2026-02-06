@@ -18,6 +18,7 @@ export const defaultFormValues = {
 
   workExperiences: [],
   educations: [],
+  languages: [],
   skills: { technical: [], personal: [] },
   summary: "",
 };

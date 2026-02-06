@@ -71,6 +71,20 @@ export const educationSchema = z.object({
 
 export type EducationForm = z.infer<typeof educationSchema>;
 
+export const languagesSchema = z.object({
+  languages: z
+    .array(
+      z.object({
+        id: z.string(),
+        languageName: optionalString,
+        languageLevel: optionalString,
+      }),
+    )
+    .optional(),
+});
+
+export type LanguagesForm = z.infer<typeof languagesSchema>;
+
 const skillItemSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Skill name must be at least 2 characters"),
