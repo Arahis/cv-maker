@@ -4,8 +4,8 @@ import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 import { ResumeForm } from "@/lib/validation";
 
-const Education = ({ items = [] }: { items: ResumeForm["educations"] }) => {
-  if (items.length === 0) return null;
+const Education = ({ items }: { items: ResumeForm["educations"] }) => {
+  if (items?.length === 0) return null;
 
   return (
     <SectionItem
@@ -60,13 +60,14 @@ const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
 };
 
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
-  if (items?.length === 0) return;
+  if (!items?.length) return;
 
   return (
     <SectionItem
       title="Languages"
       items={items}
       renderItem={(item) => {
+        if (!item.languageName) return;
         return (
           <React.Fragment key={item.id}>
             <p className="font-bold">{item.languageName}</p>
@@ -83,14 +84,18 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
 
   return (
     <React.Fragment>
-      {items?.map((item) => {
-        if (!item.sectionName) return;
+      {items?.map((item, idx) => {
+        const title = item.sectionName?.trim();
+        const sectionItems = item.sectionItems ?? [];
+
+        if (!title) return null;
+        if (sectionItems.length === 0) return null;
 
         return (
           <SectionItem
-            key={item.id}
-            title={item.sectionName}
-            items={item.sectionItems}
+            key={item.id ?? `${title}-${idx}`}
+            title={title}
+            items={sectionItems}
             renderItem={(i) => {
               return (
                 <React.Fragment key={i.id}>
