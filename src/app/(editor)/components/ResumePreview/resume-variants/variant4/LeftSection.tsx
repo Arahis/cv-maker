@@ -1,0 +1,171 @@
+import { formatDate } from "../../utils/formatDate";
+import { Paginate } from "../../Paginate";
+import { ResumeForm } from "@/lib/validation";
+import SectionItem from "./SectionItem";
+import React from "react";
+import { Phone } from "lucide-react";
+import { Mail } from "lucide-react";
+import { MapPin } from "lucide-react";
+
+const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
+  const skillsToArray = Object.entries(skills).map(([head, items]) => ({
+    head: head === "technical" ? "Technical" : "Professional",
+    items,
+  }));
+
+  if (!skills.personal?.length && !skills.technical?.length) return null;
+
+  return (
+    <Paginate.Columns>
+      <SectionItem
+        title="Skills"
+        items={skillsToArray}
+        renderItem={(item) => {
+          if (item.items.length === 0) return null;
+
+          return (
+            <div key={item.head} className="mb-2">
+              <p className="font-bold">{item.head}</p>
+              <p>{item.items.map((i) => i.name).join(", ")}</p>
+            </div>
+          );
+        }}
+      />
+    </Paginate.Columns>
+  );
+};
+
+const Contacts = ({
+  items,
+}: {
+  items: Pick<ResumeForm, "phone" | "city" | "country" | "email">[];
+}) => {
+  return (
+    <SectionItem
+      title="Contacts"
+      renderItem={({ phone, city, country, email }) => (
+        <div className="space-y-2">
+          <div className="flex">
+            <Phone className="mr-2 w-4" />
+            <p className="text-[16px]">{phone}</p>
+          </div>
+          <div className="flex">
+            <Mail className="mr-2 w-4" />
+            <p className="text-[16px] break-all">{email}</p>
+          </div>
+          <div className="flex">
+            <MapPin className="mr-2 w-4" />
+            <p className="text-[16px] break-all">
+              {country}
+              {country && city && ", "}
+              {city}
+            </p>
+          </div>
+        </div>
+      )}
+      items={items}
+    />
+  );
+};
+
+const Education = ({ items }: { items: ResumeForm["educations"] }) => {
+  if (!items?.length) return;
+
+  return (
+    <SectionItem
+      title="Education"
+      renderItem={({
+        degree,
+        institution,
+        city,
+        startDate,
+        endDate,
+        isFullDate,
+      }) => (
+        <div>
+          <p className="mb-2 text-[16px] font-bold">{degree}</p>
+          <p className="text-[16px]">{institution}</p>
+          <div className="mb-0.5">
+            {startDate && (
+              <p className="mr-2">{`${formatDate(isFullDate, startDate)} - ${endDate ? formatDate(isFullDate, endDate) : "Present"}`}</p>
+            )}
+            {city && <p className="italic">{city}</p>}
+          </div>
+        </div>
+      )}
+      items={items || []}
+    />
+  );
+};
+
+const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
+  if (!items?.length) return;
+
+  return (
+    <SectionItem
+      title="Languages"
+      items={items}
+      renderItem={(item) => {
+        return (
+          <React.Fragment key={item.id}>
+            <p className="font-bold">{item.languageName}</p>
+            <p>{item.languageLevel}</p>
+          </React.Fragment>
+        );
+      }}
+    />
+  );
+};
+
+const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
+  if (!items?.length) return;
+
+  return (
+    <React.Fragment>
+      {items.map((item, idx) => {
+        const title = item.sectionName?.trim();
+        const sectionItems = item.sectionItems ?? [];
+
+        if (!title) return null;
+        if (sectionItems.length === 0) return null;
+
+        return (
+          <SectionItem
+            key={item.id ?? `${title}-${idx}`}
+            title={title}
+            items={sectionItems}
+            renderItem={(i) => {
+              return (
+                <React.Fragment key={i.id}>
+                  <p className="font-bold">{i.title}</p>
+                  <p>{i.value}</p>
+                </React.Fragment>
+              );
+            }}
+          />
+        );
+      })}
+    </React.Fragment>
+  );
+};
+
+const LeftSection = ({ data }: { data: ResumeForm }) => {
+  const { educations, languages, customSections, phone, country, city, email } =
+    data;
+
+  return (
+    <Paginate.Section className="w-[30%] space-y-8 pr-6 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
+      <Contacts items={[{ phone, country, city, email }]} />
+
+      <Education items={educations || []} />
+
+      <Skills skills={data.skills || {}} />
+
+      <Languages items={languages} />
+
+      <CustomSections items={customSections} />
+    </Paginate.Section>
+  );
+};
+
+export default LeftSection;

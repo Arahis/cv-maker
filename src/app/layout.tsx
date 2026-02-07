@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Source_Code_Pro } from "next/font/google";
+import { Inter, Outfit, Source_Code_Pro, Cantata_One } from "next/font/google";
 import "./globals.css";
 import "./main.css";
 
@@ -18,6 +18,13 @@ const tech = Source_Code_Pro({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-tech",
+  display: "swap",
+});
+
+const cantata = Cantata_One({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-cantata",
   display: "swap",
 });
 
@@ -42,7 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} ${outfit.variable} ${tech.variable} antialiased`}
+        className={`${inter.className} ${outfit.variable} ${tech.variable} ${cantata.variable} antialiased`}
       >
         {children}
       </body>
