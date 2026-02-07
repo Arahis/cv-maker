@@ -70,13 +70,12 @@ export class VNodeBuilder {
     { startPage: number; endPage: number; chunksByPage: string[] }
   >();
 
-  // ✅ NEW: правила “убрать spacing” на DOM-элементах по страницам
   public readonly spacingRules = new Map<Node, SpacingRules>();
 
   private readonly eps = 0.1;
 
   constructor(
-    private readonly rootContainer: HTMLElement, // ✅ нужно, чтобы знать до куда подниматься
+    private readonly rootContainer: HTMLElement,
     private readonly workingPageHeight: number,
     private readonly getBottom: (n: Node) => number,
     private readonly getTop: (n: Node) => number,
@@ -98,10 +97,11 @@ export class VNodeBuilder {
     const nodeTop = this.getTop(domNode);
     const nodeBottom = this.getBottom(domNode);
 
-    const startPage = Math.floor((nodeTop + this.eps) / this.workingPageHeight);
-    const endPage = Math.floor(
-      (nodeBottom - this.eps) / this.workingPageHeight,
-    );
+    const rawStart = Math.floor((nodeTop + this.eps) / this.workingPageHeight);
+    const rawEnd = Math.floor((nodeBottom - this.eps) / this.workingPageHeight);
+
+    const startPage = Math.max(0, rawStart);
+    const endPage = Math.max(startPage, rawEnd);
 
     return { nodeTop, nodeBottom, startPage, endPage, isText };
   }
@@ -121,33 +121,24 @@ export class VNodeBuilder {
     from: number,
     to: number,
   ) {
-    if (to < from) return; // пустой диапазон
+    if (to < from) return;
     const rules = this.ensureSpacingRules(domNode);
     rules[type].push({ from, to });
   }
 
-  /**
-   * ✅ Убираем spacing на всех предках от textNode.parentElement до rootContainer
-   * - bottom: только на startPage (и до endPage-1)
-   * - top:    со startPage+1 до endPage
-   */
   private markSpacingForTextSplit(textNode: Text, meta: LeafMeta) {
     const start = meta.startPage;
     const end = meta.endPage;
 
-    // bottom должно исчезнуть на странице, где происходит разрыв “вниз”
     const bottomFrom = start;
     const bottomTo = end - 1;
 
-    // top должно исчезнуть на страницах, где продолжается текст “сверху”
     const topFrom = start + 1;
     const topTo = end;
 
-    // поднимаемся вверх по DOM
     let cur: Node | null = textNode.parentNode;
 
     while (cur) {
-      // только элементы имеют смысл как “обёртки”
       if (cur.nodeType === Node.ELEMENT_NODE) {
         this.addSpacingRange(cur, "bottom", bottomFrom, bottomTo);
         this.addSpacingRange(cur, "top", topFrom, topTo);
@@ -173,7 +164,7 @@ export class VNodeBuilder {
       const meta = this.computeLeafMeta(domNode, isTextNode);
       this.leafMeta.set(domNode, meta);
 
-      // ✅ split text once + mark spacing rules
+      // split text once + mark spacing rules
       if (isTextNode && meta.startPage !== meta.endPage) {
         const textDomNode = domNode as Text;
 
@@ -201,7 +192,7 @@ export class VNodeBuilder {
           chunksByPage: normalized,
         });
 
-        // ✅ NEW: spacing removal rules up to rootContainer
+        // spacing removal rules up to rootContainer
         this.markSpacingForTextSplit(textDomNode, meta);
       }
     }
@@ -219,7 +210,7 @@ export class VNodeBuilder {
 
 /* =========================================================
    PageRenderer
-   - рендерит одну страницу pageIndex
+   - renders one page pageIndex
    - uses leafMeta visibility
    - uses precomputed textChunks
    - columns: one-pass, preserves wrappers
@@ -308,7 +299,7 @@ export class PageRenderer {
       return vNode.text ?? null;
     }
 
-    // ✅ COLUMNS CONTAINER (ONE PASS)
+    // COLUMNS CONTAINER (ONE PASS)
     if (isColumnsContainerVNode(vNode)) {
       return this.renderColumnsContainer(vNode, pageIndex);
     }
@@ -400,7 +391,6 @@ export class PageRenderer {
   ): ReactNode {
     this.keyCounter += 1;
 
-    // исходные атрибуты
     const reactProps = convertDomAttributesToProps({
       attributes: Object.entries(vNode.props ?? {}).map(([name, value]) => ({
         name,
@@ -408,7 +398,6 @@ export class PageRenderer {
       })),
     } as any);
 
-    // ✅ добавляем page-specific data-remove-spacing-*
     const mergedProps = { ...reactProps, ...extraProps, key: this.keyCounter };
 
     if (VOID_TAGS.has(vNode.type)) {
