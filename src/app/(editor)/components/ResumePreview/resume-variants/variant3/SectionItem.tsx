@@ -25,7 +25,7 @@ const SectionItem = <T,>({
     <Paginate.Section className={className}>
       <p className="mb-6 text-lg font-bold tracking-wider uppercase">{title}</p>
 
-      <div className={cn("gap-4", columns && "grid grid-cols-2")}>
+      <div className={cn(columns && "grid grid-cols-2 gap-4")}>
         {items.map((item, idx) => (
           <React.Fragment key={idx}>{renderItem(item, idx)}</React.Fragment>
         ))}

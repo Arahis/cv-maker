@@ -116,7 +116,7 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
   const { educations, skills, languages, customSections } = data;
 
   return (
-    <Paginate.Section className="grid gap-8">
+    <Paginate.Section className="space-y-8">
       <Education items={educations} />
 
       <Skills items={skills} />
