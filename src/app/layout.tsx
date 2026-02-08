@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit, Source_Code_Pro, Cantata_One } from "next/font/google";
 import "./globals.css";
 import "./main.css";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,6 +53,8 @@ export default function RootLayout({
         className={`${inter.className} ${outfit.variable} ${tech.variable} ${cantata.variable} antialiased`}
       >
         {children}
+
+        <GoogleAnalytics />
       </body>
     </html>
   );
