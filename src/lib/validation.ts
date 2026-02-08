@@ -85,6 +85,20 @@ export const languagesSchema = z.object({
 
 export type LanguagesForm = z.infer<typeof languagesSchema>;
 
+export const socialLinksSchema = z.object({
+  socialLinks: z
+    .array(
+      z.object({
+        id: z.string(),
+        linkName: optionalString,
+        linkAddress: optionalString,
+      }),
+    )
+    .optional(),
+});
+
+export type SocialLinksForm = z.infer<typeof socialLinksSchema>;
+
 const skillItemSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Skill name must be at least 2 characters"),
@@ -134,6 +148,7 @@ export const resumeSchema = z.object({
   ...skillsSchema.shape,
   ...summarySchema.shape,
   ...languagesSchema.shape,
+  ...socialLinksSchema.shape,
   ...customSectionSchema.shape,
 });
 

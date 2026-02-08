@@ -97,7 +97,7 @@ const Languages = () => {
           })
         }
       >
-        Add language
+        Add Language
       </Button>
     </div>
   );

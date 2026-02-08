@@ -22,4 +22,5 @@ export const defaultFormValues = {
   skills: { technical: [], personal: [] },
   summary: "",
   customSections: [],
+  socialLinks: [],
 };
