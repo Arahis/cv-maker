@@ -1,4 +1,5 @@
 import Logo from "@/assets/logo";
+import { trackEvent } from "@/components/analytics/events";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -29,6 +30,9 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="link-hover mr-2 hidden px-4 py-2 font-bold md:block"
+            onClick={() =>
+              trackEvent("donate_click", { btn_location: "navbar" })
+            }
           >
             Support us
           </a>

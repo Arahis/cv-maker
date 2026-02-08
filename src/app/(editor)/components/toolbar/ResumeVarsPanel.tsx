@@ -1,3 +1,4 @@
+import { trackEvent } from "@/components/analytics/events";
 import { cn } from "@/lib/utils";
 import { ResumeForm } from "@/lib/validation";
 
@@ -96,6 +97,7 @@ const ResumeVarsPanel = ({
     getScaleForA4(0.2);
 
   const onVarChange = (key: string) => {
+    trackEvent("switch_var", { var: key });
     onChange(key);
   };
 

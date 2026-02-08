@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import { trackEvent } from "@/components/analytics/events";
 
 const ResumePreviewWrapper = ({
   resumeId,
@@ -27,6 +28,7 @@ const ResumePreviewWrapper = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
     contentRef,
+    onAfterPrint: () => trackEvent("printed", { variant: resumeVar }),
   });
 
   const onResumeVarChange = async (newVar: ResumeVariantKey) => {
@@ -38,7 +40,8 @@ const ResumePreviewWrapper = ({
     }
   };
 
-  const handlePrintClick = () => {
+  const handlePrintClick = (device: "web" | "touch") => {
+    trackEvent("print_click", { device });
     if (isDesktopLike()) {
       reactToPrintFn();
       return;
@@ -59,7 +62,7 @@ const ResumePreviewWrapper = ({
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
           <div className="relative flex overflow-y-auto">
             <Toolbar
-              onPrintClick={handlePrintClick}
+              onPrintClick={() => handlePrintClick("touch")}
               onResumeVarChange={onResumeVarChange}
               resumeVariants={resumeVariants}
               variant={resumeVar || "variant1"}
@@ -79,7 +82,7 @@ const ResumePreviewWrapper = ({
   return (
     <div className="relative flex w-1/2 overflow-y-auto">
       <Toolbar
-        onPrintClick={handlePrintClick}
+        onPrintClick={() => handlePrintClick("web")}
         onResumeVarChange={onResumeVarChange}
         resumeVariants={resumeVariants}
         variant={resumeVar || "variant1"}
