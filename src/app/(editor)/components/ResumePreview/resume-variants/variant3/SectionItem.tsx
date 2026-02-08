@@ -22,7 +22,7 @@ const SectionItem = <T,>({
   }
 
   return (
-    <Paginate.Section className={className}>
+    <Paginate.Section className={cn("w-full", className)}>
       <p className="mb-6 text-lg font-bold tracking-wider uppercase">{title}</p>
 
       <div className={cn(columns && "grid grid-cols-2 gap-4")}>
