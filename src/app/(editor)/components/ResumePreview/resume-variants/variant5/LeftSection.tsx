@@ -40,28 +40,36 @@ const Contacts = ({
 }: {
   items: Pick<ResumeForm, "phone" | "city" | "country" | "email">[];
 }) => {
+  if (!items?.length) return;
+
   return (
     <SectionItem
       align="right"
       title="Contacts"
       renderItem={({ phone, city, country, email }) => (
         <div className="space-y-2">
-          <div className="flex justify-end gap-2">
-            <p className="text-[16px]">{phone}</p>
-            <Phone className="w-4" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <p className="text-[16px] break-all">{email}</p>
-            <Mail className="w-4" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <p className="text-[16px] break-all">
-              {country}
-              {country && city && ", "}
-              {city}
-            </p>
-            <MapPin className="w-4" />
-          </div>
+          {phone && (
+            <div className="flex justify-end gap-2">
+              <p className="text-[16px]">{phone}</p>
+              <Phone className="w-4" />
+            </div>
+          )}
+          {email && (
+            <div className="flex justify-end gap-2">
+              <p className="text-[16px] break-all">{email}</p>
+              <Mail className="w-4" />
+            </div>
+          )}
+          {(country || city) && (
+            <div className="flex justify-end gap-2">
+              <p className="text-[16px] break-all">
+                {country}
+                {country && city && ", "}
+                {city}
+              </p>
+              <MapPin className="w-4" />
+            </div>
+          )}
         </div>
       )}
       items={items}
@@ -161,9 +169,14 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
     socialLinks,
   } = data;
 
+  const hasAnyValue = [phone, country, city, email].some(
+    (v) => typeof v === "string" && v.trim() !== "",
+  );
+  const contacts = hasAnyValue ? [{ phone, country, city, email }] : [];
+
   return (
     <Paginate.Section className="w-[30%] space-y-12 pr-6">
-      <Contacts items={[{ phone, country, city, email }]} />
+      <Contacts items={contacts} />
 
       <Skills skills={data.skills} />
 

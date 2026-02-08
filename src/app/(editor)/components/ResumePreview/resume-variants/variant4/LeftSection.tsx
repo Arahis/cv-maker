@@ -40,29 +40,39 @@ const Contacts = ({
 }: {
   items: Pick<ResumeForm, "phone" | "city" | "country" | "email">[];
 }) => {
+  if (!items?.length) return;
+
   return (
     <SectionItem
       title="Contacts"
-      renderItem={({ phone, city, country, email }) => (
-        <div className="space-y-2">
-          <div className="flex">
-            <Phone className="mr-2 w-4" />
-            <p className="text-[16px]">{phone}</p>
+      renderItem={({ phone, city, country, email }) => {
+        return (
+          <div className="space-y-2">
+            {phone && (
+              <div className="flex">
+                <Phone className="mr-2 w-4" />
+                <p className="text-[16px]">{phone}</p>
+              </div>
+            )}
+            {email && (
+              <div className="flex">
+                <Mail className="mr-2 w-4" />
+                <p className="text-[16px] break-all">{email}</p>
+              </div>
+            )}
+            {(country || city) && (
+              <div className="flex">
+                <MapPin className="mr-2 w-4" />
+                <p className="text-[16px] break-all">
+                  {country}
+                  {country && city && ", "}
+                  {city}
+                </p>
+              </div>
+            )}
           </div>
-          <div className="flex">
-            <Mail className="mr-2 w-4" />
-            <p className="text-[16px] break-all">{email}</p>
-          </div>
-          <div className="flex">
-            <MapPin className="mr-2 w-4" />
-            <p className="text-[16px] break-all">
-              {country}
-              {country && city && ", "}
-              {city}
-            </p>
-          </div>
-        </div>
-      )}
+        );
+      }}
       items={items}
     />
   );
@@ -188,9 +198,14 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
     socialLinks,
   } = data;
 
+  const hasAnyValue = [phone, country, city, email].some(
+    (v) => typeof v === "string" && v.trim() !== "",
+  );
+  const contacts = hasAnyValue ? [{ phone, country, city, email }] : [];
+
   return (
     <Paginate.Section className="w-[30%] space-y-8 pr-6 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
-      <Contacts items={[{ phone, country, city, email }]} />
+      <Contacts items={contacts} />
 
       <Education items={educations} />
 
