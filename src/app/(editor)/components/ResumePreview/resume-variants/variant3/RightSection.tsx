@@ -34,6 +34,33 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   );
 };
 
+const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
+  if (!items?.length) return;
+
+  return (
+    <SectionItem
+      title="Social Links"
+      items={items}
+      renderItem={(item) => {
+        if (!item.linkName) return;
+        return (
+          <React.Fragment key={item.id}>
+            <p className="font-bold">{item.linkName}</p>
+            <a
+              href={item.linkAddress}
+              className="break-all"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {item.linkAddress}
+            </a>
+          </React.Fragment>
+        );
+      }}
+    />
+  );
+};
+
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
   if (!items?.length) return;
 
@@ -86,11 +113,13 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
 };
 
 const RightSection = ({ data }: { data: ResumeForm }) => {
-  const { educations, languages, customSections } = data;
+  const { educations, languages, customSections, socialLinks } = data;
 
   return (
     <Paginate.Section className="w-[30%] space-y-8 py-8 pl-6">
       <Education items={educations || []} />
+
+      <SocialLinks items={socialLinks} />
 
       <Languages items={languages} />
 
