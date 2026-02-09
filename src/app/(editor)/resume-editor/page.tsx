@@ -3,8 +3,12 @@ import ResumeEditorPageClient from "./ResumeEditorPageClient";
 export const runtime = "edge";
 
 export const metadata = {
-  title: "Editor",
-  description: "Create and edit your resumes here",
+  title: "Resume editor",
+  description: "Create and edit your resume.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const Page = async () => {

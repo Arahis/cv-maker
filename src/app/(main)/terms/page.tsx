@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Terms of Service | Cvoop",
+  title: "Terms of Service",
   description:
     "These Terms of Service describe the rules and conditions for using the Cvoop website and resume builder.",
   openGraph: {

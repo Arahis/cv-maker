@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Privacy Policy | Cvoop",
+  title: "Privacy Policy",
   description:
     "Learn how Cvoop handles your data. We do not require registration and store resume data locally on your device. Privacy-first resume builder.",
   openGraph: {
