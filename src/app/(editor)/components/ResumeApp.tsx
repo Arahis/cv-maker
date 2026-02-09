@@ -8,7 +8,7 @@ import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
 import { loadResume } from "@/lib/indexedDB";
-import { ResumeVariantKey } from "@/components/resume/variants";
+import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 
 const useResumeForm = () =>
@@ -20,7 +20,7 @@ const useResumeForm = () =>
 
 const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   const [valid, setValid] = useState<null | boolean>(null);
-  const [resumeVariant, setResumeVariant] = useState<ResumeVariantKey>();
+  const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
 
   // Check if the resume exists in IndexedDB
@@ -33,7 +33,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
       const resume = await loadResume(resumeId);
       if (resume) {
         f.reset(resume.data);
-        setResumeVariant(resume.variant);
+        setResumeTemplate(resume.template);
       }
       setValid(!!resume);
     };
@@ -53,7 +53,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
 
         <ResumePreviewWrapper
           resumeId={resumeId}
-          resumeVariant={resumeVariant}
+          resumeTemplate={resumeTemplate}
         />
       </Form>
     </div>

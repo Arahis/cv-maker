@@ -4,9 +4,9 @@ import { Paginate } from "../../Paginate";
 import HeaderSection from "./HeaderSection";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
-import { ResumeVariantProps } from "@/lib/types/resume/variants.types";
+import { ResumeTemplateProps } from "@/lib/types/resume/template.types";
 
-export const ResumeVariant2 = forwardRef<HTMLDivElement, ResumeVariantProps>(
+export const ResumeTemplate2 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
   ({ data }, ref) => {
     return (
       <Paginate ref={ref}>
@@ -28,4 +28,4 @@ export const ResumeVariant2 = forwardRef<HTMLDivElement, ResumeVariantProps>(
   },
 );
 
-ResumeVariant2.displayName = "ResumeVariant2";
+ResumeTemplate2.displayName = "ResumeTemplate2";

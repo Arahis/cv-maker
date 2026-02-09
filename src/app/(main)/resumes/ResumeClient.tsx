@@ -6,7 +6,7 @@ import { deleteResume, loadAllResumes, ResumeRecord } from "@/lib/indexedDB";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { resumeVariants } from "@/components/resume/variants";
+import { resumeTemplates } from "@/components/templates/components";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -73,7 +73,7 @@ const ResumeClient = () => {
   return (
     <div className="mx-auto flex w-[60%] flex-wrap justify-center gap-4">
       {createdResumes.map((r) => {
-        const Variant = resumeVariants[r.variant];
+        const Template = resumeTemplates[r.template || "template1"];
 
         return (
           <div key={r.id}>
@@ -94,7 +94,7 @@ const ResumeClient = () => {
                     className="origin-top-left transform text-left"
                     style={{ width: width, height: height, scale: scale }}
                   >
-                    <Variant data={r.data} />
+                    <Template data={r.data} />
                   </div>
                 </div>
               </div>
