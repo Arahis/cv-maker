@@ -1,5 +1,4 @@
-import { ResumeVariantKey, resumeVariants } from "@/components/resume/variants";
-import { saveResumeVariant } from "@/lib/indexedDB";
+import { saveResumeTemplate } from "@/lib/indexedDB";
 import { isDesktopLike } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -14,27 +13,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { trackEvent } from "@/components/analytics/events";
+import {
+  ResumeTemplateKey,
+  resumeTemplates,
+} from "@/components/templates/components";
 
 const ResumePreviewWrapper = ({
   resumeId,
-  resumeVariant,
+  resumeTemplate,
 }: {
   resumeId: string;
-  resumeVariant: ResumeVariantKey | undefined;
+  resumeTemplate: ResumeTemplateKey | undefined;
 }) => {
-  const [resumeVar, setResumeVar] = useState<ResumeVariantKey | undefined>(
-    resumeVariant,
+  const [template, setTemplate] = useState<ResumeTemplateKey | undefined>(
+    resumeTemplate,
   );
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({
     contentRef,
-    onAfterPrint: () => trackEvent("printed", { variant: resumeVar }),
+    onAfterPrint: () => trackEvent("printed", { variant: template }),
   });
 
-  const onResumeVarChange = async (newVar: ResumeVariantKey) => {
-    setResumeVar(newVar);
+  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
+    setTemplate(newVar);
     try {
-      await saveResumeVariant(resumeId, newVar);
+      await saveResumeTemplate(resumeId, newVar);
     } catch (e) {
       console.error("Failed to save resume variant", e);
     }
@@ -63,15 +66,15 @@ const ResumePreviewWrapper = ({
           <div className="relative flex overflow-y-auto">
             <Toolbar
               onPrintClick={() => handlePrintClick("touch")}
-              onResumeVarChange={onResumeVarChange}
-              resumeVariants={resumeVariants}
-              variant={resumeVar || "variant1"}
+              onResumeTemplateChange={onResumeTemplateChange}
+              resumeTemplates={resumeTemplates}
+              template={template || "template1"}
             />
             <ResumePreview
-              key={resumeVar}
+              key={template}
               resumeId={resumeId}
               ref={contentRef}
-              resumeComponent={resumeVariants[resumeVar || "variant1"]}
+              resumeComponent={resumeTemplates[template || "template1"]}
             />
           </div>
         </DrawerContent>
@@ -83,15 +86,15 @@ const ResumePreviewWrapper = ({
     <div className="relative flex w-1/2 overflow-y-auto">
       <Toolbar
         onPrintClick={() => handlePrintClick("web")}
-        onResumeVarChange={onResumeVarChange}
-        resumeVariants={resumeVariants}
-        variant={resumeVar || "variant1"}
+        onResumeTemplateChange={onResumeTemplateChange}
+        resumeTemplates={resumeTemplates}
+        template={template || "template1"}
       />
       <ResumePreview
-        key={resumeVar}
+        key={template}
         resumeId={resumeId}
         ref={contentRef}
-        resumeComponent={resumeVariants[resumeVar || "variant1"]}
+        resumeComponent={resumeTemplates[template || "template1"]}
       />
     </div>
   );

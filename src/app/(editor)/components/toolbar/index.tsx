@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import ResumeVarsPanel from "./ResumeVarsPanel";
+import ResumeTemplatesPanel from "./ResumeTemplatesPanel";
 
 const ToolbarTooltip = ({
   text = "Click Me!",
@@ -31,14 +31,14 @@ const ToolbarTooltip = ({
 
 const Toolbar = ({
   onPrintClick,
-  onResumeVarChange,
-  resumeVariants,
-  variant,
+  onResumeTemplateChange,
+  resumeTemplates,
+  template,
 }: {
   onPrintClick: () => void;
-  onResumeVarChange: (resumeVar: any) => void;
-  resumeVariants: Record<string, React.ElementType>;
-  variant: string;
+  onResumeTemplateChange: (template: any) => void;
+  resumeTemplates: Record<string, React.ElementType>;
+  template: string;
 }) => {
   return (
     <div className="absolute z-10 flex h-full items-end">
@@ -64,10 +64,10 @@ const Toolbar = ({
             avoidCollisions={false}
             className="pointer-events-auto z-50 w-max max-w-(--radix-popover-content-available-width) overflow-auto overflow-x-auto"
           >
-            <ResumeVarsPanel
-              variant={variant}
-              onChange={onResumeVarChange}
-              resumeVariants={resumeVariants}
+            <ResumeTemplatesPanel
+              template={template}
+              onChange={onResumeTemplateChange}
+              resumeTemplates={resumeTemplates}
             />
           </PopoverContent>
         </Popover>

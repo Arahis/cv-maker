@@ -2,21 +2,17 @@ import { forwardRef } from "react";
 
 import { Paginate } from "../../Paginate";
 
-import { ResumeVariantProps } from "@/lib/types/resume/variants.types";
+import { ResumeTemplateProps } from "@/lib/types/resume/template.types";
 import HeaderSection from "./HeaderSection";
 import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
 
-export const ResumeVariant4 = forwardRef<HTMLDivElement, ResumeVariantProps>(
+export const ResumeTemplate5 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
   ({ data, photo }, ref) => {
     return (
       <Paginate ref={ref} className="px-4">
         <HeaderSection data={data} photo={photo} />
-
-        <Paginate.Columns
-          className="columns flex w-full pt-12"
-          datatype="main-cv-info"
-        >
+        <Paginate.Columns className="flex w-full" datatype="main-cv-info">
           <LeftSection data={data} />
           <RightSection data={data} />
         </Paginate.Columns>
@@ -25,4 +21,4 @@ export const ResumeVariant4 = forwardRef<HTMLDivElement, ResumeVariantProps>(
   },
 );
 
-ResumeVariant4.displayName = "ResumeVariant4";
+ResumeTemplate5.displayName = "ResumeTemplate5";

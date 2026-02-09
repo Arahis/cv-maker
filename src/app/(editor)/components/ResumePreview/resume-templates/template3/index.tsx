@@ -2,13 +2,13 @@ import { forwardRef } from "react";
 
 import { Paginate } from "../../Paginate";
 
-import { ResumeVariantProps } from "@/lib/types/resume/variants.types";
+import { ResumeTemplateProps } from "@/lib/types/resume/template.types";
 import HeaderSection from "./HeaderSection";
 import Summary from "./Summary";
 import RightSection from "./RightSection";
 import LeftSection from "./LeftSection";
 
-export const ResumeVariant3 = forwardRef<HTMLDivElement, ResumeVariantProps>(
+export const ResumeTemplate3 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
   ({ data, photo }, ref) => {
     return (
       <Paginate ref={ref} className="px-4">
@@ -27,4 +27,4 @@ export const ResumeVariant3 = forwardRef<HTMLDivElement, ResumeVariantProps>(
   },
 );
 
-ResumeVariant3.displayName = "ResumeVariant3";
+ResumeTemplate3.displayName = "ResumeTemplate3";

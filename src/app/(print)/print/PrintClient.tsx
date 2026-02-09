@@ -1,6 +1,6 @@
 "use client";
 
-import { resumeVariants } from "@/components/resume/variants";
+import { resumeTemplates } from "@/components/templates/components";
 import { loadResume, ResumeRecord } from "@/lib/indexedDB";
 import { notFound, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
@@ -56,11 +56,11 @@ const PrintClient = () => {
   if (resumeData === undefined) return <p>Loading...</p>;
   if (!resumeData || !id) return notFound();
 
-  const Variant = resumeVariants[resumeData.variant];
+  const Template = resumeTemplates[resumeData.template || "template1"];
 
   return (
     <ResumeWrapperDOM>
-      <Variant
+      <Template
         data={resumeData.data}
         photo={resumeData.media.avatar?.cropped}
       />

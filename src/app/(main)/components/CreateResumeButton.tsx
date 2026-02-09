@@ -4,11 +4,14 @@ import { useState, JSX } from "react";
 import { defaultFormValues } from "@/lib/formUtils";
 import { createResume } from "@/lib/indexedDB";
 import { useRouter } from "next/navigation";
+import { TemplateKey } from "@/components/templates/previews";
 
 const CreateResumeButton = ({
   button,
+  template = "template1",
 }: {
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
+  template?: TemplateKey;
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +23,7 @@ const CreateResumeButton = ({
     const resumeId = crypto.randomUUID();
 
     try {
-      await createResume(resumeId, defaultFormValues);
+      await createResume(resumeId, defaultFormValues, template);
       router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
     } catch {
       alert("Error while creating resume. Please try again.");

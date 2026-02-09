@@ -84,14 +84,14 @@ const getScaleForA4 = (scale: number) => {
   };
 };
 
-const ResumeVarsPanel = ({
+const ResumeTemplatesPanel = ({
   onChange,
-  resumeVariants,
-  variant,
+  resumeTemplates,
+  template,
 }: {
-  onChange: (resumeVar: any) => void;
-  resumeVariants: Record<string, React.ElementType>;
-  variant: string;
+  onChange: (template: any) => void;
+  resumeTemplates: Record<string, React.ElementType>;
+  template: string;
 }) => {
   const { scaledWidth, scaledHeight, width, height, scale } =
     getScaleForA4(0.2);
@@ -103,12 +103,12 @@ const ResumeVarsPanel = ({
 
   return (
     <div className="flex gap-2">
-      {Object.entries(resumeVariants).map(([key, Variant]) => (
+      {Object.entries(resumeTemplates).map(([key, Template]) => (
         <div
           key={key}
           className={cn(
             "flex rounded-md border p-1 hover:border-blue-300",
-            variant === key && "border-2 border-blue-300",
+            template === key && "border-2 border-blue-300",
           )}
         >
           <div
@@ -120,7 +120,7 @@ const ResumeVarsPanel = ({
               className="pointer-events-none origin-top-left transform"
               style={{ width: width, height: height, scale }}
             >
-              <Variant data={resumeMock} />
+              <Template data={resumeMock} />
             </div>
           </div>
         </div>
@@ -129,4 +129,4 @@ const ResumeVarsPanel = ({
   );
 };
 
-export default ResumeVarsPanel;
+export default ResumeTemplatesPanel;
