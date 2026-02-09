@@ -193,6 +193,18 @@
     display: none;
   }
 
+  .policy_page h2 {
+    @apply mb-4 text-2xl font-semibold;
+  }
+
+  .policy_page ol {
+    @apply list-inside py-2;
+  }
+
+  .policy_page li {
+    @apply ml-4 list-disc text-base leading-relaxed;
+  }
+
   :root {
     --brand-gradient: linear-gradient(
       45deg,
