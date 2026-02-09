@@ -31,15 +31,16 @@ const cantata = Cantata_One({
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Free resume builder",
-    template: "%s | Free resume builder",
+    default: "Cvoop – Free Resume Builder",
+    template: "%s | Cvoop",
   },
+  description:
+    "Create a professional resume in minutes — simple, fast, and free.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  description: "Free resume templates to build your coolest resume Now.",
 };
 
 export default function RootLayout({
