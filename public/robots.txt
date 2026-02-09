@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block app-like/private areas
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://cvoop.com/sitemap.xml

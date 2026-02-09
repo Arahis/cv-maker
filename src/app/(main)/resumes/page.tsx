@@ -3,8 +3,13 @@ import ResumeClient from "./ResumeClient";
 import CreateNewResumeButton from "./CreateNewResumeButton";
 
 export const metadata: Metadata = {
-  title: "List of resumes",
-  description: "Manage your resumes here",
+  title: "Your resumes",
+  description: "Manage your resumes.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
 };
 
 const Page = () => {
