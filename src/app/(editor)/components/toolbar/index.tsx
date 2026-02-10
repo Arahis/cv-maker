@@ -32,12 +32,10 @@ const ToolbarTooltip = ({
 const Toolbar = ({
   onPrintClick,
   onResumeTemplateChange,
-  resumeTemplates,
   template,
 }: {
   onPrintClick: () => void;
   onResumeTemplateChange: (template: any) => void;
-  resumeTemplates: Record<string, React.ElementType>;
   template: string;
 }) => {
   return (
@@ -67,7 +65,6 @@ const Toolbar = ({
             <ResumeTemplatesPanel
               template={template}
               onChange={onResumeTemplateChange}
-              resumeTemplates={resumeTemplates}
             />
           </PopoverContent>
         </Popover>

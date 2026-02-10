@@ -67,7 +67,6 @@ const ResumePreviewWrapper = ({
             <Toolbar
               onPrintClick={() => handlePrintClick("touch")}
               onResumeTemplateChange={onResumeTemplateChange}
-              resumeTemplates={resumeTemplates}
               template={template || "template1"}
             />
             <ResumePreview
@@ -87,7 +86,6 @@ const ResumePreviewWrapper = ({
       <Toolbar
         onPrintClick={() => handlePrintClick("web")}
         onResumeTemplateChange={onResumeTemplateChange}
-        resumeTemplates={resumeTemplates}
         template={template || "template1"}
       />
       <ResumePreview

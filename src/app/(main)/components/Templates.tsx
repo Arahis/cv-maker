@@ -36,13 +36,14 @@ const Templates = () => {
               button={(onClick) => (
                 <div
                   onClick={() => handleClick(onClick, key)}
-                  className="cursor-pointer font-semibold"
+                  className="cursor-pointer"
                 >
                   <div className="relative aspect-794/1123 w-35 cursor-pointer overflow-hidden rounded-md border-2 hover:border-blue-300 sm:w-40 md:w-50">
                     <Image
                       src={src}
                       alt={`Template preview ${key}`}
                       fill
+                      sizes="(max-width: 640px) 140px, (max-width: 768px) 160px, 200px"
                       className="object-cover"
                     />
                   </div>
