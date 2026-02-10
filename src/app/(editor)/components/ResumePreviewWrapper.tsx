@@ -1,7 +1,5 @@
 import { saveResumeTemplate } from "@/lib/indexedDB";
 import { isDesktopLike } from "@/lib/utils";
-import { useRef, useState } from "react";
-import { useReactToPrint } from "react-to-print";
 import Toolbar from "./toolbar";
 import ResumePreview from "./ResumePreview";
 import {
@@ -12,7 +10,6 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { trackEvent } from "@/components/analytics/events";
 import {
   ResumeTemplateKey,
   resumeTemplates,
@@ -21,36 +18,23 @@ import {
 const ResumePreviewWrapper = ({
   resumeId,
   resumeTemplate,
+  ref,
+  onPrintClick,
+  setResumeTemplate,
 }: {
   resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
+  ref: React.RefObject<HTMLDivElement | null>;
+  onPrintClick: () => void;
+  setResumeTemplate: (t: ResumeTemplateKey) => void;
 }) => {
-  const [template, setTemplate] = useState<ResumeTemplateKey | undefined>(
-    resumeTemplate,
-  );
-  const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({
-    contentRef,
-    onAfterPrint: () => trackEvent("printed", { variant: template }),
-  });
-
   const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
-    setTemplate(newVar);
+    setResumeTemplate(newVar);
     try {
       await saveResumeTemplate(resumeId, newVar);
     } catch (e) {
       console.error("Failed to save resume variant", e);
     }
-  };
-
-  const handlePrintClick = (device: "web" | "touch") => {
-    trackEvent("print_click", { device });
-    if (isDesktopLike()) {
-      reactToPrintFn();
-      return;
-    }
-    const url = `/print?id=${encodeURIComponent(resumeId)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (!isDesktopLike()) {
@@ -65,15 +49,15 @@ const ResumePreviewWrapper = ({
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
           <div className="relative flex overflow-y-auto">
             <Toolbar
-              onPrintClick={() => handlePrintClick("touch")}
+              onPrintClick={onPrintClick}
               onResumeTemplateChange={onResumeTemplateChange}
-              template={template || "template1"}
+              template={resumeTemplate || "template1"}
             />
             <ResumePreview
-              key={template}
+              key={resumeTemplate}
               resumeId={resumeId}
-              ref={contentRef}
-              resumeComponent={resumeTemplates[template || "template1"]}
+              ref={ref}
+              resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
             />
           </div>
         </DrawerContent>
@@ -84,15 +68,15 @@ const ResumePreviewWrapper = ({
   return (
     <div className="relative flex w-1/2 overflow-y-auto">
       <Toolbar
-        onPrintClick={() => handlePrintClick("web")}
+        onPrintClick={onPrintClick}
         onResumeTemplateChange={onResumeTemplateChange}
-        template={template || "template1"}
+        template={resumeTemplate || "template1"}
       />
       <ResumePreview
-        key={template}
+        key={resumeTemplate}
         resumeId={resumeId}
-        ref={contentRef}
-        resumeComponent={resumeTemplates[template || "template1"]}
+        ref={ref}
+        resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
       />
     </div>
   );

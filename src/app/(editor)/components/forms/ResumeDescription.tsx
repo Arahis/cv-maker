@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormField,
@@ -9,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
 
-const ResumeDescription = ({}) => {
+const ResumeDescription = ({ onPrintClick }: { onPrintClick: () => void }) => {
   const { control } = useFormContext();
 
   return (
@@ -19,7 +20,7 @@ const ResumeDescription = ({}) => {
         <p>Give it a name to keep things organized.</p>
         <p>This won’t be visible to employers.</p>
       </div>
-      <div className="grid gap-4 px-12">
+      <div className="grid gap-4 md:px-12">
         <FormField
           control={control}
           name="title"
@@ -55,9 +56,12 @@ const ResumeDescription = ({}) => {
         <p className="text-lg font-semibold">
           That’s it — your resume is ready to print or save as PDF.
         </p>
-        <p className="text-sm text-gray-400">
+        <p className="mb-4 text-sm text-gray-400">
           You can always come back and make changes later.
         </p>
+        <Button onClick={onPrintClick} className="cursor-pointer">
+          Print / Save as PDF
+        </Button>
       </div>
     </div>
   );

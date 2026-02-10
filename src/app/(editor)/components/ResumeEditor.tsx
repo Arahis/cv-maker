@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import PersonalInfo from "./forms/personalInfo";
@@ -20,42 +20,42 @@ import { cn } from "@/lib/utils";
 const resumeSections: {
   title: string;
   slug: string;
-  item: ReactNode;
+  Component: React.ComponentType<any>;
 }[] = [
   {
     title: "Personal information",
     slug: "personal-info",
-    item: <PersonalInfo />,
+    Component: PersonalInfo,
   },
   {
     title: "Summary",
     slug: "summary",
-    item: <Summary />,
+    Component: Summary,
   },
   {
     title: "Work experience",
     slug: "work-experience",
-    item: <WorkExperience />,
+    Component: WorkExperience,
   },
   {
     title: "Education",
     slug: "education",
-    item: <Education />,
+    Component: Education,
   },
   {
     title: "Skills",
     slug: "skills",
-    item: <Skills />,
+    Component: Skills,
   },
   {
     title: "Other Info",
     slug: "other-info",
-    item: <OtherInfo />,
+    Component: OtherInfo,
   },
   {
     title: "Finalize",
     slug: "finalize",
-    item: <ResumeDescription />,
+    Component: ResumeDescription,
   },
 ];
 
@@ -108,11 +108,19 @@ const ResumeStepsControl = ({
   );
 };
 
-const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
+const ResumeEditor = ({
+  resumeId,
+  onPrintClick,
+}: {
+  resumeId: string;
+  onPrintClick: () => void;
+}) => {
   const f = useFormContext<ResumeForm>();
   const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
+
+  const { slug, Component } = resumeSections[currentEditorStep];
 
   const handleGoToNextItem = () => {
     if (currentEditorStep === sectionTitles.length - 1) return;
@@ -141,7 +149,7 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
       />
       <ResumeEditorProvider value={{ resumeId }}>
         <div className="rounded-2xl border-2 border-gray-100 p-6">
-          {resumeSections[currentEditorStep].item}
+          <Component {...(slug === "finalize" ? { onPrintClick } : {})} />
         </div>
       </ResumeEditorProvider>
     </div>
