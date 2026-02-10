@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import PersonalInfo from "./forms/personalInfo";
@@ -20,42 +20,42 @@ import { cn } from "@/lib/utils";
 const resumeSections: {
   title: string;
   slug: string;
-  item: ReactNode;
+  Component: React.ComponentType<any>;
 }[] = [
   {
     title: "Personal information",
     slug: "personal-info",
-    item: <PersonalInfo />,
+    Component: PersonalInfo,
   },
   {
     title: "Summary",
     slug: "summary",
-    item: <Summary />,
+    Component: Summary,
   },
   {
     title: "Work experience",
     slug: "work-experience",
-    item: <WorkExperience />,
+    Component: WorkExperience,
   },
   {
     title: "Education",
     slug: "education",
-    item: <Education />,
+    Component: Education,
   },
   {
     title: "Skills",
     slug: "skills",
-    item: <Skills />,
+    Component: Skills,
   },
   {
     title: "Other Info",
     slug: "other-info",
-    item: <OtherInfo />,
+    Component: OtherInfo,
   },
   {
     title: "Finalize",
     slug: "finalize",
-    item: <ResumeDescription />,
+    Component: ResumeDescription,
   },
 ];
 
@@ -73,38 +73,54 @@ const ResumeStepsControl = ({
   setStep,
   setNextStep,
   setPrevStep,
-}: ResumeStepsControlProps) => (
-  <div className="mb-6">
-    <ResumeSteps
-      items={titles}
-      currentStep={currentStep}
-      setItem={setStep}
-      className="mb-4"
-    />
-    <div className="flex justify-between">
-      <Button
-        variant="secondary"
-        onClick={setPrevStep}
-        className={cn(currentStep === 0 && "opacity-0")}
-      >
-        Prev Step
-      </Button>
-      <Button
-        variant="secondary"
-        onClick={setNextStep}
-        className={cn(currentStep === titles.length - 1 && "opacity-0")}
-      >
-        Next Step
-      </Button>
-    </div>
-  </div>
-);
+}: ResumeStepsControlProps) => {
+  const isFinalize = currentStep === titles.length - 2;
 
-const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
+  return (
+    <div className="mb-6">
+      <ResumeSteps
+        items={titles}
+        currentStep={currentStep}
+        setItem={setStep}
+        className="mb-4"
+      />
+      <div className="grid grid-cols-2">
+        <div>
+          <Button
+            variant="secondary"
+            onClick={setPrevStep}
+            className={cn(currentStep === 0 && "hidden")}
+          >
+            Prev Step
+          </Button>
+        </div>
+        <div className="flex justify-end">
+          <Button
+            variant={isFinalize ? "default" : "secondary"}
+            onClick={setNextStep}
+            className={cn(currentStep === titles.length - 1 && "hidden")}
+          >
+            {isFinalize ? "Finalize" : "Next Step"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ResumeEditor = ({
+  resumeId,
+  onPrintClick,
+}: {
+  resumeId: string;
+  onPrintClick: () => void;
+}) => {
   const f = useFormContext<ResumeForm>();
   const formData = useWatch({ control: f.control });
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
+
+  const { slug, Component } = resumeSections[currentEditorStep];
 
   const handleGoToNextItem = () => {
     if (currentEditorStep === sectionTitles.length - 1) return;
@@ -133,7 +149,7 @@ const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
       />
       <ResumeEditorProvider value={{ resumeId }}>
         <div className="rounded-2xl border-2 border-gray-100 p-6">
-          {resumeSections[currentEditorStep].item}
+          <Component {...(slug === "finalize" ? { onPrintClick } : {})} />
         </div>
       </ResumeEditorProvider>
     </div>
