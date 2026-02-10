@@ -176,6 +176,8 @@ const DialogInner = ({
   const [src, setSrc] = useState<string | null>(originalPhoto || null);
   const [shouldResetCrop, setShouldResetCrop] = useState(false);
 
+  console.log({ src });
+
   const handleFile = (file: File | string) => {
     setShouldResetCrop(true);
     if (typeof file === "string") {
@@ -200,10 +202,13 @@ const DialogInner = ({
   if (src) {
     // We have original image SRC, we have cropData for cropping and saving into the main form in DB, and we get cropped image
     const handleResetChosenFile = () => setSrc(null);
+
     const handleDeleteFile = () => {
+      handleResetChosenFile();
       onChange("", "", { ...avatarCropInitialValues });
       onModalClose(false);
     };
+
     const handleSaveFiles = async (cropData: PhotoCropperProps) => {
       const { croppedPixels, cropped, zoom, rotation } = cropData;
       const croppedImage = await getCroppedImg(src, croppedPixels, rotation);
