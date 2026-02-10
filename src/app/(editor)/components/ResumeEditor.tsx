@@ -9,7 +9,7 @@ import WorkExperience from "./forms/WorkExperience";
 import Education from "./forms/Education";
 import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
-import ResumeSteps from "./CreateResumeSteps";
+import ResumeSteps from "./ResumeSteps";
 import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm } from "@/lib/validation";
@@ -22,11 +22,6 @@ const resumeSections: {
   slug: string;
   item: ReactNode;
 }[] = [
-  {
-    title: "Resume description",
-    slug: "description",
-    item: <ResumeDescription />,
-  },
   {
     title: "Personal information",
     slug: "personal-info",
@@ -56,6 +51,11 @@ const resumeSections: {
     title: "Other Info",
     slug: "other-info",
     item: <OtherInfo />,
+  },
+  {
+    title: "Finalize",
+    slug: "finalize",
+    item: <ResumeDescription />,
   },
 ];
 
