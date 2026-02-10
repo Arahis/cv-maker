@@ -73,32 +73,40 @@ const ResumeStepsControl = ({
   setStep,
   setNextStep,
   setPrevStep,
-}: ResumeStepsControlProps) => (
-  <div className="mb-6">
-    <ResumeSteps
-      items={titles}
-      currentStep={currentStep}
-      setItem={setStep}
-      className="mb-4"
-    />
-    <div className="flex justify-between">
-      <Button
-        variant="secondary"
-        onClick={setPrevStep}
-        className={cn(currentStep === 0 && "opacity-0")}
-      >
-        Prev Step
-      </Button>
-      <Button
-        variant="secondary"
-        onClick={setNextStep}
-        className={cn(currentStep === titles.length - 1 && "opacity-0")}
-      >
-        Next Step
-      </Button>
+}: ResumeStepsControlProps) => {
+  const isFinalize = currentStep === titles.length - 2;
+
+  return (
+    <div className="mb-6">
+      <ResumeSteps
+        items={titles}
+        currentStep={currentStep}
+        setItem={setStep}
+        className="mb-4"
+      />
+      <div className="grid grid-cols-2">
+        <div>
+          <Button
+            variant="secondary"
+            onClick={setPrevStep}
+            className={cn(currentStep === 0 && "hidden")}
+          >
+            Prev Step
+          </Button>
+        </div>
+        <div className="flex justify-end">
+          <Button
+            variant={isFinalize ? "default" : "secondary"}
+            onClick={setNextStep}
+            className={cn(currentStep === titles.length - 1 && "hidden")}
+          >
+            {isFinalize ? "Finalize" : "Next Step"}
+          </Button>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ResumeEditor = ({ resumeId }: { resumeId: string }) => {
   const f = useFormContext<ResumeForm>();
