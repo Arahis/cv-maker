@@ -18,6 +18,7 @@ const useResumeForm = () =>
   useForm({
     resolver: zodResolver(resumeSchema),
     shouldUnregister: false,
+    mode: "onBlur",
     // defaultValues,
   });
 

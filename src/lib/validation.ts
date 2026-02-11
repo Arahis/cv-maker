@@ -27,8 +27,54 @@ export const personalInfoSchema = z.object({
   jobTitle: optionalString,
   city: optionalString,
   country: optionalString,
-  phone: optionalString, // TODO: add phone number validation later
-  email: optionalString, // TODO: add email validation later
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^[0-9+()\s]+$/.test(v), {
+      message: "Phone can contain only digits, +, parentheses and spaces",
+    })
+    .superRefine((v, ctx) => {
+      if (!v) return;
+
+      const plusCount = (v.match(/\+/g) ?? []).length;
+      if (plusCount > 1) {
+        ctx.addIssue({ code: "custom", message: "Only one + is allowed" });
+      }
+      if (plusCount === 1 && v.trimStart().indexOf("+") !== 0) {
+        ctx.addIssue({ code: "custom", message: "+ must be at the start" });
+      }
+
+      const openCount = (v.match(/\(/g) ?? []).length;
+      const closeCount = (v.match(/\)/g) ?? []).length;
+      if (openCount > 1 || closeCount > 1) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Only one pair of parentheses is allowed",
+        });
+      }
+
+      const openPos = v.indexOf("(");
+      const closePos = v.indexOf(")");
+      if (closePos !== -1 && (openPos === -1 || closePos < openPos)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Parentheses order is invalid",
+        });
+      }
+
+      if (openPos !== -1 && closePos === -1)
+        ctx.addIssue({
+          code: "custom",
+          message: "Missing closing parenthesis",
+        });
+    })
+    .optional(),
+  email: z.preprocess((v) => {
+    const s = String(v ?? "")
+      .trim()
+      .toLowerCase();
+    return s === "" ? undefined : s;
+  }, z.string().email("Invalid email format").optional()),
 });
 
 export type PersonalInfoForm = z.infer<typeof personalInfoSchema>;

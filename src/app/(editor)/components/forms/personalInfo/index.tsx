@@ -15,18 +15,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InputHTMLAttributes } from "react";
+import { sanitizePhone } from "./lib/sanitizePhone";
 
 const TextFormField = ({
   name,
-  title,
   label,
   control,
+  ...props
 }: {
   name: PersonalInfoKeys;
-  title: string;
   label?: string;
   control: Control<PersonalInfoForm>;
-}) => {
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "value">) => {
+  const isPhoneField = name === "phone";
+
   return (
     <FormField
       control={control}
@@ -35,15 +38,24 @@ const TextFormField = ({
         <FormItem>
           {/* Additional DIV container to resolve issue with LastPass breaking layout in FormItem */}
           <div>
-            <FormLabel className="mb-2">{label ? label : name}</FormLabel>
+            <FormLabel className="mb-2">{label ?? name}</FormLabel>
             <FormControl>
               <Input
-                placeholder={title}
                 {...field}
+                {...props}
                 //  to skip the error with photo field
                 value={typeof field.value === "string" ? field.value : ""}
+                inputMode={isPhoneField ? "tel" : props.inputMode}
+                onChange={(e) => {
+                  if (!isPhoneField) {
+                    field.onChange(e);
+                    return;
+                  }
+                  field.onChange(sanitizePhone(e.target.value));
+                }}
               />
             </FormControl>
+            <FormMessage />
           </div>
         </FormItem>
       )}
@@ -75,28 +87,28 @@ const PersonalInfo = () => {
             <TextFormField
               control={control}
               name="firstName"
-              title="First name"
+              placeholder="First name"
               label="First name"
             />
             <TextFormField
               control={control}
               name="lastName"
-              title="Last name"
+              placeholder="Last name"
               label="Last name"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <TextFormField
               control={control}
-              name="city"
-              title="City"
-              label="City"
+              name="country"
+              placeholder="Country"
+              label="Country"
             />
             <TextFormField
               control={control}
-              name="country"
-              title="Country"
-              label="Country"
+              name="city"
+              placeholder="City"
+              label="City"
             />
           </div>
         </div>
@@ -106,21 +118,26 @@ const PersonalInfo = () => {
         <TextFormField
           control={control}
           name="jobTitle"
-          title="Job title"
+          placeholder="Job title"
           label="Position"
         />
 
         <div className="grid grid-cols-2 gap-4">
           <TextFormField
             control={control}
+            inputMode="tel"
+            pattern="[0-9+()\s]"
             name="phone"
-            title="Phone"
+            placeholder="Phone"
             label="Phone"
           />
           <TextFormField
             control={control}
             name="email"
-            title="E-mail"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="E-mail"
             label="E-mail"
           />
         </div>
