@@ -128,7 +128,7 @@ const PersonalInfo = () => {
             inputMode="tel"
             pattern="[0-9+()\s]"
             name="phone"
-            placeholder="Phone"
+            placeholder="ex: +1(234) 567 890"
             label="Phone"
           />
           <TextFormField
