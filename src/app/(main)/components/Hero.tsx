@@ -4,7 +4,7 @@ import MainCreateNewResumeButton from "./MainCreateNewResumeButton";
 const Hero = () => {
   return (
     <div>
-      <h1 className="sr-only">Free resume builder</h1>
+      <h1 className="sr-only">Free resume builder with modern templates</h1>
 
       <div className="flex h-[60vh] flex-col items-center justify-center md:h-[70vh]">
         <div className="font-brand mb-8 pt-12 md:pt-24">
