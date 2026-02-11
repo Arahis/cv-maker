@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhotoCropper from "./PhotoCropper";
-import { getCroppedImg } from "./cropImage";
+import { getCroppedImg } from "./lib/cropImage";
 import { Area } from "react-easy-crop";
 import { AvatarCropDataForm } from "@/lib/validation";
 import { avatarCropInitialValues } from "@/lib/formUtils";
