@@ -82,8 +82,10 @@ export function DatePickerInput<
           aria-label="Select date"
           className="flex items-center gap-2"
         >
-          <CalendarIcon className="h-4 w-4" />
-          <span>{selected ? formatDate(selected) : "Select date"}</span>
+          <CalendarIcon className="h-4 w-4 grow-0" />
+          <span className="grow">
+            {selected ? formatDate(selected) : "Select date"}
+          </span>
         </Button>
       </PopoverTrigger>
 

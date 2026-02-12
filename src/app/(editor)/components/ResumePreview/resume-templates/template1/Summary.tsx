@@ -1,7 +1,7 @@
 import React from "react";
 import { Paginate } from "../../Paginate";
 import { TextReader } from "@/components/editor";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
 
 const Summary = ({ data }: { data: any }) => {
   if (!data.summary) return;

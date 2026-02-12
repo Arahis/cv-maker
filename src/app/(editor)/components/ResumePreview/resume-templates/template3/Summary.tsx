@@ -3,7 +3,7 @@ import { Paginate } from "../../Paginate";
 import { TextReader } from "@/components/editor";
 import SectionItem from "./SectionItem";
 import { ResumeForm } from "@/lib/validation";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
 
 const Summary = ({ data }: { data: ResumeForm }) => {
   if (!data.summary) return;

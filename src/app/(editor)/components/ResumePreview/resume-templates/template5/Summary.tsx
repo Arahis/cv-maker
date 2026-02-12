@@ -2,7 +2,7 @@ import React from "react";
 import { Paginate } from "../../Paginate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
 
 const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   if (!data) return;

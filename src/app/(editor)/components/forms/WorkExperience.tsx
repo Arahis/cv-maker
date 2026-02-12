@@ -14,7 +14,7 @@ import { WorkExperienceForm } from "@/lib/validation";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 import { SortableList } from "../SortableList";
 import { TextEditor } from "@/components/editor";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
 import { Trash2 } from "lucide-react";
 import { DatePickerInput } from "@/components/DatePicker";
 
@@ -70,7 +70,7 @@ const WorkExperienceItem = ({
           name={`workExperiences.${index}.city`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>City</FormLabel>
+              <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input placeholder="City" {...field} />
               </FormControl>

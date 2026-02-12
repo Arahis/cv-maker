@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, JSX } from "react";
-import { defaultFormValues } from "@/lib/formUtils";
+import { defaultFormValues } from "@/lib/formDefaults";
 import { createResume } from "@/lib/indexedDB";
 import { useRouter } from "next/navigation";
 import { TemplateKey } from "@/components/templates/previews";
