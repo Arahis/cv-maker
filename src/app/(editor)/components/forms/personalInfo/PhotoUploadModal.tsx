@@ -12,7 +12,7 @@ import PhotoCropper from "./PhotoCropper";
 import { getCroppedImg } from "./lib/cropImage";
 import { Area } from "react-easy-crop";
 import { AvatarCropDataForm } from "@/lib/validation";
-import { avatarCropInitialValues } from "@/lib/formUtils";
+import { avatarCropInitialValues } from "@/lib/formDefaults";
 
 export type PhotoCropperProps = {
   croppedPixels: Area;

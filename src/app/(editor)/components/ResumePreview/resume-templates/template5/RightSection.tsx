@@ -4,9 +4,15 @@ import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
+import {
+  isEducationFilled,
+  isWorkExperienceFilled,
+} from "../../lib/isSectionFilled";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
-  if (!items?.length) return;
+  const hasEducation = items?.some(isEducationFilled);
+
+  if (!hasEducation) return null;
 
   return (
     <SectionItem
@@ -31,7 +37,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           </div>
         </div>
       )}
-      items={items || []}
+      items={items}
     />
   );
 };
@@ -81,7 +87,9 @@ export function JobSection({
 }
 
 const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
-  if (items?.length === 0) return;
+  const isFilledSection = items?.some(isWorkExperienceFilled);
+
+  if (!isFilledSection) return null;
 
   return (
     <SectionItem

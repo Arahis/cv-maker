@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type SectionProps<T> = {
   title: string;
   renderItem: (item: T, idx: number) => React.ReactNode;
-  items: T[];
+  items?: T[];
   className?: string;
   columns?: boolean;
 };
@@ -13,7 +13,7 @@ type SectionProps<T> = {
 const SectionItem = <T,>({
   title,
   renderItem,
-  items,
+  items = [],
   className = "",
   columns = false,
 }: SectionProps<T>) => {

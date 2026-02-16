@@ -5,6 +5,7 @@ import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
 import { cn } from "@/lib/utils";
+import { isWorkExperienceFilled } from "../../lib/isSectionFilled";
 
 const heightMap = {
   sm: "h-2 mx-2",
@@ -87,17 +88,25 @@ export function JobSection({
   );
 }
 
-const LeftSection = ({ data }: { data: ResumeForm }) => {
-  if (data.workExperiences?.length === 0) return;
+const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
+  const isFilledSection = items?.some(isWorkExperienceFilled);
 
+  if (!isFilledSection) return null;
+
+  return (
+    <SectionItem
+      title={"Experience"}
+      items={items || []}
+      renderItem={(item) => <JobSection item={item} />}
+    />
+  );
+};
+
+const LeftSection = ({ data }: { data: ResumeForm }) => {
   return (
     <Paginate.Section className="w-[70%] border-r border-yellow-400 py-8 pr-6">
       <Skills skills={data.skills || {}} />
-      <SectionItem
-        title={"Experience"}
-        items={data.workExperiences || []}
-        renderItem={(item) => <JobSection item={item} />}
-      />
+      <Experience items={data.workExperiences} />
     </Paginate.Section>
   );
 };

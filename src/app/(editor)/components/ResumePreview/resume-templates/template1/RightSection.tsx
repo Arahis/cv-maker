@@ -4,7 +4,8 @@ import { Paginate } from "../../Paginate";
 import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formUtils";
+import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
+import { isWorkExperienceFilled } from "../../lib/isSectionFilled";
 
 // TODO add proper type for item so it could see item fields
 export function JobSection({
@@ -39,7 +40,9 @@ export function JobSection({
 }
 
 const RightSection = ({ data }: { data: ResumeForm }) => {
-  if (data.workExperiences?.length === 0) return null;
+  const isFilledSection = data.workExperiences?.some(isWorkExperienceFilled);
+
+  if (!isFilledSection) return null;
 
   return (
     <Paginate.Section

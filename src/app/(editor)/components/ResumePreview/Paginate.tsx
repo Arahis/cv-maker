@@ -10,7 +10,9 @@ export const Paginate = Object.assign(
   ) {
     return (
       <div ref={ref} data-paginate="main">
-        <div {...props}>{children}</div>
+        <div {...props} className="resume-template">
+          {children}
+        </div>
       </div>
     );
   }),

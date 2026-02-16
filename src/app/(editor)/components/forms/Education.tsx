@@ -64,7 +64,7 @@ const EducationItem = ({
           name={`educations.${index}.city`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>City</FormLabel>
+              <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input placeholder="City" {...field} className="md:w-[70%]" />
               </FormControl>

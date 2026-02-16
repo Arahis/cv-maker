@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { PhotoCropperProps } from "./PhotoUploadModal";
 import { AvatarCropDataForm } from "@/lib/validation";
-import { avatarCropInitialValues } from "@/lib/formUtils";
+import { avatarCropInitialValues } from "@/lib/formDefaults";
 import { Trash2 } from "lucide-react";
 
 const PhotoCropper = ({

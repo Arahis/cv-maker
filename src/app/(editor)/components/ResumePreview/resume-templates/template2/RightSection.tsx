@@ -3,9 +3,17 @@ import { formatDate } from "../../utils/formatDate";
 import SectionItem from "./SectionItem";
 import { Paginate } from "../../Paginate";
 import { ResumeForm } from "@/lib/validation";
+import {
+  isEducationFilled,
+  isLanguageFilled,
+  isSocialFilled,
+} from "../../lib/isSectionFilled";
+import { formatUrl } from "../../utils/formatUrl";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
-  if (!items?.length) return;
+  const hasEducation = items?.some(isEducationFilled);
+
+  if (!hasEducation) return null;
 
   return (
     <SectionItem
@@ -62,7 +70,8 @@ const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
 };
 
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
-  if (!items?.length) return;
+  const hasLanguages = items?.some(isLanguageFilled);
+  if (!hasLanguages) return;
 
   return (
     <SectionItem
@@ -81,7 +90,9 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
 };
 
 const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
-  if (!items?.length) return;
+  const hasLinks = items?.some(isSocialFilled);
+
+  if (!hasLinks) return;
 
   return (
     <SectionItem
@@ -94,11 +105,10 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
             <p className="font-bold">{item.linkName}</p>
             <a
               href={item.linkAddress}
-              className="break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {item.linkAddress}
+              {formatUrl(item.linkAddress)}
             </a>
           </React.Fragment>
         );
@@ -128,7 +138,7 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
               return (
                 <React.Fragment key={i.id}>
                   <p className="font-bold">{i.title}</p>
-                  <p>{i.value}</p>
+                  <p>{formatUrl(i.value)}</p>
                 </React.Fragment>
               );
             }}

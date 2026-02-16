@@ -6,6 +6,12 @@ import React from "react";
 import { Phone } from "lucide-react";
 import { Mail } from "lucide-react";
 import { MapPin } from "lucide-react";
+import {
+  isEducationFilled,
+  isLanguageFilled,
+  isSocialFilled,
+} from "../../lib/isSectionFilled";
+import { formatUrl } from "../../utils/formatUrl";
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   const skillsToArray = Object.entries(skills).map(([head, items]) => ({
@@ -57,13 +63,13 @@ const Contacts = ({
             {email && (
               <div className="flex">
                 <Mail className="mr-2 w-4" />
-                <p className="text-[16px] break-all">{email}</p>
+                <p className="text-[16px]">{email}</p>
               </div>
             )}
             {(country || city) && (
               <div className="flex">
                 <MapPin className="mr-2 w-4" />
-                <p className="text-[16px] break-all">
+                <p className="text-[16px]">
                   {country}
                   {country && city && ", "}
                   {city}
@@ -79,7 +85,9 @@ const Contacts = ({
 };
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
-  if (!items?.length) return;
+  const hasEducation = items?.some(isEducationFilled);
+
+  if (!hasEducation) return null;
 
   return (
     <SectionItem
@@ -103,13 +111,15 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           </div>
         </div>
       )}
-      items={items || []}
+      items={items}
     />
   );
 };
 
 const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
-  if (!items?.length) return;
+  const hasLinks = items?.some(isSocialFilled);
+
+  if (!hasLinks) return;
 
   return (
     <SectionItem
@@ -122,11 +132,10 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
             <p className="font-bold">{item.linkName}</p>
             <a
               href={item.linkAddress}
-              className="break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {item.linkAddress}
+              {formatUrl(item.linkAddress)}
             </a>
           </React.Fragment>
         );
@@ -136,7 +145,8 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
 };
 
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
-  if (!items?.length) return;
+  const hasLanguages = items?.some(isLanguageFilled);
+  if (!hasLanguages) return;
 
   return (
     <SectionItem
@@ -175,7 +185,7 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
               return (
                 <React.Fragment key={i.id}>
                   <p className="font-bold">{i.title}</p>
-                  <p>{i.value}</p>
+                  <p>{formatUrl(i.value)}</p>
                 </React.Fragment>
               );
             }}
