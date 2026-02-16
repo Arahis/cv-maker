@@ -6,7 +6,11 @@ import React from "react";
 import { Phone } from "lucide-react";
 import { Mail } from "lucide-react";
 import { MapPin } from "lucide-react";
-import { isEducationFilled, isSocialFilled } from "../../lib/isSectionFilled";
+import {
+  isEducationFilled,
+  isLanguageFilled,
+  isSocialFilled,
+} from "../../lib/isSectionFilled";
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   const skillsToArray = Object.entries(skills).map(([head, items]) => ({
@@ -141,7 +145,8 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
 };
 
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
-  if (!items?.length) return;
+  const hasLanguages = items?.some(isLanguageFilled);
+  if (!hasLanguages) return;
 
   return (
     <SectionItem

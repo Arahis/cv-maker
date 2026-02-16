@@ -32,3 +32,10 @@ export function isSocialFilled(
   const { id, ...itemsToCheck } = item;
   return hasFilledFields(Object.values(itemsToCheck));
 }
+
+export function isLanguageFilled(
+  item: NonNullable<ResumeForm["languages"]>[number],
+) {
+  const { id, ...itemsToCheck } = item;
+  return hasFilledFields(Object.values(itemsToCheck));
+}

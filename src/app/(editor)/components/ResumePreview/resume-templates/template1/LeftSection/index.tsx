@@ -5,6 +5,7 @@ import { formatDate } from "../../../utils/formatDate";
 import { ResumeForm } from "@/lib/validation";
 import {
   isEducationFilled,
+  isLanguageFilled,
   isSocialFilled,
 } from "../../../lib/isSectionFilled";
 
@@ -66,7 +67,8 @@ const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
 };
 
 const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
-  if (!items?.length) return;
+  const hasLanguages = items?.some(isLanguageFilled);
+  if (!hasLanguages) return;
 
   return (
     <SectionItem
