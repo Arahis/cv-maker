@@ -11,7 +11,7 @@ export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
     return (
       <Paginate ref={ref}>
         <HeaderSection data={data} photo={photo} />
-        <Summary data={data} />
+        <Summary data={data.summary} />
 
         <Paginate.Columns
           className="columns flex w-full"

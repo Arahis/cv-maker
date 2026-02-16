@@ -1,12 +1,15 @@
 import React from "react";
 import { Paginate } from "../../Paginate";
-import { TextReader } from "@/components/editor";
+import { createTextReader, TextReader } from "@/components/editor";
 import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
+import { ResumeForm } from "@/lib/validation";
 
-const Summary = ({ data }: { data: any }) => {
-  if (!data.summary) return;
+const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
+  const summary = data || EMPTY_LEXICAL_STATE;
+  const hasDescription = createTextReader(summary).text.trim();
 
-  const summary = data.summary || EMPTY_LEXICAL_STATE;
+  if (!hasDescription) return;
+
   return (
     <Paginate.Section className="py-8" datatype="main-summary">
       <TextReader value={summary} />
