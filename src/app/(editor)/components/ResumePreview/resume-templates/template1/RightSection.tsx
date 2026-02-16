@@ -5,7 +5,7 @@ import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
-import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
+import { isWorkExperienceFilled } from "../../lib/isSectionFilled";
 
 // TODO add proper type for item so it could see item fields
 export function JobSection({

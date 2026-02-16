@@ -3,9 +3,12 @@ import { Paginate } from "../../Paginate";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
 import React from "react";
+import { isEducationFilled } from "../../lib/isSectionFilled";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
-  if (!items?.length) return;
+  const hasEducation = items?.some(isEducationFilled);
+
+  if (!hasEducation) return null;
 
   return (
     <SectionItem
@@ -29,7 +32,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           </div>
         </div>
       )}
-      items={items || []}
+      items={items}
     />
   );
 };

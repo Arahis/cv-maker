@@ -4,7 +4,7 @@ import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
-import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
+import { isWorkExperienceFilled } from "../../lib/isSectionFilled";
 
 function Separator() {
   return <div className="mx-4 h-4 w-0.5 bg-gray-500" />;

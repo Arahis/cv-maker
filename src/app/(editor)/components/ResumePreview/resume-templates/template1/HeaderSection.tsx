@@ -11,7 +11,7 @@ const HeaderSection = ({
   photo?: string;
 }) => {
   return (
-    <Paginate.Columns className="gap-8">
+    <Paginate.Columns className="mb-4 gap-8">
       {photo && (
         <Paginate.Section
           className="-mt-8 h-60 w-[30%] shrink-0 bg-gray-50 bg-cover bg-center"
@@ -52,12 +52,6 @@ const HeaderSection = ({
                 <Paginate.Text>{data.email}</Paginate.Text>
               </div>
             )}
-            {/* {data.website && (
-              <div className="flex flex-1 items-center gap-2">
-                <Icon name="web" size={16} />
-                <Paginate.Text>Website</Paginate.Text>
-              </div>
-            )} */}
           </Paginate.Section>
         </Paginate.Section>
       </Paginate.Section>

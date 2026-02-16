@@ -4,10 +4,15 @@ import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
-import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
+import {
+  isEducationFilled,
+  isWorkExperienceFilled,
+} from "../../lib/isSectionFilled";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
-  if (!items?.length) return;
+  const hasEducation = items?.some(isEducationFilled);
+
+  if (!hasEducation) return null;
 
   return (
     <SectionItem
@@ -32,7 +37,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           </div>
         </div>
       )}
-      items={items || []}
+      items={items}
     />
   );
 };

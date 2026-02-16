@@ -6,7 +6,7 @@ import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
 import { cn } from "@/lib/utils";
 import Summary from "./Summary";
-import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
+import { isWorkExperienceFilled } from "../../lib/isSectionFilled";
 
 const heightMap = {
   sm: "h-2 mx-2",

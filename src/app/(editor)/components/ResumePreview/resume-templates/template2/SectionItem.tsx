@@ -4,14 +4,14 @@ import { Paginate } from "../../Paginate";
 type SectionProps<T> = {
   title: string;
   renderItem: (item: T, idx: number) => React.ReactNode;
-  items: T[];
+  items?: T[];
   className?: string;
 };
 
 const SectionItem = <T,>({
   title,
   renderItem,
-  items,
+  items = [],
   className = "",
 }: SectionProps<T>) => {
   if (items.length === 0) {
