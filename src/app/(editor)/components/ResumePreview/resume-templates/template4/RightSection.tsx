@@ -6,6 +6,7 @@ import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
 import { cn } from "@/lib/utils";
 import Summary from "./Summary";
+import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
 
 const heightMap = {
   sm: "h-2 mx-2",
@@ -60,7 +61,9 @@ export function JobSection({
 }
 
 const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
-  if (items?.length === 0) return;
+  const isFilledSection = items?.some(isWorkExperienceFilled);
+
+  if (!isFilledSection) return null;
 
   return (
     <SectionItem

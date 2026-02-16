@@ -41,7 +41,6 @@ export function JobSection({
 
 const RightSection = ({ data }: { data: ResumeForm }) => {
   const isFilledSection = data.workExperiences?.some(isWorkExperienceFilled);
-  console.log({ isFilledSection });
 
   if (!isFilledSection) return null;
 

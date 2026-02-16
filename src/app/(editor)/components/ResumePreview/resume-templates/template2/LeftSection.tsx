@@ -4,6 +4,7 @@ import { formatDate } from "../../utils/formatDate";
 import { TextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
+import { isWorkExperienceFilled } from "../../lib/isWorkExperienceFilled";
 
 function Separator() {
   return <div className="mx-4 h-4 w-0.5 bg-gray-500" />;
@@ -44,7 +45,9 @@ export function JobSection({
 }
 
 const LeftSection = ({ data }: { data: ResumeForm }) => {
-  if (data.workExperiences?.length === 0) return;
+  const isFilledSection = data.workExperiences?.some(isWorkExperienceFilled);
+
+  if (!isFilledSection) return null;
 
   return (
     <Paginate.Section>
