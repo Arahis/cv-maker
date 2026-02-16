@@ -8,6 +8,7 @@ import {
   isLanguageFilled,
   isSocialFilled,
 } from "../../lib/isSectionFilled";
+import { formatUrl } from "../../utils/formatUrl";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -57,11 +58,10 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
             <p className="font-bold">{item.linkName}</p>
             <a
               href={item.linkAddress}
-              className="break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {item.linkAddress}
+              {formatUrl(item.linkAddress)}
             </a>
           </React.Fragment>
         );
@@ -111,7 +111,7 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
               return (
                 <React.Fragment key={i.id}>
                   <p className="font-bold">{i.title}</p>
-                  <p>{i.value}</p>
+                  <p>{formatUrl(i.value)}</p>
                 </React.Fragment>
               );
             }}

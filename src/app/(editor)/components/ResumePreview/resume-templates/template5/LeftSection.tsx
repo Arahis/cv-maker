@@ -6,6 +6,7 @@ import { Phone } from "lucide-react";
 import { Mail } from "lucide-react";
 import { MapPin } from "lucide-react";
 import { isLanguageFilled, isSocialFilled } from "../../lib/isSectionFilled";
+import { formatUrl } from "../../utils/formatUrl";
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   const skillsToArray = Object.entries(skills).map(([head, items]) => ({
@@ -57,13 +58,13 @@ const Contacts = ({
           )}
           {email && (
             <div className="flex justify-end gap-2">
-              <p className="text-[16px] break-all">{email}</p>
+              <p className="text-[16px]">{email}</p>
               <Mail className="w-4" />
             </div>
           )}
           {(country || city) && (
             <div className="flex justify-end gap-2">
-              <p className="text-[16px] break-all">
+              <p className="text-[16px]">
                 {country}
                 {country && city && ", "}
                 {city}
@@ -95,11 +96,10 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
             <p className="font-bold">{item.linkName}</p>
             <a
               href={item.linkAddress}
-              className="break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {item.linkAddress}
+              {formatUrl(item.linkAddress)}
             </a>
           </React.Fragment>
         );
@@ -151,7 +151,7 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
               return (
                 <React.Fragment key={i.id}>
                   <p className="font-bold">{i.title}</p>
-                  <p>{i.value}</p>
+                  <p>{formatUrl(i.value)}</p>
                 </React.Fragment>
               );
             }}
