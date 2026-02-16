@@ -8,7 +8,7 @@ import { ListItemNode, ListNode } from "@lexical/list";
 import { $generateHtmlFromNodes } from "@lexical/html";
 import parse from "html-react-parser";
 
-import { createEditor, ParagraphNode, TextNode } from "lexical";
+import { $getRoot, createEditor, ParagraphNode, TextNode } from "lexical";
 
 import "./editor.css";
 import ToolbarPlugin from "./plugins/Toolbar";
@@ -41,7 +41,7 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export function TextReader({ value }: { value: string }) {
+export function createTextReader(value: string) {
   const initialConfig = {
     namespace: "EditorPreview",
     nodes,
@@ -54,12 +54,19 @@ export function TextReader({ value }: { value: string }) {
   editor.setEditorState(editorState);
 
   let html = "";
+  let text = "";
   editorState.read(() => {
+    text = $getRoot().getTextContent();
     html = $generateHtmlFromNodes(editor);
   });
 
-  return <div>{parse(html)}</div>;
+  return { html, text };
 }
+
+export const TextReader = ({ value }: { value: string }) => {
+  const { html } = createTextReader(value);
+  return <div>{parse(html)}</div>;
+};
 
 export function TextEditor({
   placeholder = "Type your text right here...",
