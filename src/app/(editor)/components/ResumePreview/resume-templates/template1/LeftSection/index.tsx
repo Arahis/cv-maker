@@ -3,7 +3,10 @@ import SectionItem from "../SectionItem";
 import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 import { ResumeForm } from "@/lib/validation";
-import { isEducationFilled } from "../../../lib/isSectionFilled";
+import {
+  isEducationFilled,
+  isSocialFilled,
+} from "../../../lib/isSectionFilled";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -83,7 +86,9 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
 };
 
 const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
-  if (!items?.length) return;
+  const hasLinks = items?.some(isSocialFilled);
+
+  if (!hasLinks) return;
 
   return (
     <SectionItem

@@ -1,8 +1,8 @@
 import { createTextReader } from "@/components/editor";
 import { ResumeForm } from "@/lib/validation";
 
-const hasFilledFields = (items: any) =>
-  items.some((value: any) => {
+export const hasFilledFields = (items: Array<string | boolean>) =>
+  items.some((value) => {
     if (typeof value === "string") {
       return value.trim() !== "";
     }
@@ -24,4 +24,11 @@ export function isWorkExperienceFilled(
   const hasDescription = createTextReader(description || "").text.trim();
 
   return hasDescription || hasFilledFields(Object.values(fieldsToCheck));
+}
+
+export function isSocialFilled(
+  item: NonNullable<ResumeForm["socialLinks"]>[number],
+) {
+  const { id, ...itemsToCheck } = item;
+  return hasFilledFields(Object.values(itemsToCheck));
 }

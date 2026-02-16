@@ -3,7 +3,7 @@ import { Paginate } from "../../Paginate";
 import { ResumeForm } from "@/lib/validation";
 import SectionItem from "./SectionItem";
 import React from "react";
-import { isEducationFilled } from "../../lib/isSectionFilled";
+import { isEducationFilled, isSocialFilled } from "../../lib/isSectionFilled";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -38,7 +38,9 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
 };
 
 const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
-  if (!items?.length) return;
+  const hasLinks = items?.some(isSocialFilled);
+
+  if (!hasLinks) return;
 
   return (
     <SectionItem
