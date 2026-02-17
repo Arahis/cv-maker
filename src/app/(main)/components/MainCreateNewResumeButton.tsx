@@ -23,7 +23,7 @@ const MainCreateNewResumeButton = () => {
           size="lg"
           className="cursor-pointer font-semibold"
         >
-          {"Try it Now!".toUpperCase()}
+          {"Build your resume for free".toUpperCase()}
         </Button>
       )}
     />
