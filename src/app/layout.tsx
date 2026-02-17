@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: "%s | Cvoop",
   },
   description:
-    "Create a professional resume in minutes — simple, fast, and free.",
+    "Free resume and CV builder with modern templates. Create and download your resume instantly without registration.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon-16x16.png",
