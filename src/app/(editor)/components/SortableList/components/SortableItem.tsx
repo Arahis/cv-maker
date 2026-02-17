@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, memo, useContext, useMemo } from "react";
 import type { CSSProperties, PropsWithChildren } from "react";
 import type {
   DraggableSyntheticListeners,
@@ -6,8 +6,7 @@ import type {
 } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripHorizontal } from "lucide-react";
-import { GripVertical } from "lucide-react";
+import { GripHorizontal, GripVertical } from "lucide-react";
 
 interface Props {
   id: UniqueIdentifier;
@@ -19,13 +18,18 @@ interface Context {
   ref(node: HTMLElement | null): void;
 }
 
-const SortableItemContext = createContext<Context>({
-  attributes: {},
-  listeners: undefined,
-  ref() {},
-});
+const SortableItemContext = createContext<Context | null>(null);
 
-export function SortableItem({ children, id }: PropsWithChildren<Props>) {
+function useSortableItemContext() {
+  const ctx = useContext(SortableItemContext);
+  if (!ctx) throw new Error("DragHandle must be used inside <SortableItem />");
+  return ctx;
+}
+
+export const SortableItem = memo(function SortableItem({
+  children,
+  id,
+}: PropsWithChildren<Props>) {
   const {
     attributes,
     isDragging,
@@ -35,6 +39,7 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
     transform,
     transition,
   } = useSortable({ id });
+
   const context = useMemo(
     () => ({
       attributes,
@@ -45,7 +50,7 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
   );
   const style: CSSProperties = {
     opacity: isDragging ? 0.4 : undefined,
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
     transition,
   };
 
@@ -56,7 +61,7 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
       </li>
     </SortableItemContext.Provider>
   );
-}
+});
 
 const grips = {
   vertical: GripVertical,
@@ -68,12 +73,13 @@ export function DragHandle({
 }: {
   variant?: "vertical" | "horizontal";
 }) {
-  const { attributes, listeners, ref } = useContext(SortableItemContext);
+  const { attributes, listeners, ref } = useSortableItemContext();
 
   const Grip = grips[variant];
 
   return (
     <button
+      type="button"
       className="DragHandle h-8 cursor-move"
       {...attributes}
       {...listeners}

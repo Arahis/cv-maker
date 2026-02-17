@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { ReactNode } from "react";
 import {
   DndContext,
@@ -7,7 +7,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { Active, UniqueIdentifier } from "@dnd-kit/core";
+import type { Active, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -34,10 +34,9 @@ export function SortableList<T extends BaseItem>({
   className,
 }: Props<T>) {
   const [active, setActive] = useState<Active | null>(null);
-  const activeItem = useMemo(
-    () => items.find((item) => item.id === active?.id),
-    [active, items],
-  );
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const activeItem = items.find((item) => item.id === active?.id);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -45,24 +44,35 @@ export function SortableList<T extends BaseItem>({
     }),
   );
 
+  const handleDragStart = useCallback(({ active }: { active: Active }) => {
+    setActive(active);
+    setActiveIdx(active.data.current?.sortable?.index ?? null);
+  }, []);
+
+  const handleDragCancel = useCallback(() => {
+    setActive(null);
+    setActiveIdx(0);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent) => {
+      if (over && active.id !== over.id) {
+        const activeIndex = items.findIndex(({ id }) => id === active.id);
+        const overIndex = items.findIndex(({ id }) => id === over.id);
+        onMove(activeIndex, overIndex);
+      }
+      setActive(null);
+      setActiveIdx(0);
+    },
+    [items, onMove],
+  );
+
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={({ active }) => {
-        setActive(active);
-      }}
-      onDragEnd={({ active, over }) => {
-        if (over && active.id !== over?.id) {
-          const activeIndex = items.findIndex(({ id }) => id === active.id);
-          const overIndex = items.findIndex(({ id }) => id === over.id);
-
-          onMove(activeIndex, overIndex);
-        }
-        setActive(null);
-      }}
-      onDragCancel={() => {
-        setActive(null);
-      }}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
       <SortableContext items={items}>
         <ul role="application" className={className}>
@@ -74,7 +84,7 @@ export function SortableList<T extends BaseItem>({
         </ul>
       </SortableContext>
       <SortableOverlay>
-        {activeItem ? renderItem(activeItem, 0) : null}
+        {activeItem ? renderItem(activeItem, activeIdx) : null}
       </SortableOverlay>
     </DndContext>
   );
