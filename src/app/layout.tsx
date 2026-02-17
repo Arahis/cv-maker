@@ -30,6 +30,7 @@ const cantata = Cantata_One({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cvoop.com"),
   title: {
     default: "Cvoop – Free Resume Builder",
     template: "%s | Cvoop",
