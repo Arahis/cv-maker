@@ -18,7 +18,7 @@ const Templates = () => {
   };
 
   return (
-    <section>
+    <section aria-labelledby="templates-list">
       <h2 className="font-brand mb-4 text-2xl font-semibold md:text-4xl">
         Free resume templates
       </h2>
