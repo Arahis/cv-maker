@@ -9,7 +9,7 @@
     "minimatch": "^10.2.1"
   },
   "scripts": {
-    "build": "npm run build:web && npm run build:pdf-css",
+    "build": "npm run build:web && npm run build:pdf",
     "dev:web": "npm run -w apps/web dev",
     "build:web": "npm run -w apps/web build",
     "lint:web": "npm run -w apps/web lint",
