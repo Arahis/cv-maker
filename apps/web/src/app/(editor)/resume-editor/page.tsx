@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import ResumeEditorPageClient from "./ResumeEditorPageClient";
 
-export const dynamic = "force-dynamic";
-
 export const metadata = {
   title: "Resume editor",
   description: "Create and edit your resume.",
