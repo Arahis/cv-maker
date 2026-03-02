@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import ResumeEditorPageClient from "./ResumeEditorPageClient";
 
-export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Resume editor",
@@ -14,7 +15,11 @@ export const metadata = {
 const Page = async () => {
   return (
     <main className="mx-auto min-h-0 w-full max-w-400 flex-1">
-      <ResumeEditorPageClient />
+      <Suspense
+        fallback={<div className="h-96 w-full animate-pulse bg-gray-200" />}
+      >
+        <ResumeEditorPageClient />
+      </Suspense>
     </main>
   );
 };
