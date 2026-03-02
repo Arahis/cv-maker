@@ -1,6 +1,5 @@
+import { Suspense } from "react";
 import PrintClient from "./PrintClient";
-
-export const runtime = "edge";
 
 export const metadata = {
   title: "Print your resume",
@@ -10,7 +9,11 @@ export const metadata = {
 const Page = async () => {
   return (
     <main>
-      <PrintClient />
+      <Suspense
+        fallback={<div className="h-96 w-full animate-pulse bg-gray-200" />}
+      >
+        <PrintClient />
+      </Suspense>
     </main>
   );
 };
