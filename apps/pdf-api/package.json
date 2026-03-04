@@ -1,0 +1,8 @@
+{
+  "name": "pdf-api",
+  "private": true,
+  "dependencies": {
+    "aws-lambda-ric": "^4.0.1",
+    "playwright": "1.58.2"
+  }
+}
