@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     // Monorepo root so Turbopack can resolve hoisted deps
     root: path.resolve(__dirname, "../.."),
   },
+  // Keep tracing root aligned with turbopack.root
+  outputFileTracingRoot: path.resolve(__dirname, "../.."),
   images: {
     unoptimized: true, // Turn off img optimization
   },
