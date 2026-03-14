@@ -84,6 +84,11 @@ const ResumePreview = ({
 
   const ref = useRef<HTMLDivElement>(null);
 
+  const setRefs = (node: HTMLDivElement | null) => {
+    ref.current = node;
+    contentRefForPrint.current = node;
+  };
+
   const pages = usePaginateDom({ ref, data: formData, photo: cropped });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -101,7 +106,7 @@ const ResumePreview = ({
         className="pointer-events-none absolute z-40 mb-4 cursor-none opacity-0"
       >
         <ResumeWrapperDOM>
-          <Variant ref={ref} data={formData} photo={cropped} />
+          <Variant ref={setRefs} data={formData} photo={cropped} />
         </ResumeWrapperDOM>
       </div>
       <div ref={contentRefForPrint} className="flex flex-col gap-4">

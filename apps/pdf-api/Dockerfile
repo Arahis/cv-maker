@@ -27,7 +27,6 @@ COPY . .
 ENV HOME=/tmp
 ENV NPM_CONFIG_CACHE=/tmp/.npm
 ENV npm_config_loglevel=error
-
 # Set Lambda entrypoint
 ENTRYPOINT ["/usr/bin/aws-lambda-ric"]
 CMD ["handler.handler"]

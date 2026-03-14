@@ -1,10 +1,21 @@
 const { chromium } = require("playwright");
+const fs = require("fs");
+const path = require("path");
+
+console.log("fonts dir exists:", fs.existsSync("/var/task/fonts"));
+try {
+  console.log("fonts dir list:", fs.readdirSync("/var/task/fonts"));
+} catch (e) {
+  console.log("fonts list error:", String(e));
+}
 
 exports.handler = async (event) => {
   let browser;
   try {
     const body = JSON.parse(event.body || "{}");
     const { html, css = "", baseUrl } = body;
+
+    console.log("css head:", css.slice(0, 300));
 
     if (!html || typeof html !== "string") {
       return {
@@ -33,6 +44,27 @@ exports.handler = async (event) => {
 
     const page = await context.newPage();
 
+    page.on("request", (req) => {
+      if (isFontRequest(req.url())) {
+        console.log("FONT FILE REQUEST:", req.url());
+      }
+    });
+    page.on("requestfailed", (req) => {
+      if (isFontRequest(req.url())) {
+        console.log(
+          "FONT REQUEST FAILED:",
+          req.url(),
+          req.failure()?.errorText,
+        );
+      }
+    });
+    page.on("response", async (res) => {
+      const url = res.url();
+      if (isFontRequest(url)) {
+        console.log("FONT RESPONSE:", url, res.status());
+      }
+    });
+
     await page.setExtraHTTPHeaders({
       "Accept-Language": "en-US,en;q=0.9",
     });
@@ -40,6 +72,24 @@ exports.handler = async (event) => {
     // Potential blocking place
     await page.route("**/*", (route) => {
       const reqUrl = route.request().url();
+      const localFontPath = getLocalFontPath(reqUrl);
+
+      if (localFontPath) {
+        try {
+          const body = fs.readFileSync(localFontPath);
+          return route.fulfill({
+            status: 200,
+            body,
+            headers: {
+              "Content-Type": "font/woff2",
+              "Cache-Control": "public, max-age=31536000, immutable",
+            },
+          });
+        } catch (e) {
+          console.log("FONT READ FAILED:", localFontPath, String(e));
+          return route.abort();
+        }
+      }
 
       const allow =
         reqUrl.startsWith("data:") ||
@@ -81,6 +131,31 @@ exports.handler = async (event) => {
       timeout: 60000,
     });
 
+    const fontStatus = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return {
+        status: document.fonts.status,
+        inter: document.fonts.check("16px Inter"),
+        outfit: document.fonts.check("16px Outfit"),
+        cantata: document.fonts.check("16px Cantata"),
+      };
+    });
+    console.log("fonts:", fontStatus);
+
+    const fontDetails = await page.evaluate(() => {
+      const list = [];
+      for (const f of document.fonts) {
+        list.push({
+          family: f.family,
+          status: f.status,
+          weight: f.weight,
+          style: f.style,
+        });
+      }
+      return list;
+    });
+    console.log("font faces:", fontDetails);
+
     // Дать чуть времени на layout
     await page.waitForTimeout(200);
 
@@ -94,7 +169,6 @@ exports.handler = async (event) => {
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
-      margin: { top: "0", right: "0", bottom: "0", left: "0" }, // если нужно
     });
 
     return {
@@ -139,4 +213,18 @@ ${html}
 
 function escapeHtmlAttr(s) {
   return String(s).replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function getLocalFontPath(reqUrl) {
+  try {
+    const { pathname } = new URL(reqUrl);
+    if (!pathname || !pathname.startsWith("/fonts/")) return null;
+    return path.join("/var/task", pathname);
+  } catch {
+    return null;
+  }
+}
+
+function isFontRequest(reqUrl) {
+  return !!getLocalFontPath(reqUrl);
 }
