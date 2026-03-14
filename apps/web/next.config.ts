@@ -3,7 +3,8 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: path.resolve(__dirname),
+    // Monorepo root so Turbopack can resolve hoisted deps
+    root: path.resolve(__dirname, "../.."),
   },
   images: {
     unoptimized: true, // Turn off img optimization
