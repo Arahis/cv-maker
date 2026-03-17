@@ -1,4 +1,11 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
 import { pdfCss } from "@/pdf/pdfCss";
+
+function getPdfLambdaUrl() {
+  const cloudflareEnv = getCloudflareContext({ async: false }).env;
+  return (cloudflareEnv as any).PDF_LAMBDA_URL ?? process.env.PDF_LAMBDA_URL;
+}
 
 function getSiteBaseUrl(req: Request) {
   const url = new URL(req.url);
@@ -19,7 +26,7 @@ export async function POST(req: Request) {
     const siteBaseUrl = getSiteBaseUrl(req);
     const css = pdfCss;
 
-    const lambdaUrl = process.env.PDF_LAMBDA_URL;
+    const lambdaUrl = getPdfLambdaUrl();
 
     if (!lambdaUrl) {
       return new Response(JSON.stringify({ error: "Missing PDF_LAMBDA_URL" }), {
