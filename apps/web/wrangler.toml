@@ -5,3 +5,4 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2025-04-01"
 observability = { enabled = true, logs = { invocation_logs = true } }
+keep_vars = true
