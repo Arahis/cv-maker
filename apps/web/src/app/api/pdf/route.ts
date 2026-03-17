@@ -2,14 +2,14 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import { pdfCss } from "@/pdf/pdfCss";
 
-function getPdfLambdaUrl() {
-  const cloudflareEnv = getCloudflareContext({ async: false }).env;
+async function getPdfLambdaUrl() {
+  const { env } = await getCloudflareContext({ async: true });
   console.log("pdf route env diagnostics", {
-    cloudflareEnvKeys: Object.keys(cloudflareEnv ?? {}),
-    hasCloudflareLambdaUrl: Boolean((cloudflareEnv as any)?.PDF_LAMBDA_URL),
+    cloudflareEnvKeys: Object.keys(env ?? {}),
+    hasCloudflareLambdaUrl: Boolean((env as any)?.PDF_LAMBDA_URL),
     hasProcessEnvLambdaUrl: Boolean(process.env.PDF_LAMBDA_URL),
   });
-  return (cloudflareEnv as any).PDF_LAMBDA_URL ?? process.env.PDF_LAMBDA_URL;
+  return (env as any).PDF_LAMBDA_URL ?? process.env.PDF_LAMBDA_URL;
 }
 
 function getSiteBaseUrl(req: Request) {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const siteBaseUrl = getSiteBaseUrl(req);
     const css = pdfCss;
 
-    const lambdaUrl = getPdfLambdaUrl();
+    const lambdaUrl = await getPdfLambdaUrl();
 
     if (!lambdaUrl) {
       console.log("pdf route missing lambda url");
