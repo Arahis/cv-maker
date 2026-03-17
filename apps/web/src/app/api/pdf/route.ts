@@ -1,18 +1,8 @@
+import { pdfCss } from "@/pdf/pdfCss";
+
 function getSiteBaseUrl(req: Request) {
   const url = new URL(req.url);
   return url.origin;
-}
-
-async function getPdfCss(siteBaseUrl: string) {
-  const res = await fetch(`${siteBaseUrl}/pdf.css`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to load pdf.css: ${res.status}`);
-  }
-
-  return await res.text();
 }
 
 export async function POST(req: Request) {
@@ -27,9 +17,7 @@ export async function POST(req: Request) {
     }
 
     const siteBaseUrl = getSiteBaseUrl(req);
-    const css = await getPdfCss(siteBaseUrl);
-
-    console.log({ css });
+    const css = pdfCss;
 
     const lambdaUrl = process.env.PDF_LAMBDA_URL;
 
@@ -53,7 +41,6 @@ export async function POST(req: Request) {
     });
 
     if (!lambdaRes.ok) {
-      const errorText = await lambdaRes.text().catch(() => "");
       return new Response(
         JSON.stringify({
           error: "Lambda error",

@@ -7,14 +7,14 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:cf": "opennextjs-cloudflare build",
+    "build": "npm run build:pdf-assets && next build",
+    "build:cf": "npm run build:pdf-assets && opennextjs-cloudflare build",
     "preview": "npm run build:cf && opennextjs-cloudflare preview",
     "deploy": "npm run build:cf && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "start": "next start",
     "lint": "next lint",
-    "build:pdf-css": "npx tailwindcss -i ./src/pdf/styles.css -o ./public/pdf.css --minify"
+    "build:pdf-assets": "node ./src/pdf/generate-pdf-css.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

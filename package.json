@@ -9,7 +9,7 @@
     "minimatch": "^10.2.1"
   },
   "scripts": {
-    "build": "npm run build:web && npm run build:pdf",
+    "build": "npm run build:web",
     "dev:web": "npm run -w apps/web dev",
     "build:web": "npm run -w apps/web build",
     "build:cf:web": "npm run -w apps/web build:cf",
@@ -18,8 +18,7 @@
     "cf-typegen:web": "npm run -w apps/web cf-typegen",
     "lint:web": "npm run -w apps/web lint",
     "dev:pdf": "npm run -w apps/pdf-api dev",
-    "deploy:pdf": "npm run -w apps/pdf-api deploy",
-    "build:pdf": "npm run build:pdf-css -w web"
+    "deploy:pdf": "npm run -w apps/pdf-api deploy"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.2.1",
