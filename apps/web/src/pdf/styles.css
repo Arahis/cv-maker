@@ -152,6 +152,12 @@
     font-style: normal;
     font-display: swap;
   }
+
+  html,
+  body {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+  }
 }
 
 @layer utilities {
