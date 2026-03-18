@@ -109,7 +109,7 @@ const ResumePreview = ({
           <Variant ref={setRefs} data={formData} photo={cropped} />
         </ResumeWrapperDOM>
       </div>
-      <div ref={contentRefForPrint} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {pages.map((page, idx) => (
           <ResumeWrapperPages
             scale={scaleControls.scale}

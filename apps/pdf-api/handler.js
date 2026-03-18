@@ -181,6 +181,17 @@ exports.handler = async (event) => {
     });
     console.log("computed fonts:", computedFonts);
 
+    const bodyFont = await page.evaluate(() => {
+      const style = getComputedStyle(document.body);
+
+      return {
+        fontFamily: style.fontFamily,
+        fontWeight: style.fontWeight,
+        fontStyle: style.fontStyle,
+      };
+    });
+    console.log("body font:", bodyFont);
+
     // Дать чуть времени на layout
     await page.waitForTimeout(200);
 
