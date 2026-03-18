@@ -156,6 +156,31 @@ exports.handler = async (event) => {
     });
     console.log("font faces:", fontDetails);
 
+    const computedFonts = await page.evaluate(() => {
+      const selectors = [".font-cantata", ".font-brand", ".font-sans"];
+
+      return selectors.map((selector) => {
+        const el = document.querySelector(selector);
+
+        if (!el) {
+          return { selector, found: false };
+        }
+
+        const style = getComputedStyle(el);
+
+        return {
+          selector,
+          found: true,
+          text: (el.textContent || "").trim().slice(0, 120),
+          className: el.className,
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          fontStyle: style.fontStyle,
+        };
+      });
+    });
+    console.log("computed fonts:", computedFonts);
+
     // Дать чуть времени на layout
     await page.waitForTimeout(200);
 
