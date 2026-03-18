@@ -2,13 +2,6 @@ const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
 
-console.log("fonts dir exists:", fs.existsSync("/var/task/fonts"));
-try {
-  console.log("fonts dir list:", fs.readdirSync("/var/task/fonts"));
-} catch (e) {
-  console.log("fonts list error:", String(e));
-}
-
 exports.handler = async (event) => {
   let browser;
   try {
