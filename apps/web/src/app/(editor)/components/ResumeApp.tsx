@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ResumeEditor from "./ResumeEditor";
-import { useForm } from "react-hook-form";
+import ResumeForm from "./ResumeForm";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resumeSchema } from "@/lib/validation";
+import { ResumeForm as ResumeFormProps, resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
 import { loadResume } from "@/lib/indexedDB";
-import { ResumeTemplateKey } from "@/components/templates/components";
+import {
+  ResumeTemplateKey,
+  resumeTemplates,
+} from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
-import { useReactToPrint } from "react-to-print";
 import { trackEvent } from "@/components/analytics/events";
 import { isDesktopLike } from "@/lib/utils";
+import useAvatar from "../store/hooks/useAvatar";
+import { renderToStaticMarkup } from "react-dom/server";
 
 const useResumeForm = () =>
   useForm({
@@ -22,23 +26,53 @@ const useResumeForm = () =>
     // defaultValues,
   });
 
+const downloadPdf = async (html: string) => {
+  try {
+    const res = await fetch("/api/pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ html }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("PDF request failed:", res.status, text);
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "resume.pdf";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error("Failed to download PDF", e);
+  }
+};
+
 const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
+  if (!resumeId) return notFound();
+  return <ResumeAppInner resumeId={resumeId} />;
+};
+
+const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   const [valid, setValid] = useState<null | boolean>(null);
   const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({
-    contentRef,
-  });
 
   // Check if the resume exists in IndexedDB
   // If it exists, load the data into the form
   // If it doesn't exist, show a not found page
   useEffect(() => {
     const checkResumeExists = async () => {
-      if (!resumeId) return;
-
       const resume = await loadResume(resumeId);
       if (resume) {
         f.reset(resume.data);
@@ -51,24 +85,27 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   }, [resumeId, f]);
 
   if (valid === null) return <p>Loading...</p>;
-  if (!valid || !resumeId) return notFound();
+  if (!valid) return notFound();
 
-  const handlePrintClick = () => {
+  const handlePrintClick = async () => {
     const device = isDesktopLike() ? "web" : "touch";
     trackEvent("print_click", { device, resumeTemplate });
-    if (isDesktopLike()) {
-      reactToPrintFn();
+
+    const html = contentRef.current?.outerHTML;
+
+    if (!html) {
+      console.error("print root not found");
       return;
     }
-    const url = `/print?id=${encodeURIComponent(resumeId)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+
+    await downloadPdf(html);
   };
 
   return (
     <div className="flex h-full min-h-0 w-full">
       <Form {...f}>
         <div className="w-full overflow-y-auto border-r md:w-1/2">
-          <ResumeEditor resumeId={resumeId} onPrintClick={handlePrintClick} />
+          <ResumeForm resumeId={resumeId} onPrintClick={handlePrintClick} />
         </div>
 
         <ResumePreviewWrapper
