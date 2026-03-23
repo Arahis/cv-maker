@@ -17,8 +17,8 @@
     "deploy:web": "npm run -w apps/web deploy",
     "cf-typegen:web": "npm run -w apps/web cf-typegen",
     "lint:web": "npm run -w apps/web lint",
-    "dev:pdf": "npm run -w apps/pdf-api dev",
-    "deploy:pdf": "npm run -w apps/pdf-api deploy"
+    "dev:pdf": "npm run -w apps/api dev",
+    "deploy:pdf": "npm run -w apps/api deploy"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.2.1",
