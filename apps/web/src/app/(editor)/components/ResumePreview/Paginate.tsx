@@ -10,7 +10,7 @@ export const Paginate = Object.assign(
   ) {
     return (
       <div ref={ref} data-paginate="main">
-        <div {...props} className="resume-template font-inter">
+        <div {...props} className="resume-template font-inter font-medium">
           {children}
         </div>
       </div>

@@ -36,10 +36,18 @@ exports.handler = async (event) => {
     });
 
     const page = await context.newPage();
+    const interRequests = [];
+    const interResponses = [];
 
     page.on("request", (req) => {
-      if (isFontRequest(req.url())) {
-        console.log("FONT FILE REQUEST:", req.url());
+      const url = req.url();
+
+      if (isFontRequest(url)) {
+        console.log("FONT FILE REQUEST:", url);
+      }
+
+      if (url.includes("/fonts/inter/")) {
+        interRequests.push(url);
       }
     });
     page.on("requestfailed", (req) => {
@@ -55,6 +63,10 @@ exports.handler = async (event) => {
       const url = res.url();
       if (isFontRequest(url)) {
         console.log("FONT RESPONSE:", url, res.status());
+      }
+
+      if (url.includes("/fonts/inter/")) {
+        interResponses.push({ url, status: res.status() });
       }
     });
 
@@ -193,6 +205,25 @@ exports.handler = async (event) => {
       if (document.fonts?.ready) await document.fonts.ready;
       await new Promise((r) => requestAnimationFrame(() => r()));
     });
+
+    console.log("inter font traffic:", {
+      requests: interRequests,
+      responses: interResponses,
+    });
+
+    try {
+      const interRegularPath = "/var/task/fonts/inter/Inter-Regular.woff2";
+      const interRegularBuffer = fs.readFileSync(interRegularPath);
+
+      console.log("Inter-Regular file info:", {
+        path: interRegularPath,
+        size: interRegularBuffer.length,
+        signature: interRegularBuffer.subarray(0, 4).toString("ascii"),
+        first16Hex: interRegularBuffer.subarray(0, 16).toString("hex"),
+      });
+    } catch (error) {
+      console.log("Inter-Regular file read failed:", String(error));
+    }
 
     const pdf = await page.pdf({
       format: "A4",
