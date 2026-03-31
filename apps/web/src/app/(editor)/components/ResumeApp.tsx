@@ -2,21 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import ResumeForm from "./ResumeForm";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ResumeForm as ResumeFormProps, resumeSchema } from "@/lib/validation";
+import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
 import { loadResume } from "@/lib/indexedDB";
-import {
-  ResumeTemplateKey,
-  resumeTemplates,
-} from "@/components/templates/components";
+import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
 import { isDesktopLike } from "@/lib/utils";
-import useAvatar from "../store/hooks/useAvatar";
-import { renderToStaticMarkup } from "react-dom/server";
+import { useReactToPrint } from "react-to-print";
 
 const useResumeForm = () =>
   useForm({
@@ -26,35 +22,36 @@ const useResumeForm = () =>
     // defaultValues,
   });
 
-const downloadPdf = async (html: string) => {
-  try {
-    const res = await fetch("/api/pdf", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ html }),
-    });
+// TODO: Migrate to the new PDF generation API and uncomment this function
+// const downloadPdf = async (html: string) => {
+//   try {
+//     const res = await fetch("/api/pdf", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ html }),
+//     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("PDF request failed:", res.status, text);
-      return;
-    }
+//     if (!res.ok) {
+//       const text = await res.text();
+//       console.error("PDF request failed:", res.status, text);
+//       return;
+//     }
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+//     const blob = await res.blob();
+//     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "resume.pdf";
-    a.click();
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = "resume.pdf";
+//     a.click();
 
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    console.error("Failed to download PDF", e);
-  }
-};
+//     URL.revokeObjectURL(url);
+//   } catch (e) {
+//     console.error("Failed to download PDF", e);
+//   }
+// };
 
 const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   if (!resumeId) return notFound();
@@ -67,6 +64,10 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   const f = useResumeForm();
 
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+  });
 
   // Check if the resume exists in IndexedDB
   // If it exists, load the data into the form
@@ -91,14 +92,22 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     const device = isDesktopLike() ? "web" : "touch";
     trackEvent("print_click", { device, resumeTemplate });
 
-    const html = contentRef.current?.outerHTML;
+    // TODO: Uncomment this line when migrating to the new PDF generation API
+    // const html = contentRef.current?.outerHTML;
 
-    if (!html) {
-      console.error("print root not found");
+    // if (!html) {
+    //   console.error("print root not found");
+    //   return;
+    // }
+    // await downloadPdf(html);
+
+    if (isDesktopLike()) {
+      reactToPrintFn();
       return;
     }
 
-    await downloadPdf(html);
+    const url = `/print?id=${encodeURIComponent(resumeId)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
