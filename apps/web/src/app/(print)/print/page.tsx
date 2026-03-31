@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import PrintClient from "./PrintClient";
+import Loading from "@/components/Loading";
 
 export const metadata = {
   title: "Print your resume",
@@ -9,9 +10,7 @@ export const metadata = {
 const Page = async () => {
   return (
     <main>
-      <Suspense
-        fallback={<div className="h-96 w-full animate-pulse bg-gray-200" />}
-      >
+      <Suspense fallback={<Loading />}>
         <PrintClient />
       </Suspense>
     </main>

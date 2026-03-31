@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import ResumeEditorPageClient from "./ResumeEditorPageClient";
+import Loading from "@/components/Loading";
 
 export const metadata = {
   title: "Resume editor",
@@ -13,9 +14,7 @@ export const metadata = {
 const Page = async () => {
   return (
     <main className="mx-auto min-h-0 w-full max-w-400 flex-1">
-      <Suspense
-        fallback={<div className="h-96 w-full animate-pulse bg-gray-200" />}
-      >
+      <Suspense fallback={<Loading />}>
         <ResumeEditorPageClient />
       </Suspense>
     </main>

@@ -13,6 +13,7 @@ import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
 import { isDesktopLike } from "@/lib/utils";
 import { useReactToPrint } from "react-to-print";
+import Loading from "@/components/Loading";
 
 const useResumeForm = () =>
   useForm({
@@ -85,7 +86,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     checkResumeExists();
   }, [resumeId, f]);
 
-  if (valid === null) return <p>Loading...</p>;
+  if (valid === null) return <Loading />;
   if (!valid) return notFound();
 
   const handlePrintClick = async () => {
