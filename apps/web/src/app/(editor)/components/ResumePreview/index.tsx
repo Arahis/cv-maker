@@ -86,7 +86,8 @@ const ResumePreview = ({
 
   const setRefs = (node: HTMLDivElement | null) => {
     ref.current = node;
-    contentRefForPrint.current = node;
+    // TODO: Uncomment this line when migrating to the new PDF generation API
+    // contentRefForPrint.current = node;
   };
 
   const pages = usePaginateDom({ ref, data: formData, photo: cropped });
@@ -109,7 +110,7 @@ const ResumePreview = ({
           <Variant ref={setRefs} data={formData} photo={cropped} />
         </ResumeWrapperDOM>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" ref={contentRefForPrint}>
         {pages.map((page, idx) => (
           <ResumeWrapperPages
             scale={scaleControls.scale}
