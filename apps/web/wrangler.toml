@@ -6,3 +6,18 @@ compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2025-04-01"
 observability = { enabled = true, logs = { invocation_logs = true } }
 keep_vars = true
+
+[[routes]]
+pattern = "cvoop.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.cvoop.com"
+custom_domain = true
+
+[env.staging]
+name = "cvoop-staging"
+
+[[env.staging.routes]]
+pattern = "staging.cvoop.com"
+custom_domain = true
