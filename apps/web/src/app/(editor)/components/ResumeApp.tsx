@@ -91,7 +91,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
 
   const handlePrintClick = async () => {
     const device = isDesktopLike() ? "web" : "touch";
-    trackEvent("print_click", { device, resumeTemplate });
+    trackEvent("print_click", { device, var: resumeTemplate });
 
     // TODO: Uncomment this line when migrating to the new PDF generation API
     // const html = contentRef.current?.outerHTML;
