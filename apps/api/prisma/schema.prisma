@@ -19,10 +19,25 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  sessions Session[]
+  refreshTokens RefreshSession[]
+  authAccounts  AuthAccount[]
 }
 
-model Session {
+model AuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model RefreshSession {
   id         String   @id @default(cuid())
   userId     String
   tokenHash  String   @unique

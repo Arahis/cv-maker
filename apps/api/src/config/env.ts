@@ -1,4 +1,5 @@
 import "dotenv/config";
+import type { StringValue } from "ms";
 
 const requiredEnv = [
   "CORS_ORIGINS",
@@ -25,7 +26,8 @@ export const env = {
   nodeEnv: process.env.NODE_ENV!,
   cookieSecret: process.env.COOKIE_SECRET!,
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET!,
-  accessTokenTtl: Number(process.env.ACCESS_TOKEN_TTL_MINUTES ?? 15),
+  accessTokenTtlMinutes:
+    `${Number(process.env.ACCESS_TOKEN_TTL_MINUTES ?? 10)}m` as StringValue,
   refreshCookieName: process.env.REFRESH_COOKIE_NAME!,
   refreshTokenTtlDays: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30),
   isProduction: process.env.NODE_ENV === "production",
