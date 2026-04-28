@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
-type AccessTokenPayload = {
+export type AccessTokenPayload = {
   sub: string;
   email: string;
 };
@@ -18,9 +18,6 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
   if (typeof decoded === "string" || !decoded.sub || !decoded.email) {
     throw new Error("Invalid access token");
   }
-
-  // TODO: Понять что дальше происходит с sub и email, как их будут проверять
-
   return {
     sub: String(decoded.sub),
     email: String(decoded.email),
