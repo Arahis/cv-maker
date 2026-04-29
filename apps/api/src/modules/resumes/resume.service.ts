@@ -88,21 +88,10 @@ export class ResumeService {
       return { error: "Resume not found" };
     }
 
-    const existingData =
-      typeof existingResume.data === "object" && existingResume.data !== null
-        ? (existingResume.data as Record<string, unknown>)
-        : {};
-
-    const data = input.data ? { ...existingData, ...input.data } : undefined;
-
     const resume = await this.resumes.update(id, {
-      ...(data ? { data } : {}),
+      ...(input.data ? { data: input.data } : {}),
       ...(input.media ? { media: input.media } : {}),
       ...(input.template ? { template: input.template } : {}),
-      ...(input.data?.title !== undefined ? { title: input.data.title } : {}),
-      ...(input.data?.description !== undefined
-        ? { description: input.data.description }
-        : {}),
     });
 
     return { resume };

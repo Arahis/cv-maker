@@ -11,7 +11,7 @@ import {
 } from "../../lib/refresh-token.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
 import { UserRepository } from "../users/user.repository.js";
-import { AuthAccountRepository } from "../auth-accounts/auth-account.repository.js";
+import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
 import { getClientIp } from "../../lib/get-client-IP.js";
 
