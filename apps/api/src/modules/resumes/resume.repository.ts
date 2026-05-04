@@ -22,16 +22,12 @@ type ResumeDelegate = {
 
 type CreateResumeInput = {
   userId: string;
-  title?: string | null;
-  description?: string | null;
   template: string;
   data: Prisma.InputJsonValue;
   media: Prisma.InputJsonValue;
 };
 
 type UpdateResumeInput = {
-  title?: string;
-  description?: string;
   template?: string;
   data?: Prisma.InputJsonValue;
   media?: Prisma.InputJsonValue;
@@ -57,8 +53,6 @@ export class ResumeRepository {
     return this.prisma.resume.create({
       data: {
         userId: input.userId,
-        title: input.title ?? null,
-        description: input.description ?? null,
         template: input.template,
         data: input.data,
         media: input.media,

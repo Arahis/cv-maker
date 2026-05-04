@@ -55,10 +55,6 @@ export class ResumeService {
 
     const resume = await this.resumes.create({
       userId,
-      ...(input.data.title !== undefined ? { title: input.data.title } : {}),
-      ...(input.data.description !== undefined
-        ? { description: input.data.description }
-        : {}),
       template: input.template,
       data: input.data,
       media: input.media,

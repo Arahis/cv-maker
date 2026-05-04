@@ -144,11 +144,9 @@ export class AuthService {
     }
 
     const refreshTokenHash = hashRefreshToken(rawRefreshToken);
-    console.log({ refreshTokenHash });
+
     const session =
       await this.refreshSessions.findByTokenHash(refreshTokenHash);
-
-    console.log("Session found for refresh token:", !!session);
 
     if (!session) {
       clearRefreshTokenCookie(reply);
