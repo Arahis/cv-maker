@@ -31,8 +31,6 @@ export async function signup(input: LoginSignupInput) {
     body: JSON.stringify(input),
   });
 
-  setAccessToken(res.accessToken);
-
   return res;
 }
 
@@ -41,8 +39,6 @@ export async function login(input: LoginSignupInput) {
     method: "POST",
     body: JSON.stringify(input),
   });
-
-  setAccessToken(res.accessToken);
 
   return res;
 }
@@ -53,6 +49,7 @@ export async function refresh() {
   });
 
   setAccessToken(res.accessToken);
+
   return res;
 }
 
@@ -61,7 +58,6 @@ export async function logout() {
     method: "POST",
   });
 
-  setAccessToken(null);
   return res;
 }
 

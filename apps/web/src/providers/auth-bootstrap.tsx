@@ -1,15 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { refresh } from "@/api/auth";
+import { setAccessToken } from "@/api/token";
+import { useEffect } from "react";
 
 export function AuthBootstrap({ children }: { children: React.ReactNode }) {
-  useQuery({
-    queryKey: ["auth", "refresh"],
-    queryFn: refresh,
-    retry: false,
-    staleTime: Infinity,
-  });
+  useEffect(() => {
+    refresh().catch(() => {
+      setAccessToken(null);
+    });
+  }, []);
 
   return children;
 }
