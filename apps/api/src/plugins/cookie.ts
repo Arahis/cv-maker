@@ -1,8 +1,10 @@
 import cookie from "@fastify/cookie";
 import type { FastifyInstance } from "fastify";
+import fp from "fastify-plugin";
+import { env } from "../config/env.js";
 
-export default async function cookiePlugin(app: FastifyInstance) {
-  const secret = process.env.COOKIE_SECRET;
+async function cookiePlugin(app: FastifyInstance) {
+  const secret = env.cookieSecret;
 
   if (!secret) {
     throw new Error("COOKIE_SECRET is not set");
@@ -13,3 +15,5 @@ export default async function cookiePlugin(app: FastifyInstance) {
     hook: "onRequest",
   });
 }
+
+export default fp(cookiePlugin);

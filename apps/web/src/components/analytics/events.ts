@@ -4,9 +4,7 @@ type EventType =
   | "create_resume_click"
   | "print_click"
   | "switch_var"
-  | "printed"
-  | "donate_click"
-  | "preview_open_touch";
+  | "donate_click";
 
 export function trackEvent(event: EventType, params?: GtagEventParams) {
   if (typeof window === "undefined") return;
