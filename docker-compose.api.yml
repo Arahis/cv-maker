@@ -1,0 +1,11 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.aws
+    container_name: cvoop-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
