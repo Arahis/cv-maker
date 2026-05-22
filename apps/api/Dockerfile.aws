@@ -1,0 +1,45 @@
+FROM node:24-bookworm-slim AS base
+
+WORKDIR /app
+
+RUN apt-get update \
+  && apt-get install -y openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+
+FROM base AS deps
+
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+
+RUN npm ci
+
+
+FROM base AS builder
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN npx prisma generate --schema apps/api/prisma/schema.prisma
+RUN npm run -w packages/shared build
+RUN npm run -w apps/api build
+
+
+FROM base AS runner
+
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+
+EXPOSE 4000
+
+CMD ["node", "apps/api/dist/server.js"]
