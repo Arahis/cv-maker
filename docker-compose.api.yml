@@ -11,5 +11,21 @@ services:
       NODE_EXTRA_CA_CERTS: /app/certs/global-bundle.pem
     volumes:
       - ./global-bundle.pem:/app/certs/global-bundle.pem:ro
+    expose:
+      - "4000"
+  caddy:
+    image: caddy:2-alpine
+    container_name: cvoop-caddy
+    restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+volumes:
+  caddy_data:
+  caddy_config:
