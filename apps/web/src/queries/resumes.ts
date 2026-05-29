@@ -5,7 +5,7 @@ import {
   getResumeList,
   updateResume,
 } from "@/api/resumes";
-import { ResumeForm, ResumeMedia } from "@cv-maker/shared/resume-schema";
+import { ResumeForm, ResumeMedia } from "@cv-maker/shared";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type CreateResumeInput = {

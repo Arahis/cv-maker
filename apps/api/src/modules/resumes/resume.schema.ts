@@ -3,7 +3,7 @@ import {
   resumeMediaSchema,
   resumeSchema,
   resumeTemplateSchema,
-} from "@cv-maker/shared/resume-schema";
+} from "@cv-maker/shared";
 
 export const createResumeBodySchema = z.object({
   data: resumeSchema,
