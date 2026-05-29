@@ -12,7 +12,7 @@ export {
   socialLinksSchema,
   summarySchema,
   workExperienceSchema,
-} from "@cv-maker/shared/resume-schema";
+} from "@cv-maker/shared";
 
 export type {
   AvatarCropDataForm,
@@ -29,4 +29,4 @@ export type {
   SocialLinksForm,
   SummaryForm,
   WorkExperienceForm,
-} from "@cv-maker/shared/resume-schema";
+} from "@cv-maker/shared";

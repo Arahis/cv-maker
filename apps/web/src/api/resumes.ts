@@ -1,4 +1,4 @@
-import { ResumeForm, ResumeMedia } from "@cv-maker/shared/resume-schema";
+import { ResumeForm, ResumeMedia } from "@cv-maker/shared";
 import { apiFetch } from "./api-fetch";
 
 type CreateResumeInput = {

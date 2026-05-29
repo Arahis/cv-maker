@@ -9,10 +9,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./resume-schema": {
-      "types": "./dist/resume-schema.d.ts",
-      "default": "./dist/resume-schema.js"
     }
   },
   "scripts": {
