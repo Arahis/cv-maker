@@ -3,10 +3,12 @@ import { z } from "zod";
 const passwordFormatMessage =
   "Password must be at least 8 characters and include an uppercase letter, a number, and a special character.";
 
-export const emailSchema = z.preprocess((value) => {
-  if (typeof value !== "string") return value;
-  return value.trim().toLowerCase();
-}, z.email("Invalid email address"));
+export const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, "Email is required")
+  .pipe(z.email("Invalid email address"));
 
 export const signupPasswordSchema = z
   .string()
