@@ -2,28 +2,34 @@
   "name": "api",
   "private": true,
   "type": "module",
+  "overrides": {
+    "@hono/node-server": "^1.19.13"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
+    "@cv-maker/shared": "*",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "argon2": "^0.44.0",
-    "aws-lambda-ric": "^4.0.1",
     "dotenv": "^16.6.1",
     "fastify": "^5.8.4",
+    "jsonwebtoken": "^9.0.3",
     "playwright": "1.58.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
-    "prisma": "^7.5.0",
+    "prisma": "^7.6.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

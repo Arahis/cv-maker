@@ -134,7 +134,7 @@ const ResumeForm = ({
     setCurrentEditorStep((prev) => Math.max(0, prev - 1));
   };
 
-  // Autosave в IndexedDB with debounce
+  // Autosave into IndexedDB with debounce
   // @ts-expect-error: useWatch doesn't infer the type of formData correctly
   useIndexedDBDebouncedSave(resumeId, formData, 2000);
 
