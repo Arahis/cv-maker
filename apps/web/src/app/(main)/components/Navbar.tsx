@@ -25,10 +25,11 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
 
         {/* Links */}
         <div className="flex items-center gap-4">
-          <DonateLink />
-
           <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
-            Your resumes here
+            Your resumes
+          </Link>
+          <Link href="/sign-in" className="link-hover px-4 py-2 font-bold">
+            Sign in
           </Link>
         </div>
       </nav>
