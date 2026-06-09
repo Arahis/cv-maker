@@ -13,6 +13,9 @@ services:
       - ./global-bundle.pem:/app/certs/global-bundle.pem:ro
     expose:
       - "4000"
+    command: >
+      sh -c "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma &&
+         node apps/api/dist/server.js"
   caddy:
     image: caddy:2-alpine
     container_name: cvoop-caddy
