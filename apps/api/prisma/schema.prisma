@@ -26,8 +26,9 @@ model User {
   authAccounts  AuthAccount[]
   resumes       Resume[]
 
-  emailVerificationTokens EmailVerificationToken[]
-  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens   EmailVerificationToken[]
+  passwordResetTokens       PasswordResetToken[]
+  emailVerificationSessions EmailVerificationSession[]
 }
 
 model EmailVerificationToken {
@@ -51,6 +52,21 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationSession {
+  id          String    @id @default(cuid())
+  userId      String
+  sessionHash String    @unique
+  expiresAt   DateTime
+  completedAt DateTime?
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
