@@ -3,10 +3,8 @@ import { hashPassword, verifyPassword } from "../../lib/hash.js";
 import { signAccessToken, verifyAccessToken } from "../../lib/jwt.js";
 import {
   clearRefreshTokenCookie,
-  generateRefreshToken,
   getRefreshTokenExpiresAt,
   getRefreshTokenFromRequest,
-  hashRefreshToken,
   setRefreshTokenCookie,
 } from "../../lib/refresh-token.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
@@ -14,16 +12,34 @@ import { UserRepository } from "../users/user.repository.js";
 import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
 import { getClientIp } from "../../lib/get-client-IP.js";
+import {
+  addHours,
+  addMinutes,
+  generateToken,
+  hashToken,
+} from "../../lib/tokens.js";
+import { sendEmailVerificationEmail } from "../../lib/auth-emails.js";
+import { EmailVerificationTokenRepository } from "../email-verification/email-verification-token.repository.js";
+import { EmailVerificationSessionRepository } from "../email-verification/email-verification-session.repository.js";
+import { setEmailVerificationSessionCookie } from "../../lib/cookies.js";
 
 export class AuthService {
   private readonly users;
   private readonly authAccounts;
   private readonly refreshSessions;
+  private readonly emailVerificationTokens;
+  private readonly emailVerificationSessions;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
     this.authAccounts = new AuthAccountRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
+    this.emailVerificationTokens = new EmailVerificationTokenRepository(
+      app.prisma,
+    );
+    this.emailVerificationSessions = new EmailVerificationSessionRepository(
+      app.prisma,
+    );
   }
 
   async signup(
@@ -42,6 +58,18 @@ export class AuthService {
 
     const passwordHash = await hashPassword(input.password);
 
+    // Gen token for email verification
+    const rawEmailVerificationToken = generateToken();
+    const emailVerificationTokenHash = hashToken(rawEmailVerificationToken);
+    const emailVerificationTokenExpiresAt = addHours(24);
+
+    // Gen token to update email verification session
+    const rawEmailVerificationSessionToken = generateToken();
+    const emailVerificationSessionHash = hashToken(
+      rawEmailVerificationSessionToken,
+    );
+    const emailVerificationSessionExpiresAt = addMinutes(10);
+
     const user = await this.users.create(input.email, passwordHash);
 
     await this.authAccounts.create({
@@ -50,31 +78,38 @@ export class AuthService {
       providerAccountId: user.email,
     });
 
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
-
-    await this.refreshSessions.create({
+    await this.emailVerificationTokens.create({
       userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
+      tokenHash: emailVerificationTokenHash,
+      expiresAt: emailVerificationTokenExpiresAt,
+    });
+
+    await this.emailVerificationSessions.create({
+      userId: user.id,
+      sessionHash: emailVerificationSessionHash,
+      expiresAt: emailVerificationSessionExpiresAt,
       ...(request.headers["user-agent"]
         ? { userAgent: request.headers["user-agent"] }
         : {}),
-      ipAddress: getClientIp(request),
+      ipAddress: getClientIp(request) ?? "unknown", // Fallback to "unknown" if IP cannot be determined
     });
 
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
+    setEmailVerificationSessionCookie(
+      reply,
+      rawEmailVerificationSessionToken,
+      emailVerificationSessionExpiresAt,
+    );
 
-    const accessToken = signAccessToken({
-      sub: user.id,
-      email: user.email,
+    await sendEmailVerificationEmail({
+      to: user.email,
+      token: rawEmailVerificationToken,
     });
 
     reply.code(201);
 
     return {
-      accessToken,
+      message:
+        "Account created. Please check your email to verify your account.",
       user: {
         id: user.id,
         email: user.email,
@@ -105,8 +140,8 @@ export class AuthService {
     }
 
     //TODO: From this part the code almost repeats in both login and signup, we should extract it to a separate method
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+    const rawRefreshToken = generateToken();
+    const refreshTokenHash = hashToken(rawRefreshToken);
     const refreshExpiresAt = getRefreshTokenExpiresAt();
 
     await this.refreshSessions.create({
@@ -143,7 +178,7 @@ export class AuthService {
       return { error: "Missing refresh token" };
     }
 
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+    const refreshTokenHash = hashToken(rawRefreshToken);
 
     const session =
       await this.refreshSessions.findByTokenHash(refreshTokenHash);
@@ -188,7 +223,7 @@ export class AuthService {
     const rawRefreshToken = getRefreshTokenFromRequest(request);
 
     if (rawRefreshToken) {
-      const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+      const refreshTokenHash = hashToken(rawRefreshToken);
 
       try {
         await this.refreshSessions.deleteByTokenHash(refreshTokenHash);
