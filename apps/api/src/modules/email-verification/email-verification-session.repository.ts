@@ -21,4 +21,18 @@ export class EmailVerificationSessionRepository {
       data: input,
     });
   }
+
+  findBySessionHash(
+    sessionHash: string,
+  ): Promise<EmailVerificationSession | null> {
+    return this.prisma.emailVerificationSession.findUnique({
+      where: { sessionHash },
+    });
+  }
+
+  deleteById(id: string): Promise<EmailVerificationSession> {
+    return this.prisma.emailVerificationSession.delete({
+      where: { id },
+    });
+  }
 }

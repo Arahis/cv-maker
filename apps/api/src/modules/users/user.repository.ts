@@ -26,7 +26,7 @@ export class UserRepository {
   markEmailAsVerified(userId: string): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
-      data: { emailVerified: true },
+      data: { emailVerifiedAt: new Date() },
     });
   }
 }
