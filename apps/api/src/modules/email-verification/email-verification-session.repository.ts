@@ -7,7 +7,7 @@ type CreateEmailVerificationSessionInput = {
   userId: string;
   sessionHash: string;
   expiresAt: Date;
-  ipAddress: string;
+  ipAddress?: string;
   userAgent?: string;
 };
 
