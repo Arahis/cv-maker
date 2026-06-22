@@ -35,12 +35,8 @@ export default async function authRoutes(app: FastifyInstance) {
     return authService.login(parsedBody.data, request, reply);
   });
 
-  app.post("/verify-email", async (request, reply) => {
-    return emailVerificationService.verifyEmail(request, reply);
-  });
-
-  app.get("/email-verification/status", async (request, reply) => {
-    return emailVerificationService.getStatus(request, reply);
+  app.post("/verify-email-code", async (request, reply) => {
+    return emailVerificationService.verifyEmailCode(request, reply);
   });
 
   app.post("/refresh", async (request, reply) => {

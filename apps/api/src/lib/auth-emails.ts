@@ -1,33 +1,20 @@
 import { sendEmail } from "./email.js";
 
-function getAppUrl() {
-  const appUrl = process.env.APP_URL;
-
-  if (!appUrl) {
-    throw new Error("APP_URL is not defined");
-  }
-
-  return appUrl;
-}
-
-export async function sendEmailVerificationEmail({
+export async function sendVerificationCodeEmail({
   to,
-  token,
+  code,
 }: {
   to: string;
-  token: string;
+  code: string;
 }) {
-  const verificationUrl = `${getAppUrl()}/verify-email?token=${token}`;
-
   await sendEmail({
     to,
-    subject: "Confirm your Cvoop account",
+    subject: "Confirm your Cvoop email",
     html: `
-      <p>Welcome to Cvoop!</p>
-      <p>Please confirm your email address:</p>
-      <p><a href="${verificationUrl}">Confirm email</a></p>
-      <p>This link expires in 24 hours.</p>
+      <p>Your verification code is:</p>
+      <h1>${code}</h1>
+      <p>This code expires in 10 minutes.</p>
     `,
-    text: `Confirm your Cvoop account: ${verificationUrl}`,
+    text: `Your verification code is: ${code}. This code expires in 10 minutes.`,
   });
 }

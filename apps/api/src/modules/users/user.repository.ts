@@ -23,10 +23,24 @@ export class UserRepository {
       },
     });
   }
+
+  update(userId: string, passwordHash: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  }
+
   markEmailAsVerified(userId: string): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
       data: { emailVerifiedAt: new Date() },
+    });
+  }
+
+  delete(userId: string): Promise<User> {
+    return this.prisma.user.delete({
+      where: { id: userId },
     });
   }
 }

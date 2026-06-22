@@ -1,152 +1,142 @@
 import type { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import { z } from "zod";
-import { generateToken, hashToken } from "../../lib/tokens.js";
+import {
+  generateVerificationCode,
+  getEmailVerificationCodeExpiresAt,
+  hashEmailVerificationCode,
+} from "../../lib/verification-code.js";
+import { EmailVerificationCodeRepository } from "./email-verification.repository.js";
+import { sendVerificationCodeEmail } from "../../lib/auth-emails.js";
+import { emailSchema } from "../../../../../packages/shared/dist/schemas/auth.js";
 import { UserRepository } from "../users/user.repository.js";
-import { EmailVerificationTokenRepository } from "./email-verification-token.repository.js";
-import { EmailVerificationSessionRepository } from "./email-verification-session.repository.js";
-import {
-  clearEmailVerificationSessionCookie,
-  getEmailVerificationSessionTokenFromRequest,
-} from "../../lib/cookies.js";
-import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
-import {
-  getRefreshTokenExpiresAt,
-  setRefreshTokenCookie,
-} from "../../lib/refresh-token.js";
-import { signAccessToken } from "../../lib/jwt.js";
-import { getClientIp } from "../../lib/get-client-IP.js";
+import { AuthAccountRepository } from "../auth/auth.repository.js";
+import { AuthSessionService } from "../auth/auth-session.service.js";
 
-const verifyEmailBodySchema = z.object({
-  token: z.string().min(1),
+export const verifyEmailCodeBodySchema = z.object({
+  email: emailSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Verification code must be 6 digits"),
 });
 
 export class EmailVerificationService {
   private readonly users;
-  private readonly emailVerification;
-  private readonly emailVerificationSessions;
-  private readonly refreshSessions;
+  private readonly emailVerificationCode;
+  private readonly authAccounts;
+  private readonly authSessionService;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
-    this.emailVerification = new EmailVerificationTokenRepository(app.prisma);
-    this.emailVerificationSessions = new EmailVerificationSessionRepository(
+    this.emailVerificationCode = new EmailVerificationCodeRepository(
       app.prisma,
     );
-    this.refreshSessions = new RefreshSessionRepository(app.prisma);
+    this.authAccounts = new AuthAccountRepository(app.prisma);
+    this.authSessionService = new AuthSessionService(app);
   }
 
-  async verifyEmail(request: FastifyRequest, reply: FastifyReply) {
-    const parsedBody = verifyEmailBodySchema.safeParse(request.body);
+  async sendEmailVerificationCode(input: { userId: string; email: string }) {
+    const code = generateVerificationCode();
+
+    const codeHash = hashEmailVerificationCode(input.userId, code);
+
+    const expiresAt = getEmailVerificationCodeExpiresAt();
+
+    await this.emailVerificationCode.upsert({
+      userId: input.userId,
+      codeHash,
+      expiresAt,
+    });
+
+    await sendVerificationCodeEmail({
+      to: input.email,
+      code,
+    });
+  }
+
+  async verifyEmailCode(request: FastifyRequest, reply: FastifyReply) {
+    const parsedBody = verifyEmailCodeBodySchema.safeParse(request.body);
 
     if (!parsedBody.success) {
       reply.code(400);
       return {
-        message: "Invalid request body",
+        error: "Invalid request body",
         issues: parsedBody.error.issues,
       };
     }
 
-    const { token } = parsedBody.data;
+    const { email, code } = parsedBody.data;
 
-    const tokenHash = hashToken(token);
-
-    const verificationToken =
-      await this.emailVerification.findByTokenHash(tokenHash);
-
-    if (!verificationToken) {
-      reply.code(400);
-      return {
-        status: "invalid_token",
-      };
-    }
-
-    if (verificationToken.expiresAt < new Date()) {
-      await this.emailVerification.deleteById(verificationToken.id);
-
-      reply.code(400);
-      return {
-        status: "expired_token",
-      };
-    }
-
-    await this.users.markEmailAsVerified(verificationToken.userId);
-
-    await this.emailVerification.deleteById(verificationToken.id);
-
-    return {
-      status: "verified",
-    };
-  }
-
-  async getStatus(request: FastifyRequest, reply: FastifyReply) {
-    const rawSessionToken = getEmailVerificationSessionTokenFromRequest(request);
-
-    if (!rawSessionToken) {
-      reply.code(401);
-      return {
-        status: "invalid_session",
-      };
-    }
-
-    const sessionHash = hashToken(rawSessionToken);
-    const session =
-      await this.emailVerificationSessions.findBySessionHash(sessionHash);
-
-    if (!session) {
-      clearEmailVerificationSessionCookie(reply);
-      reply.code(401);
-      return {
-        status: "invalid_session",
-      };
-    }
-
-    if (session.expiresAt < new Date()) {
-      clearEmailVerificationSessionCookie(reply);
-      await this.emailVerificationSessions.deleteById(session.id);
-      reply.code(401);
-      return {
-        status: "expired_session",
-      };
-    }
-
-    const user = await this.users.findById(session.userId);
+    const user = await this.users.findByEmail(email);
 
     if (!user) {
-      clearEmailVerificationSessionCookie(reply);
-      await this.emailVerificationSessions.deleteById(session.id);
-      reply.code(404);
+      reply.code(400);
       return {
-        status: "user_not_found",
+        status: "invalid_code",
       };
     }
 
-    if (user.emailVerifiedAt === null) {
+    if (user.emailVerifiedAt) {
+      reply.code(400);
       return {
-        status: "pending",
+        status: "already_verified",
       };
     }
 
-    const rawRefreshToken = generateToken();
-    const refreshTokenHash = hashToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
+    const verificationCode = await this.emailVerificationCode.findByUserId(
+      user.id,
+    );
 
-    await this.refreshSessions.create({
+    if (!verificationCode) {
+      reply.code(400);
+      return {
+        status: "invalid_code",
+      };
+    }
+
+    if (verificationCode.expiresAt < new Date()) {
+      await this.emailVerificationCode.deleteById(verificationCode.id);
+
+      reply.code(400);
+      return {
+        status: "expired_code",
+      };
+    }
+
+    if (verificationCode.attempts >= 5) {
+      await this.emailVerificationCode.deleteById(verificationCode.id);
+
+      reply.code(400);
+      return {
+        status: "too_many_attempts",
+      };
+    }
+
+    const codeHash = hashEmailVerificationCode(user.id, code);
+
+    if (codeHash !== verificationCode.codeHash) {
+      await this.emailVerificationCode.incrementAttempts(verificationCode.id);
+
+      reply.code(400);
+      return {
+        status: "invalid_code",
+      };
+    }
+
+    await this.users.markEmailAsVerified(user.id);
+
+    await this.authAccounts.upsertCredentialsAccount({
       userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request),
+      providerAccountId: user.email,
     });
 
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
-    clearEmailVerificationSessionCookie(reply);
-    await this.emailVerificationSessions.deleteById(session.id);
+    await this.emailVerificationCode.deleteById(verificationCode.id);
 
-    const accessToken = signAccessToken({
-      sub: user.id,
+    const { accessToken } = await this.authSessionService.createSession({
+      userId: user.id,
       email: user.email,
+      request,
+      reply,
     });
 
     return {

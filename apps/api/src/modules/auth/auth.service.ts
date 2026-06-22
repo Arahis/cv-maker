@@ -12,34 +12,18 @@ import { UserRepository } from "../users/user.repository.js";
 import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
 import { getClientIp } from "../../lib/get-client-IP.js";
-import {
-  addHours,
-  addMinutes,
-  generateToken,
-  hashToken,
-} from "../../lib/tokens.js";
-import { sendEmailVerificationEmail } from "../../lib/auth-emails.js";
-import { EmailVerificationTokenRepository } from "../email-verification/email-verification-token.repository.js";
-import { EmailVerificationSessionRepository } from "../email-verification/email-verification-session.repository.js";
-import { setEmailVerificationSessionCookie } from "../../lib/cookies.js";
+import { generateToken, hashToken } from "../../lib/tokens.js";
+import { EmailVerificationService } from "../email-verification/email-verification.service.js";
 
 export class AuthService {
   private readonly users;
-  private readonly authAccounts;
   private readonly refreshSessions;
-  private readonly emailVerificationTokens;
-  private readonly emailVerificationSessions;
+  private readonly emailVerification;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
-    this.authAccounts = new AuthAccountRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
-    this.emailVerificationTokens = new EmailVerificationTokenRepository(
-      app.prisma,
-    );
-    this.emailVerificationSessions = new EmailVerificationSessionRepository(
-      app.prisma,
-    );
+    this.emailVerification = new EmailVerificationService(app);
   }
 
   async signup(
@@ -49,7 +33,7 @@ export class AuthService {
   ) {
     const existingUser = await this.users.findByEmail(input.email);
 
-    if (existingUser) {
+    if (existingUser?.emailVerifiedAt) {
       reply.code(409);
       return {
         error: "Email is already in use",
@@ -58,62 +42,18 @@ export class AuthService {
 
     const passwordHash = await hashPassword(input.password);
 
-    // Gen token for email verification
-    const rawEmailVerificationToken = generateToken();
-    const emailVerificationTokenHash = hashToken(rawEmailVerificationToken);
-    const emailVerificationTokenExpiresAt = addHours(24);
+    const user = existingUser
+      ? await this.users.update(existingUser.id, passwordHash)
+      : await this.users.create(input.email, passwordHash);
 
-    // Gen token to update email verification session
-    const rawEmailVerificationSessionToken = generateToken();
-    const emailVerificationSessionHash = hashToken(
-      rawEmailVerificationSessionToken,
-    );
-    const emailVerificationSessionExpiresAt = addMinutes(10);
-
-    const user = await this.users.create(input.email, passwordHash);
-
-    await this.authAccounts.create({
+    await this.emailVerification.sendEmailVerificationCode({
       userId: user.id,
-      provider: "credentials",
-      providerAccountId: user.email,
+      email: user.email,
     });
-
-    await this.emailVerificationTokens.create({
-      userId: user.id,
-      tokenHash: emailVerificationTokenHash,
-      expiresAt: emailVerificationTokenExpiresAt,
-    });
-
-    await this.emailVerificationSessions.create({
-      userId: user.id,
-      sessionHash: emailVerificationSessionHash,
-      expiresAt: emailVerificationSessionExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request) ?? "unknown", // Fallback to "unknown" if IP cannot be determined
-    });
-
-    setEmailVerificationSessionCookie(
-      reply,
-      rawEmailVerificationSessionToken,
-      emailVerificationSessionExpiresAt,
-    );
-
-    await sendEmailVerificationEmail({
-      to: user.email,
-      token: rawEmailVerificationToken,
-    });
-
-    reply.code(201);
 
     return {
-      message:
-        "Account created. Please check your email to verify your account.",
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      message: "Account created. The code is sent to you email.",
+      status: "verification_required",
     };
   }
 
