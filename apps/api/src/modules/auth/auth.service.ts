@@ -3,10 +3,8 @@ import { hashPassword, verifyPassword } from "../../lib/hash.js";
 import { signAccessToken, verifyAccessToken } from "../../lib/jwt.js";
 import {
   clearRefreshTokenCookie,
-  generateRefreshToken,
   getRefreshTokenExpiresAt,
   getRefreshTokenFromRequest,
-  hashRefreshToken,
   setRefreshTokenCookie,
 } from "../../lib/refresh-token.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
@@ -14,16 +12,18 @@ import { UserRepository } from "../users/user.repository.js";
 import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
 import { getClientIp } from "../../lib/get-client-IP.js";
+import { generateToken, hashToken } from "../../lib/tokens.js";
+import { EmailVerificationService } from "../email-verification/email-verification.service.js";
 
 export class AuthService {
   private readonly users;
-  private readonly authAccounts;
   private readonly refreshSessions;
+  private readonly emailVerification;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
-    this.authAccounts = new AuthAccountRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
+    this.emailVerification = new EmailVerificationService(app);
   }
 
   async signup(
@@ -33,7 +33,7 @@ export class AuthService {
   ) {
     const existingUser = await this.users.findByEmail(input.email);
 
-    if (existingUser) {
+    if (existingUser?.emailVerifiedAt) {
       reply.code(409);
       return {
         error: "Email is already in use",
@@ -42,43 +42,18 @@ export class AuthService {
 
     const passwordHash = await hashPassword(input.password);
 
-    const user = await this.users.create(input.email, passwordHash);
+    const user = existingUser
+      ? await this.users.update(existingUser.id, passwordHash)
+      : await this.users.create(input.email, passwordHash);
 
-    await this.authAccounts.create({
+    await this.emailVerification.sendEmailVerificationCode({
       userId: user.id,
-      provider: "credentials",
-      providerAccountId: user.email,
-    });
-
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
-
-    await this.refreshSessions.create({
-      userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request),
-    });
-
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
-
-    const accessToken = signAccessToken({
-      sub: user.id,
       email: user.email,
     });
 
-    reply.code(201);
-
     return {
-      accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      message: "Account created. The code is sent to you email.",
+      status: "verification_required",
     };
   }
 
@@ -105,8 +80,8 @@ export class AuthService {
     }
 
     //TODO: From this part the code almost repeats in both login and signup, we should extract it to a separate method
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+    const rawRefreshToken = generateToken();
+    const refreshTokenHash = hashToken(rawRefreshToken);
     const refreshExpiresAt = getRefreshTokenExpiresAt();
 
     await this.refreshSessions.create({
@@ -143,7 +118,7 @@ export class AuthService {
       return { error: "Missing refresh token" };
     }
 
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+    const refreshTokenHash = hashToken(rawRefreshToken);
 
     const session =
       await this.refreshSessions.findByTokenHash(refreshTokenHash);
@@ -188,7 +163,7 @@ export class AuthService {
     const rawRefreshToken = getRefreshTokenFromRequest(request);
 
     if (rawRefreshToken) {
-      const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+      const refreshTokenHash = hashToken(rawRefreshToken);
 
       try {
         await this.refreshSessions.deleteByTokenHash(refreshTokenHash);
