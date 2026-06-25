@@ -5,7 +5,7 @@ import { generateToken, hashToken } from "../../lib/tokens.js";
 import {
   getRefreshTokenExpiresAt,
   setRefreshTokenCookie,
-} from "../../lib/refresh-token.js";
+} from "../../lib/refresh-token-cookie.js";
 import { getClientIp } from "../../lib/get-client-IP.js";
 import { signAccessToken } from "../../lib/jwt.js";
 

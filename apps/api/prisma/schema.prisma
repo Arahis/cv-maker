@@ -28,6 +28,7 @@ model User {
 
   emailVerificationCode EmailVerificationCode?
   passwordResetCode     PasswordResetCode?
+  passwordResetSession  PasswordResetSession?
 }
 
 model EmailVerificationCode {
@@ -50,6 +51,18 @@ model PasswordResetCode {
   attempts  Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model PasswordResetSession {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  sessionHash String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

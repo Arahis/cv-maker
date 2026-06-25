@@ -1,7 +1,9 @@
 import { PrismaClient, User } from "../../generated/prisma/client.js";
 
+type UserPrismaClient = Pick<PrismaClient, "user">;
+
 export class UserRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: UserPrismaClient) {}
 
   findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({

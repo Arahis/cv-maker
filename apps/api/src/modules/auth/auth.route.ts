@@ -2,10 +2,12 @@ import type { FastifyInstance } from "fastify";
 import { loginBodySchema, signupBodySchema } from "./auth.schema.js";
 import { AuthService } from "./auth.service.js";
 import { EmailVerificationService } from "../email-verification/email-verification.service.js";
+import { PasswordResetService } from "../password-reset/password-reset.service.js";
 
 export default async function authRoutes(app: FastifyInstance) {
   const authService = new AuthService(app);
   const emailVerificationService = new EmailVerificationService(app);
+  const passwordResetService = new PasswordResetService(app);
 
   app.post("/signup", async (request, reply) => {
     const parsedBody = signupBodySchema.safeParse(request.body);
@@ -37,6 +39,18 @@ export default async function authRoutes(app: FastifyInstance) {
 
   app.post("/verify-email-code", async (request, reply) => {
     return emailVerificationService.verifyEmailCode(request, reply);
+  });
+
+  app.post("/forgot-password", async (request, reply) => {
+    return passwordResetService.sendCode(request, reply);
+  });
+
+  app.post("/forgot-password/verify", async (request, reply) => {
+    return passwordResetService.verifyCode(request, reply);
+  });
+
+  app.post("/forgot-password/reset-password", async (request, reply) => {
+    return passwordResetService.resetPassword(request, reply);
   });
 
   app.post("/refresh", async (request, reply) => {

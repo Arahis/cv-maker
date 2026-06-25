@@ -49,5 +49,29 @@ export const loginBodySchema = z.object({
     .max(40, "Password must be at most 40 characters"),
 });
 
+export const forgotPasswordVerifyBodySchema = z.object({
+  email: emailSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Code must contain 6 digits"),
+});
+
+export const forgotPasswordResetPasswordBodySchema = z
+  .object({
+    password: signupPasswordSchema,
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
 export type SignupBody = z.infer<typeof signupBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;
+export type ForgotPasswordVerifyBody = z.infer<
+  typeof forgotPasswordVerifyBodySchema
+>;
+export type ForgotPasswordResetPasswordBody = z.infer<
+  typeof forgotPasswordResetPasswordBodySchema
+>;

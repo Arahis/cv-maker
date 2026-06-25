@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { env } from "../config/env.js";
 import { FastifyReply, FastifyRequest } from "fastify";
 
