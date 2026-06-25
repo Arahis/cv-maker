@@ -2,12 +2,12 @@ import type { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
   generateVerificationCode,
-  getEmailVerificationCodeExpiresAt,
-  hashEmailVerificationCode,
+  getVerificationCodeExpiresAt,
+  hashVerificationCode,
 } from "../../lib/verification-code.js";
 import { EmailVerificationCodeRepository } from "./email-verification.repository.js";
-import { sendVerificationCodeEmail } from "../../lib/auth-emails.js";
-import { emailSchema } from "../../../../../packages/shared/dist/schemas/auth.js";
+import { sendVerificationCodeEmail } from "../../lib/email/auth-email.js";
+import { emailSchema } from "@cv-maker/shared";
 import { UserRepository } from "../users/user.repository.js";
 import { AuthAccountRepository } from "../auth/auth.repository.js";
 import { AuthSessionService } from "../auth/auth-session.service.js";
@@ -38,9 +38,9 @@ export class EmailVerificationService {
   async sendEmailVerificationCode(input: { userId: string; email: string }) {
     const code = generateVerificationCode();
 
-    const codeHash = hashEmailVerificationCode(input.userId, code);
+    const codeHash = hashVerificationCode(input.userId, code);
 
-    const expiresAt = getEmailVerificationCodeExpiresAt();
+    const expiresAt = getVerificationCodeExpiresAt();
 
     await this.emailVerificationCode.upsert({
       userId: input.userId,
@@ -112,7 +112,7 @@ export class EmailVerificationService {
       };
     }
 
-    const codeHash = hashEmailVerificationCode(user.id, code);
+    const codeHash = hashVerificationCode(user.id, code);
 
     if (codeHash !== verificationCode.codeHash) {
       await this.emailVerificationCode.incrementAttempts(verificationCode.id);

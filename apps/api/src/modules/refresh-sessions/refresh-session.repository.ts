@@ -8,8 +8,10 @@ type CreateRefreshSessionInput = {
   ipAddress?: string;
 };
 
+type RefreshSessionPrismaClient = Pick<PrismaClient, "refreshSession">;
+
 export class RefreshSessionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: RefreshSessionPrismaClient) {}
 
   create(input: CreateRefreshSessionInput): Promise<RefreshSession> {
     return this.prisma.refreshSession.create({
@@ -26,6 +28,12 @@ export class RefreshSessionRepository {
   deleteByTokenHash(tokenHash: string): Promise<RefreshSession> {
     return this.prisma.refreshSession.delete({
       where: { tokenHash },
+    });
+  }
+
+  deleteManyByUserId(userId: string) {
+    return this.prisma.refreshSession.deleteMany({
+      where: { userId },
     });
   }
 }

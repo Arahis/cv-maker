@@ -6,7 +6,7 @@ import {
   getRefreshTokenExpiresAt,
   getRefreshTokenFromRequest,
   setRefreshTokenCookie,
-} from "../../lib/refresh-token.js";
+} from "../../lib/refresh-token-cookie.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
 import { UserRepository } from "../users/user.repository.js";
 import { AuthAccountRepository } from "./auth.repository.js";
