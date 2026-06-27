@@ -1,4 +1,3 @@
-// src/api/auth.ts
 import { apiFetch } from "./api-fetch";
 import { setAccessToken } from "./token";
 
@@ -7,14 +6,24 @@ type LoginSignupInput = {
   password: string;
 };
 
+type VerifyEmailCodeInput = {
+  email: string;
+  code: string;
+};
+
+type SignupRes = {
+  status: string;
+  message: string;
+};
+
 type AuthUser = {
   id: string;
   email: string;
 };
 
 type AuthRes = {
+  status: string;
   accessToken: string;
-  user: AuthUser;
 };
 
 type SuccessRes = {
@@ -26,7 +35,16 @@ type MeRes = {
 };
 
 export async function signup(input: LoginSignupInput) {
-  const res = await apiFetch<AuthRes>("/auth/signup", {
+  const res = await apiFetch<SignupRes>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  return res;
+}
+
+export async function verifyEmailCode(input: VerifyEmailCodeInput) {
+  const res = await apiFetch<AuthRes>("/auth/verify-email-code", {
     method: "POST",
     body: JSON.stringify(input),
   });

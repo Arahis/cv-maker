@@ -52,7 +52,8 @@ export class AuthService {
     });
 
     return {
-      message: "Account created. The code is sent to you email.",
+      message:
+        "The code has been sent to your email. Please verify your email to complete the signup process.",
       status: "verification_required",
     };
   }

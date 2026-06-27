@@ -1,7 +1,70 @@
+"use client";
+
 import Logo from "@/assets/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import DonateLink from "./DonateLink";
+import { Button } from "@/components/ui/button";
+import { useLogout, useMeQuery } from "@/queries/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOutIcon } from "lucide-react";
+
+export function HeaderAuth() {
+  const { data: me, isLoading } = useMeQuery();
+  const logoutMutation = useLogout();
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (me) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="link-hover"
+            disabled={logoutMutation.isPending}
+          >
+            {logoutMutation.isPending ? "Logging out..." : "My Account"}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{me.user.email}</DropdownMenuLabel>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => logoutMutation.mutate()}
+          >
+            <LogOutIcon />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button variant="ghost" asChild className="px-4 py-2 font-bold">
+        <Link href="/sign-in" className="link-hover">
+          Sign in
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
 const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
   return (
@@ -28,9 +91,7 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
           <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
             Your resumes
           </Link>
-          <Link href="/sign-in" className="link-hover px-4 py-2 font-bold">
-            Sign in
-          </Link>
+          <HeaderAuth />
         </div>
       </nav>
     </header>
