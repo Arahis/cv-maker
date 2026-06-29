@@ -13,7 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useVerifyCode } from "@/queries/auth";
 import {
   InputOTP,
   InputOTPGroup,
@@ -32,6 +31,11 @@ export const verifyCodeBodySchema = z.object({
 
 export type VerifyCodeBody = z.infer<typeof verifyCodeBodySchema>;
 
+type CodeOTPFormProps = {
+  submitForm: (data: VerifyCodeBody & { email: string }) => Promise<unknown>;
+  isPending: boolean;
+};
+
 const useCodeOTPForm = () =>
   useForm({
     resolver: zodResolver(verifyCodeBodySchema),
@@ -40,11 +44,9 @@ const useCodeOTPForm = () =>
     },
   });
 
-const CodeOTPForm = () => {
+const CodeOTPForm = ({ submitForm, isPending }: CodeOTPFormProps) => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-
-  const { mutateAsync, isPending } = useVerifyCode();
 
   const [isNavigating, setIsNavigating] = useState(false);
   const isLoading = isPending || isNavigating;
@@ -61,7 +63,7 @@ const CodeOTPForm = () => {
 
     try {
       // Success and redirect are handled in the useVerifyCode hook
-      await mutateAsync({ ...data, email });
+      await submitForm({ ...data, email });
     } catch (error) {
       setIsNavigating(false);
       console.error(error);

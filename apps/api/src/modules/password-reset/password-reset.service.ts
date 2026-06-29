@@ -24,23 +24,21 @@ import {
 import { generateToken, hashToken } from "../../lib/tokens.js";
 import { hashPassword } from "../../lib/hash.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
+import { AuthSessionService } from "../auth/auth-session.service.js";
 
 export const requestPasswordResetCodeBodySchema = z.object({
   email: emailSchema,
-  code: z
-    .string()
-    .trim()
-    .regex(/^\d{6}$/, "Verification code must be 6 digits"),
-  password: signupPasswordSchema,
 });
 
 export class PasswordResetService {
   private readonly users;
   private readonly passwordResetCodes;
+  private readonly authSessionService;
 
   constructor(private readonly app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
     this.passwordResetCodes = new PasswordResetCodeRepository(app.prisma);
+    this.authSessionService = new AuthSessionService(app);
   }
 
   async sendCode(request: FastifyRequest, reply: FastifyReply) {
@@ -62,7 +60,7 @@ export class PasswordResetService {
 
     // status: "ok" is returned even if the user does not exist to prevent user enumeration attacks.
     if (!user) {
-      return { status: "ok" };
+      return { status: "ok", message: "The code has been sent to your email." };
     }
 
     const code = generateVerificationCode();
@@ -88,7 +86,7 @@ export class PasswordResetService {
       code,
     });
 
-    return { status: "ok" };
+    return { status: "ok", message: "The code has been sent to your email." };
   }
 
   async verifyCode(request: FastifyRequest, reply: FastifyReply) {
@@ -242,22 +240,36 @@ export class PasswordResetService {
 
     const passwordHash = await hashPassword(password);
 
-    await this.app.prisma.$transaction(async (tx) => {
+    const user = await this.app.prisma.$transaction(async (tx) => {
       const usersTX = new UserRepository(tx);
       const passwordResetSessionsTX = new PasswordResetSessionRepository(tx);
       const refreshSessionsTX = new RefreshSessionRepository(tx);
 
-      await usersTX.update(passwordResetSession.userId, passwordHash);
+      const updatedUser = await usersTX.update(
+        passwordResetSession.userId,
+        passwordHash,
+      );
 
       await passwordResetSessionsTX.deleteById(passwordResetSession.id);
 
       await refreshSessionsTX.deleteManyByUserId(passwordResetSession.userId);
+
+      return updatedUser;
     });
 
     clearPasswordResetSessionCookie(reply);
 
+    // authSessionService.createSession also sets the refresh token cookie in the response, so we don't need to do it here
+    const { accessToken } = await this.authSessionService.createSession({
+      userId: user.id,
+      email: user.email,
+      request,
+      reply,
+    });
+
     return {
       status: "password_reset_success",
+      accessToken,
     };
   }
 }

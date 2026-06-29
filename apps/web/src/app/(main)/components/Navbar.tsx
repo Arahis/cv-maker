@@ -22,7 +22,15 @@ export function HeaderAuth() {
   const logoutMutation = useLogout();
 
   if (isLoading) {
-    return null;
+    return (
+      <Button
+        variant="ghost"
+        disabled
+        className="px-4 py-2 font-bold opacity-70"
+      >
+        My Account
+      </Button>
+    );
   }
 
   if (me) {

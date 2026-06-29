@@ -1,4 +1,13 @@
-import { getMe, login, logout, signup, verifyEmailCode } from "@/api/auth";
+import {
+  forgotPassword,
+  getMe,
+  login,
+  logout,
+  resetPassword,
+  signup,
+  verifyEmailCode,
+  verifyResetPasswordCode,
+} from "@/api/auth";
 import { setAccessToken } from "@/api/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -37,6 +46,53 @@ export function useVerifyCode() {
       setAccessToken(data.accessToken);
       queryClient.invalidateQueries({ queryKey: ["me"] });
       router.push("/resumes");
+    },
+  });
+}
+
+export function useForgotPassword() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: forgotPassword,
+
+    onSuccess: (data, input) => {
+      if (data.status === "ok") {
+        router.push(
+          `/forgot-password/verify-code?email=${encodeURIComponent(input.email)}`,
+        );
+      }
+    },
+  });
+}
+
+export function useVerifyResetPasswordCode() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: verifyResetPasswordCode,
+
+    onSuccess: (data) => {
+      if (data.status === "code_verified") {
+        router.push(`/forgot-password/reset`);
+      }
+    },
+  });
+}
+
+export function useResetPassword() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: resetPassword,
+
+    onSuccess: (data) => {
+      if (data.status === "password_reset_success") {
+        setAccessToken(data.accessToken);
+        queryClient.invalidateQueries({ queryKey: ["me"] });
+        router.push("/resumes");
+      }
     },
   });
 }

@@ -132,6 +132,7 @@ export class EmailVerificationService {
 
     await this.emailVerificationCode.deleteById(verificationCode.id);
 
+    // authSessionService.createSession also sets the refresh token cookie in the response, so we don't need to do it here
     const { accessToken } = await this.authSessionService.createSession({
       userId: user.id,
       email: user.email,

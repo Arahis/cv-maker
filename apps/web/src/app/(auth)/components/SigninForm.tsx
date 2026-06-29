@@ -80,7 +80,7 @@ const SigninForm = () => {
                 </FormControl>
                 <FieldDescription>
                   Forgot your password?{" "}
-                  <Link href="/reset-password">Reset it here</Link>
+                  <Link href="/forgot-password">Reset it here</Link>
                 </FieldDescription>
                 <FormMessage />
               </FormItem>
