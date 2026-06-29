@@ -1,5 +1,13 @@
 import CodeFormSignup from "../../components/CodeFormSignup";
 
-export default function CodeOTPPage() {
-  return <CodeFormSignup />;
+type PageProps = {
+  searchParams: Promise<{
+    email?: string;
+  }>;
+};
+
+export default async function CodeOTPPage({ searchParams }: PageProps) {
+  const { email } = await searchParams;
+
+  return <CodeFormSignup email={email ?? ""} />;
 }
