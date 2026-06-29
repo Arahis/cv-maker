@@ -1,5 +1,5 @@
-import CodeOTPForm from "../../components/CodeOTPForm";
+import CodeFormSignup from "../../components/CodeFormSignup";
 
 export default function CodeOTPPage() {
-  return <CodeOTPForm />;
+  return <CodeFormSignup />;
 }
