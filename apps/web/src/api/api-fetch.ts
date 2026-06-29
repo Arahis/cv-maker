@@ -14,9 +14,6 @@ async function refreshAccessToken(): Promise<string | null> {
   const res = await fetch(`${API_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
   });
 
   if (!res.ok) {
@@ -43,15 +40,20 @@ async function apiFetchInternal<T>(
   shouldTryRefresh: boolean,
 ): Promise<T> {
   const token = getAccessToken();
+  const headers = new Headers(options.headers);
+
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   });
 
   if (res.status === 401 && shouldTryRefresh && path !== "/auth/refresh") {

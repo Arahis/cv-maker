@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/queries/auth";
 import { SignupBody, signupBodySchema } from "@cv-maker/shared";
 import Link from "next/link";
+import { useState } from "react";
 
 const useSignupForm = () =>
   useForm({
@@ -27,11 +28,21 @@ const useSignupForm = () =>
   });
 
 const SignupForm = () => {
-  const { mutate, isPending } = useSignUp();
+  const { mutateAsync, isPending } = useSignUp();
   const form = useSignupForm();
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const onSubmit = (data: SignupBody) => {
-    mutate(data);
+  const isLoading = isPending || isNavigating;
+
+  const onSubmit = async (data: SignupBody) => {
+    setIsNavigating(true);
+
+    try {
+      await mutateAsync(data);
+    } catch (error) {
+      setIsNavigating(false);
+      console.error(error);
+    }
     // TODO: handle success and error cases, e.g., show a notification or redirect on success
   };
 
@@ -85,8 +96,8 @@ const SignupForm = () => {
             )}
           />
 
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Creating ..." : "Create Account"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Creating ..." : "Create Account"}
           </Button>
           <FieldDescription className="px-6 text-center">
             Already have an account? <Link href="/sign-in">Sign in</Link>

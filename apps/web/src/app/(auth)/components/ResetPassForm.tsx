@@ -16,6 +16,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginBodySchema } from "@cv-maker/shared";
 import Link from "next/link";
+import { useForgotPassword } from "@/queries/auth";
+import { useState } from "react";
 
 const useSigninForm = () =>
   useForm({
@@ -26,18 +28,28 @@ const useSigninForm = () =>
   });
 
 const ResetPassForm = () => {
+  const { mutateAsync, isPending } = useForgotPassword();
   const form = useSigninForm();
-  const isPending = false; // TODO: implement password reset mutation and set this state accordingly
 
-  // const onSubmit = (data: LoginBody["email"]) => {
-  //   mutate(data);
-  // };
+  const [isNavigating, setIsNavigating] = useState(false);
+  const isLoading = isPending || isNavigating;
+
+  const onSubmit = async (data: { email: string }) => {
+    setIsNavigating(true);
+
+    try {
+      mutateAsync(data);
+    } catch (error) {
+      setIsNavigating(false);
+      console.error(error);
+    }
+  };
 
   return (
     <Form {...form}>
       <form
         className="flex flex-col gap-6"
-        // onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         <FieldGroup>
           <div className="flex flex-col items-center gap-1 text-center">
@@ -63,8 +75,8 @@ const ResetPassForm = () => {
             )}
           />
 
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Resetting password..." : "Reset Password"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Sending reset code..." : "Reset Password"}
           </Button>
           <FieldDescription className="px-6 text-center">
             You can return to <Link href="/sign-in">Sign in</Link> or{" "}

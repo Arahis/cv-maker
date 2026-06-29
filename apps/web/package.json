@@ -43,6 +43,7 @@
     "fastest-levenshtein": "^1.0.16",
     "html-react-parser": "^5.2.11",
     "idb": "^8.0.3",
+    "input-otp": "^1.4.2",
     "jotai": "^2.15.1",
     "lexical": "^0.39.0",
     "lucide-react": "^0.488.0",

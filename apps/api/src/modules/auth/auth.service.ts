@@ -3,27 +3,30 @@ import { hashPassword, verifyPassword } from "../../lib/hash.js";
 import { signAccessToken, verifyAccessToken } from "../../lib/jwt.js";
 import {
   clearRefreshTokenCookie,
-  getRefreshTokenExpiresAt,
   getRefreshTokenFromRequest,
-  setRefreshTokenCookie,
 } from "../../lib/refresh-token-cookie.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
 import { UserRepository } from "../users/user.repository.js";
-import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
-import { getClientIp } from "../../lib/get-client-IP.js";
-import { generateToken, hashToken } from "../../lib/tokens.js";
+import { hashToken } from "../../lib/tokens.js";
 import { EmailVerificationService } from "../email-verification/email-verification.service.js";
+import { PasswordResetSessionRepository } from "../password-reset/password-reset-session.repository.js";
+import { clearPasswordResetSessionCookie } from "../../lib/reset-pass-cookie.js";
+import { AuthSessionService } from "./auth-session.service.js";
 
 export class AuthService {
   private readonly users;
   private readonly refreshSessions;
   private readonly emailVerification;
+  private readonly passwordResetSessions;
+  private readonly authSessionService;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
+    this.passwordResetSessions = new PasswordResetSessionRepository(app.prisma);
     this.emailVerification = new EmailVerificationService(app);
+    this.authSessionService = new AuthSessionService(app);
   }
 
   async signup(
@@ -52,7 +55,8 @@ export class AuthService {
     });
 
     return {
-      message: "Account created. The code is sent to you email.",
+      message:
+        "The code has been sent to your email. Please verify your email to complete the signup process.",
       status: "verification_required",
     };
   }
@@ -79,34 +83,20 @@ export class AuthService {
       };
     }
 
-    //TODO: From this part the code almost repeats in both login and signup, we should extract it to a separate method
-    const rawRefreshToken = generateToken();
-    const refreshTokenHash = hashToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
+    await this.passwordResetSessions.deleteByUserId(user.id);
 
-    await this.refreshSessions.create({
+    clearPasswordResetSessionCookie(reply);
+
+    // authSessionService.createSession also sets the refresh token cookie in the response, so we don't need to do it here
+    const { accessToken } = await this.authSessionService.createSession({
       userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request),
-    });
-
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
-
-    const accessToken = signAccessToken({
-      sub: user.id,
       email: user.email,
+      request,
+      reply,
     });
 
     return {
       accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
     };
   }
 
