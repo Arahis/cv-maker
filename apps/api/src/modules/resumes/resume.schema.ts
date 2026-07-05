@@ -11,6 +11,12 @@ export const createResumeBodySchema = z.object({
   media: resumeMediaSchema,
 });
 
+export const saveLocalResumeToAccountBodySchema = createResumeBodySchema.extend(
+  {
+    localResumeId: z.string().min(1, "Local resume id is required"),
+  },
+);
+
 export const updateResumeBodySchema = z
   .object({
     data: resumeSchema.partial().optional(),
@@ -27,3 +33,6 @@ export const resumeParamsSchema = z.object({
 
 export type CreateResumeBody = z.infer<typeof createResumeBodySchema>;
 export type UpdateResumeBody = z.infer<typeof updateResumeBodySchema>;
+export type SaveLocalResumeToAccountBody = z.infer<
+  typeof saveLocalResumeToAccountBodySchema
+>;

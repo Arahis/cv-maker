@@ -10,7 +10,7 @@ import Education from "./forms/Education";
 import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./ResumeSteps";
-import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
+import { useIndexedDBDebouncedUpdate } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm as ResumeFormProps } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,7 @@ const ResumeForm = ({
 
   // Autosave into IndexedDB with debounce
   // @ts-expect-error: useWatch doesn't infer the type of formData correctly
-  useIndexedDBDebouncedSave(resumeId, formData, 2000);
+  useIndexedDBDebouncedUpdate(resumeId, formData, 2000);
 
   return (
     <div className="mx-4 py-4 md:mx-12">

@@ -1,7 +1,7 @@
 "use client";
 
 import { resumeTemplates } from "@/components/templates/components";
-import { loadResume, ResumeRecord } from "@/lib/indexedDB";
+import { getLocalResume, ResumeRecord } from "@/lib/indexedDB";
 import { notFound, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 
@@ -39,7 +39,7 @@ const PrintClient = () => {
     const checkResumeExists = async () => {
       if (!id) return;
 
-      const resume = await loadResume(id);
+      const resume = await getLocalResume(id);
 
       if (!!resume) {
         setResumeData(resume);
@@ -62,7 +62,7 @@ const PrintClient = () => {
     <ResumeWrapperDOM>
       <Template
         data={resumeData.data}
-        photo={resumeData.media.avatar?.cropped}
+        photo={resumeData.media.avatar?.cropped ?? null}
       />
     </ResumeWrapperDOM>
   );

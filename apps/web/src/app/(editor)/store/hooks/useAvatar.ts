@@ -1,27 +1,18 @@
 import { useAtom } from "jotai";
 import { avatarCroppedAtom, avatarOriginalAtom } from "../atoms/avatarAtoms";
-import { loadResume, saveMediaData } from "@/lib/indexedDB";
 import { Avatar } from "../types";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import {
+  useLocalResumeQuery,
+  useUpdateLocalResumeMediaMutation,
+} from "@/queries/resumes/localResumes";
 
 const useAvatar = (resumeId: string) => {
   const [original, setOriginal] = useAtom(avatarOriginalAtom);
   const [cropped, setCropped] = useAtom(avatarCroppedAtom);
-
-  const loadAvatar = useCallback(async () => {
-    const resume = await loadResume(resumeId);
-
-    if (!resume) return;
-
-    const media = resume.media?.avatar;
-    if (media?.original) {
-      setOriginal(media.original);
-    }
-
-    if (media?.cropped) {
-      setCropped(media.cropped);
-    }
-  }, [resumeId, setCropped, setOriginal]);
+  const { data: resume } = useLocalResumeQuery(resumeId);
+  const { mutateAsync: updateLocalResumeMedia } =
+    useUpdateLocalResumeMediaMutation();
 
   const setAvatarMedia = async ({
     original,
@@ -33,15 +24,27 @@ const useAvatar = (resumeId: string) => {
     setOriginal(original);
     setCropped(cropped);
 
-    await saveMediaData(resumeId, {
-      original,
-      cropped,
+    await updateLocalResumeMedia({
+      resumeId,
+      data: {
+        original,
+        cropped,
+      },
     });
   };
 
   useEffect(() => {
-    loadAvatar();
-  }, [loadAvatar]);
+    if (!resume) return;
+
+    const media = resume.media?.avatar;
+    if (media?.original) {
+      setOriginal(media.original);
+    }
+
+    if (media?.cropped) {
+      setCropped(media.cropped);
+    }
+  }, [resume, setOriginal, setCropped]);
 
   return { original, cropped, setAvatarMedia };
 };

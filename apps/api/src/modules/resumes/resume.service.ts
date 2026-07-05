@@ -2,7 +2,11 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { verifyAccessToken } from "../../lib/jwt.js";
 import { UserRepository } from "../users/user.repository.js";
 import { ResumeRepository } from "./resume.repository.js";
-import type { CreateResumeBody, UpdateResumeBody } from "./resume.schema.js";
+import type {
+  CreateResumeBody,
+  SaveLocalResumeToAccountBody,
+  UpdateResumeBody,
+} from "./resume.schema.js";
 
 export class ResumeService {
   private readonly users;
@@ -58,6 +62,30 @@ export class ResumeService {
       template: input.template,
       data: input.data,
       media: input.media,
+    });
+
+    reply.code(201);
+
+    return { resume };
+  }
+
+  async createFromLocal(
+    input: SaveLocalResumeToAccountBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const userId = await this.getAuthenticatedUserId(request, reply);
+
+    if (!userId) {
+      return { error: "Unauthorized" };
+    }
+
+    const resume = await this.resumes.upsertResumeFromLocal({
+      userId,
+      template: input.template,
+      data: input.data,
+      media: input.media,
+      localResumeId: input.localResumeId,
     });
 
     reply.code(201);

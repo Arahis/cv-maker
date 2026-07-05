@@ -147,7 +147,7 @@ export const socialLinksSchema = z.object({
 export type SocialLinksForm = z.infer<typeof socialLinksSchema>;
 
 const skillItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   name: z.string().min(2, "Skill name must be at least 2 characters"),
 });
 
@@ -169,19 +169,18 @@ export const summarySchema = z.object({
 export type SummaryForm = z.infer<typeof summarySchema>;
 
 const customSectionItemFieldsSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   title: optionalString,
   value: optionalString,
 });
 
 const customSectionItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   sectionName: optionalString,
   sectionItems: z.array(customSectionItemFieldsSchema).optional(),
 });
 
 export const customSectionSchema = z.object({
-  id: z.string().optional(),
   customSections: z.array(customSectionItemSchema).optional(),
 });
 
@@ -201,15 +200,19 @@ export const resumeSchema = z.object({
 
 export type ResumeForm = z.infer<typeof resumeSchema>;
 
-export const resumeTemplateSchema = z.enum([
-  "template1",
-  "template2",
-  "template3",
-  "template4",
-  "template5",
-]);
+export const DEFAULT_RESUME_TEMPLATE: ResumeTemplate = "template1";
+export const resumeTemplateSchema = z
+  .custom<ResumeTemplate>(
+    (value) => {
+      return typeof value === "string" && /^template[1-9]\d*$/.test(value);
+    },
+    {
+      message: "Invalid resume template",
+    },
+  )
+  .default(DEFAULT_RESUME_TEMPLATE);
 
-export type ResumeTemplate = z.infer<typeof resumeTemplateSchema>;
+export type ResumeTemplate = `template${number}`;
 
 export const resumeMediaSchema = z
   .object({

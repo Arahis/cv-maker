@@ -3,8 +3,10 @@ import { ResumeService } from "./resume.service.js";
 import {
   createResumeBodySchema,
   resumeParamsSchema,
+  saveLocalResumeToAccountBodySchema,
   updateResumeBodySchema,
 } from "./resume.schema.js";
+import z from "zod";
 
 export default async function resumeRoutes(app: FastifyInstance) {
   const resumeService = new ResumeService(app);
@@ -39,6 +41,23 @@ export default async function resumeRoutes(app: FastifyInstance) {
     }
 
     return resumeService.create(parsedBody.data, request, reply);
+  });
+
+  // Work. here right NOW
+  app.post("/save-local-to-account", async (request, reply) => {
+    const parsedBody = saveLocalResumeToAccountBodySchema.safeParse(
+      request.body,
+    );
+
+    if (!parsedBody.success) {
+      reply.code(400);
+      return {
+        error: "Invalid request body",
+        issues: parsedBody.error.issues,
+      };
+    }
+
+    return resumeService.createFromLocal(parsedBody.data, request, reply);
   });
 
   app.patch("/:id", async (request, reply) => {

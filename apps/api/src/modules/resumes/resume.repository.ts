@@ -27,6 +27,14 @@ type CreateResumeInput = {
   media: Prisma.InputJsonValue;
 };
 
+type CreateFromLocalResumeInput = {
+  userId: string;
+  template: string;
+  data: Prisma.InputJsonValue;
+  media: Prisma.InputJsonValue;
+  localResumeId: string;
+};
+
 type UpdateResumeInput = {
   template?: string;
   data?: Prisma.InputJsonValue;
@@ -54,6 +62,27 @@ export class ResumeRepository {
       data: {
         userId: input.userId,
         template: input.template,
+        data: input.data,
+        media: input.media,
+      },
+    });
+  }
+
+  upsertResumeFromLocal(input: CreateFromLocalResumeInput): Promise<Resume> {
+    return this.prisma.resume.upsert({
+      where: {
+        userId_localResumeId: {
+          userId: input.userId,
+          localResumeId: input.localResumeId,
+        },
+      },
+      create: {
+        userId: input.userId,
+        localResumeId: input.localResumeId,
+        data: input.data,
+        media: input.media,
+      },
+      update: {
         data: input.data,
         media: input.media,
       },

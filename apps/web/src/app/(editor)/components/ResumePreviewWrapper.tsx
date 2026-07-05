@@ -1,4 +1,3 @@
-import { saveResumeTemplate } from "@/lib/indexedDB";
 import { isDesktopLike } from "@/lib/utils";
 import Toolbar from "./toolbar";
 import ResumePreview from "./ResumePreview";
@@ -10,10 +9,8 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import {
-  ResumeTemplateKey,
-  resumeTemplates,
-} from "@/components/templates/components";
+import { ResumeTemplateKey } from "@/components/templates/components";
+import { useUpdateLocalResumeTemplateMutation } from "@/queries/resumes/localResumes";
 
 const ResumePreviewWrapper = ({
   resumeId,
@@ -28,10 +25,13 @@ const ResumePreviewWrapper = ({
   onPrintClick: () => void;
   setResumeTemplate: (t: ResumeTemplateKey) => void;
 }) => {
+  const { mutateAsync: updateTemplate } =
+    useUpdateLocalResumeTemplateMutation();
+
   const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
     setResumeTemplate(newVar);
     try {
-      await saveResumeTemplate(resumeId, newVar);
+      await updateTemplate({ resumeId, template: newVar });
     } catch (e) {
       console.error("Failed to save resume variant", e);
     }
@@ -57,7 +57,7 @@ const ResumePreviewWrapper = ({
               key={resumeTemplate}
               resumeId={resumeId}
               ref={ref}
-              resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
+              template={resumeTemplate}
             />
           </div>
         </DrawerContent>
@@ -76,7 +76,7 @@ const ResumePreviewWrapper = ({
         key={resumeTemplate}
         resumeId={resumeId}
         ref={ref}
-        resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
+        template={resumeTemplate}
       />
     </div>
   );

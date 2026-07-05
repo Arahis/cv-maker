@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
-import { deleteResume, loadAllResumes, ResumeRecord } from "@/lib/indexedDB";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { resumeTemplates } from "@/components/templates/components";
+import {
+  DEFAULT_RESUME_TEMPLATE_COMPONENT,
+  resumeTemplates,
+} from "@/components/templates/components";
+import { ResumeController, useResumeController } from "./useResumeController";
+import { Resume } from "@/api/resumes";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -21,37 +23,56 @@ const getScaleForA4 = (scale: number) => {
   };
 };
 
-const ResumeClient = () => {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [createdResumes, setCreatedResumes] = React.useState<ResumeRecord[]>(
-    [],
-  );
+const ResumeCard = ({
+  resume,
+  deleteResume,
+  openResume,
+}: Omit<ResumeController, "resumes" | "isLoading"> & { resume: Resume }) => {
+  const { id, template, data, source } = resume;
+  const Template =
+    resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
+
   const { scaledWidth, scaledHeight, scale, width, height } =
     getScaleForA4(0.25);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const resume = await loadAllResumes();
-        if (resume) {
-          setCreatedResumes(resume);
-        }
-        setIsLoading(false);
-      } catch (e) {
-        console.error("Failed to load resumes", e);
-      }
-    };
-    load();
-  }, []);
+  return (
+    <div key={id}>
+      <div
+        onClick={() => openResume({ resumeId: id, source })}
+        className="cursor-pointer"
+      >
+        <div
+          className={cn("flex rounded-md border-2 p-1 hover:border-blue-300")}
+        >
+          <div
+            className="cursor-pointer overflow-hidden"
+            style={{ width: scaledWidth, height: scaledHeight }}
+          >
+            <div
+              className="origin-top-left transform text-left"
+              style={{ width: width, height: height, scale: scale }}
+            >
+              <Template data={data} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-2 flex items-center justify-between px-2">
+        <p className="text-sm">{data.title || "Untitled"}</p>
+        <Button
+          onClick={() => deleteResume({ resumeId: id, source })}
+          variant="ghost"
+          size="icon"
+        >
+          <Trash2 />
+        </Button>
+      </div>
+    </div>
+  );
+};
 
-  const handleDeleteResumeFromList = async (id: string) => {
-    try {
-      await deleteResume(id);
-      setCreatedResumes((prev) => prev.filter((r) => r.id !== id));
-    } catch (e) {
-      console.error("Failed to delete resume", e);
-    }
-  };
+const ResumeClient = () => {
+  const { isLoading, resumes, ...controls } = useResumeController();
 
   if (isLoading) {
     return (
@@ -61,7 +82,7 @@ const ResumeClient = () => {
     );
   }
 
-  if (createdResumes.length === 0) {
+  if (resumes.length === 0) {
     return (
       <div className="py-24 leading-7">
         <p>Looks like it is a lot of empty space here!</p>
@@ -72,46 +93,9 @@ const ResumeClient = () => {
 
   return (
     <div className="mx-auto flex w-[60%] flex-wrap justify-center gap-4">
-      {createdResumes.map((r) => {
-        const Template = resumeTemplates[r.template || "template1"];
-
-        return (
-          <div key={r.id}>
-            <Link
-              prefetch={false}
-              href={`/resume-editor?id=${encodeURIComponent(r.id)}`}
-            >
-              <div
-                className={cn(
-                  "flex rounded-md border-2 p-1 hover:border-blue-300",
-                )}
-              >
-                <div
-                  className="cursor-pointer overflow-hidden"
-                  style={{ width: scaledWidth, height: scaledHeight }}
-                >
-                  <div
-                    className="origin-top-left transform text-left"
-                    style={{ width: width, height: height, scale: scale }}
-                  >
-                    <Template data={r.data} />
-                  </div>
-                </div>
-              </div>
-            </Link>
-            <div className="mt-2 flex items-center justify-between px-2">
-              <p className="text-sm">{r.data.title || "Untitled"}</p>
-              <Button
-                onClick={() => handleDeleteResumeFromList(r.id)}
-                variant="ghost"
-                size="icon"
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          </div>
-        );
-      })}
+      {resumes.map((r) => (
+        <ResumeCard key={r.id} resume={r} {...controls} />
+      ))}
     </div>
   );
 };

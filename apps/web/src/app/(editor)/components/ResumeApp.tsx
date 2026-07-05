@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
-import { loadResume } from "@/lib/indexedDB";
+import { getLocalResume } from "@/lib/indexedDB";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
@@ -75,7 +75,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   // If it doesn't exist, show a not found page
   useEffect(() => {
     const checkResumeExists = async () => {
-      const resume = await loadResume(resumeId);
+      const resume = await getLocalResume(resumeId);
       if (resume) {
         f.reset(resume.data);
         setResumeTemplate(resume.template);

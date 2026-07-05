@@ -6,6 +6,10 @@ import { ResumeForm } from "@/lib/validation";
 import { useFormContext, useWatch } from "react-hook-form";
 import usePaginateDom from "./hooks/usePaginateDom";
 import useAvatar from "../../store/hooks/useAvatar";
+import {
+  getResumeTemplateComponent,
+  ResumeTemplateKey,
+} from "@/components/templates/components";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
@@ -71,15 +75,15 @@ const ResumeWrapperDOM = ({
 
 const ResumePreview = ({
   resumeId,
-  resumeComponent,
+  template,
   ref: contentRefForPrint,
 }: {
   resumeId: string;
-  resumeComponent: React.ElementType;
+  template: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
 }) => {
-  const { control } = useFormContext();
-  const formData = useWatch<ResumeForm>({ control });
+  const { control } = useFormContext<ResumeForm>();
+  const formData = useWatch({ control }) as ResumeForm;
   const { cropped } = useAvatar(resumeId);
 
   const ref = useRef<HTMLDivElement>(null);
@@ -95,7 +99,7 @@ const ResumePreview = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scaleControls = useStageScale(containerRef);
 
-  const Variant = resumeComponent;
+  const Variant = getResumeTemplateComponent(template);
 
   return (
     <div
