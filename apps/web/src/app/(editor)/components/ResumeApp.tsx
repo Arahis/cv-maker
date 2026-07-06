@@ -7,13 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
 import { notFound } from "next/navigation";
-import { getLocalResume } from "@/lib/indexedDB";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
 import { isDesktopLike } from "@/lib/utils";
 import { useReactToPrint } from "react-to-print";
 import Loading from "@/components/Loading";
+import { useResumeEditorController } from "../useResumeEditorController";
 
 const useResumeForm = () =>
   useForm({
@@ -60,7 +60,7 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
 };
 
 const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
-  const [valid, setValid] = useState<null | boolean>(null);
+  const { isLoading, resume } = useResumeEditorController(resumeId);
   const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
 
@@ -74,20 +74,13 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   // If it exists, load the data into the form
   // If it doesn't exist, show a not found page
   useEffect(() => {
-    const checkResumeExists = async () => {
-      const resume = await getLocalResume(resumeId);
-      if (resume) {
-        f.reset(resume.data);
-        setResumeTemplate(resume.template);
-      }
-      setValid(!!resume);
-    };
-
-    checkResumeExists();
+    if (resume) {
+      f.reset(resume.data);
+      setResumeTemplate(resume.template);
+    }
   }, [resumeId, f]);
 
-  if (valid === null) return <Loading />;
-  if (!valid) return notFound();
+  if (isLoading) return <Loading />;
 
   const handlePrintClick = async () => {
     const device = isDesktopLike() ? "web" : "touch";

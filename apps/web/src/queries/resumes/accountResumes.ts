@@ -35,7 +35,10 @@ export function useCreateResume() {
   });
 }
 
-export function useGetResume(options: { resumeId: string; enabled?: boolean }) {
+export function useAccountResumeQuery(options: {
+  resumeId: string;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: accountResumeKeys.detail(options.resumeId),
     queryFn: () => getResume(options.resumeId),

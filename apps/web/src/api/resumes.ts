@@ -1,14 +1,15 @@
-import { ResumeForm, ResumeMedia, ResumeTemplate } from "@cv-maker/shared";
+import { ResumeForm, ResumeMedia } from "@cv-maker/shared";
 import { apiFetch } from "./api-fetch";
+import { ResumeTemplateKey } from "@/components/templates/components";
 
 type CreateResumeInput = {
-  template: ResumeTemplate;
+  template: ResumeTemplateKey;
   data: ResumeForm;
   media: ResumeMedia;
 };
 
 type CreateFromLocalResumeInput = {
-  template: ResumeTemplate;
+  template: ResumeTemplateKey;
   data: ResumeForm;
   media: ResumeMedia;
   localResumeId: string;
@@ -71,11 +72,16 @@ export async function updateResume({
 }
 
 // TODO: Proper type the input
-export async function saveLocalResumeToAccount(input: CreateFromLocalResumeInput) {
-  const response = await apiFetch<ResumeResponse>(`/resumes/save-local-to-account`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+export async function saveLocalResumeToAccount(
+  input: CreateFromLocalResumeInput,
+) {
+  const response = await apiFetch<ResumeResponse>(
+    `/resumes/save-local-to-account`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
 
   return response.resume;
 }

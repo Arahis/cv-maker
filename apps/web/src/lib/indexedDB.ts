@@ -44,7 +44,7 @@ export async function getLocalResume(
   resumeId: string,
 ): Promise<ResumeRecord | null> {
   const db = await getDB();
-  return await db.get(STORE_NAME, resumeId);
+  return (await db.get(STORE_NAME, resumeId)) || null;
 }
 
 export async function createLocalResume({
