@@ -8,6 +8,12 @@ type CreateResumeInput = {
   media: ResumeMedia;
 };
 
+type UpdateResumeInput = {
+  template?: ResumeTemplateKey;
+  data?: Partial<ResumeForm>;
+  media?: ResumeMedia;
+};
+
 type CreateFromLocalResumeInput = {
   template: ResumeTemplateKey;
   data: ResumeForm;
@@ -61,7 +67,7 @@ export async function updateResume({
   input,
 }: {
   resumeId: string;
-  input: CreateResumeInput;
+  input: UpdateResumeInput;
 }) {
   const response = await apiFetch<ResumeResponse>(`/resumes/${resumeId}`, {
     method: "PATCH",

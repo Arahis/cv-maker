@@ -9,12 +9,16 @@ import { isLanguageFilled, isSocialFilled } from "../../lib/isSectionFilled";
 import { formatUrl } from "../../utils/formatUrl";
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
-  const skillsToArray = Object.entries(skills).map(([head, items]) => ({
-    head: head === "technical" ? "Technical" : "Professional",
-    items,
-  }));
-
-  if (!skills.personal?.length && !skills.technical?.length) return null;
+  const skillsToArray = [
+    {
+      head: "Technical",
+      items: skills?.technical ?? [],
+    },
+    {
+      head: "Professional",
+      items: skills?.personal ?? [],
+    },
+  ].filter((item) => item.items.length > 0);
 
   return (
     <Paginate.Columns>
@@ -23,7 +27,7 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
         title="Skills"
         items={skillsToArray}
         renderItem={(item) => {
-          if (item.items.length === 0) return null;
+          if (!item?.head) return null;
 
           return (
             <div key={item.head} className="mb-2">

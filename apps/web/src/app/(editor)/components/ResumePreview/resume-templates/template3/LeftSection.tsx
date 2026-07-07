@@ -18,12 +18,16 @@ function Separator({ size = "md" }: { size?: keyof typeof heightMap }) {
 }
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
-  const skillsToArray = Object.entries(skills).map(([head, items]) => ({
-    head: head === "technical" ? "Stack" : "Strengths",
-    items,
-  }));
-
-  if (!skills.personal?.length && !skills.technical?.length) return null;
+  const skillsToArray = [
+    {
+      head: "Stack",
+      items: skills?.technical ?? [],
+    },
+    {
+      head: "Strengths",
+      items: skills?.personal ?? [],
+    },
+  ].filter((item) => item.items.length > 0);
 
   return (
     <Paginate.Columns>
@@ -33,7 +37,7 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
         title="Skills"
         items={skillsToArray}
         renderItem={(item) => {
-          if (item.items.length === 0) return null;
+          if (!item?.head) return null;
 
           return (
             <div key={item.head} className="not-last:mb-4">

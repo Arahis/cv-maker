@@ -1,13 +1,14 @@
 "use client";
 
 import { Resume, Source } from "@/api/resumes";
+import { getAccessToken } from "@/api/token";
 import { ResumeRecord } from "@/lib/indexedDB";
 import { useMeQuery } from "@/queries/auth";
 import { useAccountResumeQuery } from "@/queries/resumes/accountResumes";
 import { useLocalResumeQuery } from "@/queries/resumes/localResumes";
 
 type ResumeEditorControllerState = {
-  isLoading: boolean;
+  status: "loading" | "ready" | "not_found" | "forbidden";
   source: Source | null;
   resume: Resume | ResumeRecord | null;
 };
@@ -23,12 +24,12 @@ export function useResumeEditorController(
   const { data: accountResume, isLoading: isAccountResumeLoading } =
     useAccountResumeQuery({
       resumeId: resumeId ?? "",
-      enabled: Boolean(resumeId) && meQuery.isSuccess,
+      enabled: Boolean(resumeId) && meQuery.data?.user !== undefined,
     });
 
   if (localResume) {
     return {
-      isLoading: false,
+      status: "ready",
       source: "local",
       resume: localResume,
     };
@@ -36,7 +37,7 @@ export function useResumeEditorController(
 
   if (accountResume) {
     return {
-      isLoading: false,
+      status: "ready",
       source: "account",
       resume: accountResume,
     };
@@ -44,14 +45,23 @@ export function useResumeEditorController(
 
   if (meQuery.isLoading || isLocalResumeLoading || isAccountResumeLoading) {
     return {
-      isLoading: true,
+      status: "loading",
       source: null,
       resume: null,
     };
   }
 
+  // State when the user logs out and tries to access a resume that is only available in their account
+  if (!meQuery.data?.user) {
+    return {
+      status: "forbidden",
+      source: "account",
+      resume: null,
+    };
+  }
+
   return {
-    isLoading: false,
+    status: "not_found",
     source: null,
     resume: null,
   };

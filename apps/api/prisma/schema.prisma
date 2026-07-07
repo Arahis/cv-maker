@@ -104,8 +104,6 @@ model Resume {
   id            String   @id @default(cuid())
   localResumeId String?
   userId        String
-  title         String?
-  description   String?
   template      String   @default("template1")
   data          Json
   media         Json

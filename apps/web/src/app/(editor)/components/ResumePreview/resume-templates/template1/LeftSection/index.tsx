@@ -40,26 +40,29 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   );
 };
 
-const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
-  const skillsToArray = Object.entries(items).map(([head, items]) => ({
-    head,
-    items,
-  }));
-
-  if (items.personal?.length === 0 && items.technical?.length === 0)
-    return null;
+const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
+  const skillsToArray = [
+    {
+      head: "Technical",
+      items: skills?.technical ?? [],
+    },
+    {
+      head: "Professional",
+      items: skills?.personal ?? [],
+    },
+  ].filter((item) => item.items.length > 0);
 
   return (
     <SectionItem
       title="Skills"
       items={skillsToArray}
       renderItem={(item) => {
-        if (item?.items?.length === 0) return null;
+        if (!item?.head) return null;
 
         return (
           <React.Fragment key={item.head}>
             <p className="font-bold">#{item.head}</p>
-            <p>{item.items.map((i) => i.name).join(", ")}</p>
+            <p>{item?.items?.map((i) => i.name).join(", ")}</p>
           </React.Fragment>
         );
       }}
@@ -158,7 +161,7 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
     >
       <Education items={educations} />
 
-      <Skills items={skills} />
+      <Skills skills={skills} />
 
       <SocialLinks items={socialLinks} />
 

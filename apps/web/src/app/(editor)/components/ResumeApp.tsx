@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
@@ -14,13 +14,14 @@ import { isDesktopLike } from "@/lib/utils";
 import { useReactToPrint } from "react-to-print";
 import Loading from "@/components/Loading";
 import { useResumeEditorController } from "../useResumeEditorController";
+import { defaultFormValues } from "@/lib/formDefaults";
 
 const useResumeForm = () =>
   useForm({
     resolver: zodResolver(resumeSchema),
     shouldUnregister: false,
     mode: "onBlur",
-    // defaultValues,
+    defaultValues: defaultFormValues(),
   });
 
 // TODO: Migrate to the new PDF generation API and uncomment this function
@@ -60,9 +61,10 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
 };
 
 const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
-  const { isLoading, resume } = useResumeEditorController(resumeId);
+  const { status, resume, source } = useResumeEditorController(resumeId);
   const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
+  const router = useRouter();
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +72,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     contentRef,
   });
 
-  // Check if the resume exists in IndexedDB
+  // Check if the resume exists
   // If it exists, load the data into the form
   // If it doesn't exist, show a not found page
   useEffect(() => {
@@ -78,9 +80,16 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
       f.reset(resume.data);
       setResumeTemplate(resume.template);
     }
-  }, [resumeId, f]);
+  }, [resumeId, f, resume?.data, resume?.template]);
 
-  if (isLoading) return <Loading />;
+  useEffect(() => {
+    if (status === "forbidden") {
+      router.replace("/resumes");
+    }
+  }, [status, router]);
+
+  if (status === "not_found") return notFound();
+  if (status === "loading" || status === "forbidden") return <Loading />;
 
   const handlePrintClick = async () => {
     const device = isDesktopLike() ? "web" : "touch";
@@ -108,7 +117,11 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     <div className="flex h-full min-h-0 w-full">
       <Form {...f}>
         <div className="w-full overflow-y-auto border-r md:w-1/2">
-          <ResumeForm resumeId={resumeId} onPrintClick={handlePrintClick} />
+          <ResumeForm
+            resumeId={resumeId}
+            onPrintClick={handlePrintClick}
+            source={source}
+          />
         </div>
 
         <ResumePreviewWrapper

@@ -20,6 +20,15 @@ export const avatarCropDataSchema = z
 
 export type AvatarCropDataForm = z.infer<typeof avatarCropDataSchema>;
 
+const resumeEmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((value) => value === "" || z.email().safeParse(value).success, {
+    message: "Invalid email format",
+  })
+  .optional();
+
 export const personalInfoSchema = z.object({
   avatarCropData: avatarCropDataSchema,
   firstName: optionalString,
@@ -70,12 +79,7 @@ export const personalInfoSchema = z.object({
       }
     })
     .optional(),
-  email: z.preprocess((v) => {
-    const s = String(v ?? "")
-      .trim()
-      .toLowerCase();
-    return s === "" ? undefined : s;
-  }, z.email("Invalid email format").optional()),
+  email: resumeEmailSchema,
 });
 
 export type PersonalInfoForm = z.infer<typeof personalInfoSchema>;

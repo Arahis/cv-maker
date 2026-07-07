@@ -10,12 +10,14 @@ import Education from "./forms/Education";
 import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./ResumeSteps";
-import { useIndexedDBDebouncedUpdate } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm as ResumeFormProps } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import OtherInfo from "./forms/OtherInfo";
 import { cn } from "@/lib/utils";
+import { useResumeAutosaveController } from "../useResumeAutosaveController";
+import { Source } from "@/api/resumes";
+import { ResumeForm as ResumeFormType } from "@/lib/validation";
 
 const resumeSections: {
   title: string;
@@ -111,12 +113,14 @@ const ResumeStepsControl = ({
 const ResumeForm = ({
   resumeId,
   onPrintClick,
+  source,
 }: {
   resumeId: string;
   onPrintClick: () => void;
+  source: Source | null;
 }) => {
   const f = useFormContext<ResumeFormProps>();
-  const formData = useWatch({ control: f.control });
+  const formData = useWatch({ control: f.control }) as ResumeFormType;
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
@@ -134,9 +138,12 @@ const ResumeForm = ({
     setCurrentEditorStep((prev) => Math.max(0, prev - 1));
   };
 
-  // Autosave into IndexedDB with debounce
-  // @ts-expect-error: useWatch doesn't infer the type of formData correctly
-  useIndexedDBDebouncedUpdate(resumeId, formData, 2000);
+  useResumeAutosaveController({
+    resumeId,
+    source,
+    data: formData,
+    debounceMs: 2000,
+  });
 
   return (
     <div className="mx-4 py-4 md:mx-12">
