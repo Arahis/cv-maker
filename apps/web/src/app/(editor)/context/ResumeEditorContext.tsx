@@ -1,7 +1,9 @@
 import { createContext, useContext } from "react";
+import { ResumeMedia } from "@/lib/validation";
 
 type ResumeEditorContextType = {
   resumeId: string;
+  saveMedia: (media: ResumeMedia) => Promise<void>;
 };
 
 const ResumeEditorContext = createContext<ResumeEditorContextType | null>(null);

@@ -10,33 +10,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { ResumeTemplateKey } from "@/components/templates/components";
-import { useUpdateLocalResumeTemplateMutation } from "@/queries/resumes/localResumes";
 
 const ResumePreviewWrapper = ({
   resumeId,
   resumeTemplate,
   ref,
   onPrintClick,
-  setResumeTemplate,
+  onResumeTemplateChange,
 }: {
   resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   onPrintClick: () => void;
-  setResumeTemplate: (t: ResumeTemplateKey) => void;
+  onResumeTemplateChange: (t: ResumeTemplateKey) => void;
 }) => {
-  const { mutateAsync: updateTemplate } =
-    useUpdateLocalResumeTemplateMutation();
-
-  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
-    setResumeTemplate(newVar);
-    try {
-      await updateTemplate({ resumeId, template: newVar });
-    } catch (e) {
-      console.error("Failed to save resume variant", e);
-    }
-  };
-
   if (!isDesktopLike()) {
     return (
       <Drawer direction="bottom">

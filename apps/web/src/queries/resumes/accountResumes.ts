@@ -5,6 +5,8 @@ import {
   getResumeList,
   saveLocalResumeToAccount,
   updateResume,
+  updateResumeMedia,
+  updateResumeTemplate,
 } from "@/api/resumes";
 import { deleteLocalResume, getLocalResume } from "@/lib/indexedDB";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -51,6 +53,34 @@ export function useUpdateResume() {
 
   return useMutation({
     mutationFn: updateResume,
+    onSuccess: (_, input) => {
+      queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
+      queryClient.invalidateQueries({
+        queryKey: accountResumeKeys.detail(input.resumeId),
+      });
+    },
+  });
+}
+
+export function useUpdateResumeTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateResumeTemplate,
+    onSuccess: (_, input) => {
+      queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
+      queryClient.invalidateQueries({
+        queryKey: accountResumeKeys.detail(input.resumeId),
+      });
+    },
+  });
+}
+
+export function useUpdateResumeMedia() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateResumeMedia,
     onSuccess: (_, input) => {
       queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
       queryClient.invalidateQueries({

@@ -5,7 +5,9 @@ import { ResumeRepository } from "./resume.repository.js";
 import type {
   CreateResumeBody,
   SaveLocalResumeToAccountBody,
+  UpdateResumeMediaBody,
   UpdateResumeBody,
+  UpdateResumeTemplateBody,
 } from "./resume.schema.js";
 
 export class ResumeService {
@@ -114,8 +116,58 @@ export class ResumeService {
 
     const resume = await this.resumes.update(id, {
       ...(input.data ? { data: input.data } : {}),
-      ...(input.media ? { media: input.media } : {}),
-      ...(input.template ? { template: input.template } : {}),
+    });
+
+    return { resume };
+  }
+
+  async updateTemplate(
+    id: string,
+    input: UpdateResumeTemplateBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const userId = await this.getAuthenticatedUserId(request, reply);
+
+    if (!userId) {
+      return { error: "Unauthorized" };
+    }
+
+    const existingResume = await this.resumes.findByUserIdAndId(userId, id);
+
+    if (!existingResume) {
+      reply.code(404);
+      return { error: "Resume not found" };
+    }
+
+    const resume = await this.resumes.update(id, {
+      template: input.template,
+    });
+
+    return { resume };
+  }
+
+  async updateMedia(
+    id: string,
+    input: UpdateResumeMediaBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const userId = await this.getAuthenticatedUserId(request, reply);
+
+    if (!userId) {
+      return { error: "Unauthorized" };
+    }
+
+    const existingResume = await this.resumes.findByUserIdAndId(userId, id);
+
+    if (!existingResume) {
+      reply.code(404);
+      return { error: "Resume not found" };
+    }
+
+    const resume = await this.resumes.update(id, {
+      media: input.media,
     });
 
     return { resume };

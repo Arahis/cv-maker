@@ -9,9 +9,7 @@ type CreateResumeInput = {
 };
 
 type UpdateResumeInput = {
-  template?: ResumeTemplateKey;
   data?: Partial<ResumeForm>;
-  media?: ResumeMedia;
 };
 
 type CreateFromLocalResumeInput = {
@@ -72,6 +70,39 @@ export async function updateResume({
   const response = await apiFetch<ResumeResponse>(`/resumes/${resumeId}`, {
     method: "PATCH",
     body: JSON.stringify(input),
+  });
+
+  return response.resume;
+}
+
+export async function updateResumeTemplate({
+  resumeId,
+  template,
+}: {
+  resumeId: string;
+  template: ResumeTemplateKey;
+}) {
+  const response = await apiFetch<ResumeResponse>(
+    `/resumes/${resumeId}/template`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ template }),
+    },
+  );
+
+  return response.resume;
+}
+
+export async function updateResumeMedia({
+  resumeId,
+  media,
+}: {
+  resumeId: string;
+  media: ResumeMedia;
+}) {
+  const response = await apiFetch<ResumeResponse>(`/resumes/${resumeId}/media`, {
+    method: "PATCH",
+    body: JSON.stringify({ media }),
   });
 
   return response.resume;

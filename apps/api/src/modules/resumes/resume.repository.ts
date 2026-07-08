@@ -1,16 +1,8 @@
-import type { PrismaClient, Prisma } from "../../generated/prisma/client.js";
-
-export type Resume = {
-  id: string;
-  userId: string;
-  title: string | null;
-  description: string | null;
-  template: string;
-  data: Prisma.JsonValue;
-  media: Prisma.JsonValue;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import type {
+  PrismaClient,
+  Prisma,
+  Resume,
+} from "../../generated/prisma/client.js";
 
 type ResumeDelegate = {
   findMany(args: unknown): Promise<Resume[]>;
@@ -79,10 +71,12 @@ export class ResumeRepository {
       create: {
         userId: input.userId,
         localResumeId: input.localResumeId,
+        template: input.template,
         data: input.data,
         media: input.media,
       },
       update: {
+        template: input.template,
         data: input.data,
         media: input.media,
       },

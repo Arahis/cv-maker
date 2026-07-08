@@ -14,19 +14,30 @@ const PhotoUploader = ({
   onChange: (v: AvatarCropDataForm) => void;
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { resumeId } = useResumeEditor();
+  const { saveMedia } = useResumeEditor();
 
-  const { cropped, original, setAvatarMedia } = useAvatar(resumeId);
+  const { cropped, original, setAvatarState } = useAvatar();
 
   const handleOnChange = async (
     originalPhoto: string,
     croppedPhoto: string,
     cropData: AvatarCropDataForm,
   ) => {
-    await setAvatarMedia({
-      original: originalPhoto,
-      cropped: croppedPhoto,
+    setAvatarState({
+      original: originalPhoto || undefined,
+      cropped: croppedPhoto || undefined,
     });
+
+    await saveMedia({
+      avatar:
+        originalPhoto || croppedPhoto
+          ? {
+              original: originalPhoto || undefined,
+              cropped: croppedPhoto || undefined,
+            }
+          : undefined,
+    });
+
     onChange(cropData);
   };
 

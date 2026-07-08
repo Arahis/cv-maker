@@ -15,9 +15,9 @@ import { ResumeForm as ResumeFormProps } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import OtherInfo from "./forms/OtherInfo";
 import { cn } from "@/lib/utils";
-import { useResumeAutosaveController } from "../useResumeAutosaveController";
 import { Source } from "@/api/resumes";
 import { ResumeForm as ResumeFormType } from "@/lib/validation";
+import { useResumePersistenceController } from "../useResumePersistenceController";
 
 const resumeSections: {
   title: string;
@@ -138,7 +138,7 @@ const ResumeForm = ({
     setCurrentEditorStep((prev) => Math.max(0, prev - 1));
   };
 
-  useResumeAutosaveController({
+  const { saveMedia } = useResumePersistenceController({
     resumeId,
     source,
     data: formData,
@@ -154,7 +154,7 @@ const ResumeForm = ({
         setNextStep={handleGoToNextItem}
         setPrevStep={handleGoToPrevItem}
       />
-      <ResumeEditorProvider value={{ resumeId }}>
+      <ResumeEditorProvider value={{ resumeId, saveMedia }}>
         <div className="rounded-2xl border-2 border-gray-100 p-6">
           <Component {...(slug === "finalize" ? { onPrintClick } : {})} />
         </div>

@@ -15,6 +15,8 @@ import { useReactToPrint } from "react-to-print";
 import Loading from "@/components/Loading";
 import { useResumeEditorController } from "../useResumeEditorController";
 import { defaultFormValues } from "@/lib/formDefaults";
+import { useResumePersistenceController } from "../useResumePersistenceController";
+import useAvatar from "../store/hooks/useAvatar";
 
 const useResumeForm = () =>
   useForm({
@@ -62,25 +64,38 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
 
 const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   const { status, resume, source } = useResumeEditorController(resumeId);
+  const { saveTemplate } = useResumePersistenceController({
+    resumeId,
+    source,
+  });
+
   const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
   const router = useRouter();
+  const { setAvatarState } = useAvatar();
 
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
+    setResumeTemplate(newVar);
+    try {
+      await saveTemplate(newVar);
+    } catch (e) {
+      console.error("Failed to save resume variant", e);
+    }
+  };
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
   });
 
-  // Check if the resume exists
-  // If it exists, load the data into the form
-  // If it doesn't exist, show a not found page
   useEffect(() => {
     if (resume) {
       f.reset(resume.data);
       setResumeTemplate(resume.template);
+      setAvatarState(resume.media?.avatar);
     }
-  }, [resumeId, f, resume?.data, resume?.template]);
+  }, [resumeId, f, resume?.data, resume?.template, resume?.media, setAvatarState]);
 
   useEffect(() => {
     if (status === "forbidden") {
@@ -127,7 +142,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
         <ResumePreviewWrapper
           resumeId={resumeId}
           resumeTemplate={resumeTemplate}
-          setResumeTemplate={setResumeTemplate}
+          onResumeTemplateChange={onResumeTemplateChange}
           onPrintClick={handlePrintClick}
           ref={contentRef}
         />

@@ -84,7 +84,7 @@ const ResumePreview = ({
 }) => {
   const { control } = useFormContext<ResumeForm>();
   const formData = useWatch({ control }) as ResumeForm;
-  const { cropped } = useAvatar(resumeId);
+  const { cropped } = useAvatar();
 
   const ref = useRef<HTMLDivElement>(null);
 
