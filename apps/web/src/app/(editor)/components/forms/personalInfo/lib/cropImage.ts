@@ -31,7 +31,7 @@ export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: Area,
   rotation: number = 0,
-): Promise<string | null> {
+): Promise<Blob | null> {
   const image = await createImage(imageSrc);
 
   const canvas = document.createElement("canvas");
@@ -82,7 +82,13 @@ export async function getCroppedImg(
     pixelCrop.height,
   );
 
-  return croppedCanvas.toDataURL("image/jpeg", 0.9);
+  return await new Promise((resolve) => {
+    croppedCanvas.toBlob(
+      (blob) => resolve(blob),
+      "image/webp",
+      0.9,
+    );
+  });
 }
 
 async function toBlob(input: string): Promise<Blob> {
@@ -91,19 +97,11 @@ async function toBlob(input: string): Promise<Blob> {
   return await response.blob();
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
-}
-
 export async function compressImage(
   src: string,
   maxWidth: number = 900,
   quality: number = 0.7,
-): Promise<string> {
+): Promise<Blob> {
   const blob = await toBlob(src);
 
   const bitmap = await createImageBitmap(blob, {
@@ -117,9 +115,9 @@ export async function compressImage(
   ctx.drawImage(bitmap, 0, 0);
 
   const compressedBlob = await canvas.convertToBlob({
-    type: "image/jpeg",
+    type: "image/webp",
     quality,
   });
 
-  return blobToBase64(compressedBlob);
+  return compressedBlob;
 }

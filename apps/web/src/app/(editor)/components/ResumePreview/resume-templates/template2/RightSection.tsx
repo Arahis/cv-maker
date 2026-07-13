@@ -42,21 +42,24 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   );
 };
 
-const Skills = ({ items = {} }: { items: ResumeForm["skills"] }) => {
-  const skillsToArray = Object.entries(items).map(([head, items]) => ({
-    head: head === "technical" ? "Stack" : "Strengths",
-    items,
-  }));
-
-  if (items.personal?.length === 0 && items.technical?.length === 0)
-    return null;
+const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
+  const skillsToArray = [
+    {
+      head: "Stack",
+      items: skills?.technical ?? [],
+    },
+    {
+      head: "Strengths",
+      items: skills?.personal ?? [],
+    },
+  ].filter((item) => item.items.length > 0);
 
   return (
     <SectionItem
       title="Skills"
       items={skillsToArray}
       renderItem={(item) => {
-        if (item.items.length === 0) return null;
+        if (!item?.head) return null;
 
         return (
           <div key={item.head} className="not-last:mb-4">
@@ -156,7 +159,7 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
     <Paginate.Section className="space-y-8">
       <Education items={educations} />
 
-      <Skills items={skills} />
+      <Skills skills={skills} />
 
       <SocialLinks items={socialLinks} />
 

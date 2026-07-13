@@ -3,7 +3,6 @@ import { Slider } from "@/components/ui/slider";
 import { useEffect, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { PhotoCropperProps } from "./PhotoUploadModal";
-import { AvatarCropDataForm } from "@/lib/validation";
 import { avatarCropInitialValues } from "@/lib/formDefaults";
 import { Trash2 } from "lucide-react";
 
@@ -12,28 +11,19 @@ const PhotoCropper = ({
   onReset,
   onSave,
   onDelete,
-  cropValue,
   shouldReset,
 }: {
   src: string;
   onReset: () => void;
   onSave: (v: PhotoCropperProps) => void;
   onDelete: () => void;
-  cropValue: AvatarCropDataForm;
   shouldReset: boolean;
 }) => {
-  const {
-    zoom: initialZoom,
-    rotation: initialRotation,
-    x: initialX,
-    y: initialY,
-  } = cropValue || avatarCropInitialValues;
-
-  const [zoom, setZoom] = useState(initialZoom);
-  const [rotation, setRotation] = useState(initialRotation);
+  const [zoom, setZoom] = useState(avatarCropInitialValues.zoom);
+  const [rotation, setRotation] = useState(avatarCropInitialValues.rotation);
   const [crop, setCrop] = useState({
-    x: initialX,
-    y: initialY,
+    x: avatarCropInitialValues.x,
+    y: avatarCropInitialValues.y,
   });
 
   // TODO: Check later if the condition inside can be removed

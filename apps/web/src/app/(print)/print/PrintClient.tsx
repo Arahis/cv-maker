@@ -1,7 +1,7 @@
 "use client";
 
 import { resumeTemplates } from "@/components/templates/components";
-import { loadResume, ResumeRecord } from "@/lib/indexedDB";
+import { getLocalResume, ResumeRecord } from "@/lib/indexedDB";
 import { notFound, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 
@@ -31,6 +31,7 @@ const PrintClient = () => {
   const id = searchParams.get("id");
 
   const [resumeData, setResumeData] = useState<ResumeRecord | undefined>();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   // Check if the resume exists in IndexedDB
   // If it exists, load the data into the form
@@ -39,7 +40,7 @@ const PrintClient = () => {
     const checkResumeExists = async () => {
       if (!id) return;
 
-      const resume = await loadResume(id);
+      const resume = await getLocalResume(id);
 
       if (!!resume) {
         setResumeData(resume);
@@ -53,6 +54,22 @@ const PrintClient = () => {
     setTimeout(() => window.print(), 300);
   }, []);
 
+  useEffect(() => {
+    const croppedAvatar = resumeData?.media.avatar;
+
+    if (!croppedAvatar?.croppedBlob) {
+      setPhotoUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(croppedAvatar.croppedBlob);
+    setPhotoUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [resumeData]);
+
   if (resumeData === undefined) return <p>Loading...</p>;
   if (!resumeData || !id) return notFound();
 
@@ -62,7 +79,7 @@ const PrintClient = () => {
     <ResumeWrapperDOM>
       <Template
         data={resumeData.data}
-        photo={resumeData.media.avatar?.cropped}
+        photo={photoUrl}
       />
     </ResumeWrapperDOM>
   );

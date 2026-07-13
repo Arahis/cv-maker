@@ -3,7 +3,7 @@ import { LeafMeta, PageRenderer, VNodeBuilder } from "./paginator";
 
 type PaginatedDomProps = {
   ref: React.RefObject<HTMLElement | null>;
-  photo?: string | null;
+  photo: string | null;
 };
 
 const PAGE_HEIGHT = 1123;

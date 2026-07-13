@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import PhotoCropper from "./PhotoCropper";
 import { getCroppedImg } from "./lib/cropImage";
 import { Area } from "react-easy-crop";
-import { AvatarCropDataForm } from "@/lib/validation";
-import { avatarCropInitialValues } from "@/lib/formDefaults";
+import type { Avatar } from "../../../store/types";
 
 export type PhotoCropperProps = {
   croppedPixels: Area;
@@ -68,7 +67,7 @@ const DropZone = ({
   );
 };
 
-const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
+const CameraZone = ({ onCapture }: { onCapture: (f: Blob) => void }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -88,8 +87,17 @@ const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const base64 = canvas.toDataURL("image/jpeg", 0.9);
-    onCapture(base64);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          return;
+        }
+
+        onCapture(blob);
+      },
+      "image/webp",
+      0.9,
+    );
   };
 
   async function startCamera() {
@@ -158,62 +166,73 @@ const CameraZone = ({ onCapture }: { onCapture: (f: string) => void }) => {
 };
 
 const DialogInner = ({
-  value, // Cropped data
   onChange,
-  originalPhoto,
+  currentPhoto,
   onModalClose,
 }: {
-  value: AvatarCropDataForm;
-  originalPhoto: string | null;
+  currentPhoto: Avatar | null;
   onModalClose: (v: boolean) => void;
-  onChange: (
-    originalPhoto: string,
-    croppedPhoto: string,
-    cropData: AvatarCropDataForm,
-  ) => void;
+  onChange: (croppedPhoto: Blob | null) => void;
 }) => {
-  // Local state for working with temporary uploaded file before submitting it
-  const [src, setSrc] = useState<string | null>(originalPhoto || null);
+  const [src, setSrc] = useState<string | null>(null);
   const [shouldResetCrop, setShouldResetCrop] = useState(false);
+  const objectUrlRef = useRef<string | null>(null);
 
-  console.log({ src });
+  const resetObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
 
-  const handleFile = (file: File | string) => {
+  const handleFile = (file: File | Blob | string) => {
     setShouldResetCrop(true);
     if (typeof file === "string") {
+      resetObjectUrl();
       setSrc(file);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSrc(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    resetObjectUrl();
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+    setSrc(objectUrl);
   };
 
   useEffect(() => {
-    if (originalPhoto) {
-      setShouldResetCrop(false);
-      setSrc(originalPhoto);
+    setShouldResetCrop(true);
+    if (!currentPhoto) {
+      resetObjectUrl();
+      setSrc(null);
+      return;
     }
-  }, [originalPhoto]);
+
+    handleFile(currentPhoto);
+  }, [currentPhoto]);
+
+  useEffect(() => {
+    return () => {
+      resetObjectUrl();
+    };
+  }, []);
 
   if (src) {
-    // We have original image SRC, we have cropData for cropping and saving into the main form in DB, and we get cropped image
-    const handleResetChosenFile = () => setSrc(null);
+    const handleResetChosenFile = () => {
+      resetObjectUrl();
+      setSrc(null);
+    };
 
     const handleDeleteFile = () => {
       handleResetChosenFile();
-      onChange("", "", { ...avatarCropInitialValues });
+      onChange(null);
       onModalClose(false);
     };
 
     const handleSaveFiles = async (cropData: PhotoCropperProps) => {
-      const { croppedPixels, cropped, zoom, rotation } = cropData;
+      const { croppedPixels, rotation } = cropData;
       const croppedImage = await getCroppedImg(src, croppedPixels, rotation);
       if (croppedImage) {
-        onChange(src, croppedImage, { ...cropped, zoom, rotation });
+        onChange(croppedImage);
       }
       onModalClose(false);
     };
@@ -221,7 +240,6 @@ const DialogInner = ({
     return (
       <PhotoCropper
         src={src}
-        cropValue={value}
         onReset={handleResetChosenFile}
         onSave={handleSaveFiles}
         onDelete={handleDeleteFile}
@@ -249,19 +267,13 @@ const DialogInner = ({
 const PhotoUploadModal = ({
   open,
   onModalChange,
-  value,
   onChange,
-  originalPhoto,
+  currentPhoto,
 }: {
   open: boolean;
   onModalChange: (v: boolean) => void;
-  value: AvatarCropDataForm;
-  originalPhoto: string | null;
-  onChange: (
-    originalPhoto: string,
-    croppedPhoto: string,
-    cropData: AvatarCropDataForm,
-  ) => void;
+  currentPhoto: Avatar | null;
+  onChange: (croppedPhoto: Blob | null) => void;
 }) => {
   return (
     <Dialog open={open} onOpenChange={() => onModalChange(!open)}>
@@ -270,9 +282,8 @@ const PhotoUploadModal = ({
           <DialogTitle>Add your latest photo</DialogTitle>
         </DialogHeader>
         <DialogInner
-          value={value}
           onChange={onChange}
-          originalPhoto={originalPhoto}
+          currentPhoto={currentPhoto}
           onModalClose={onModalChange}
         />
       </DialogContent>

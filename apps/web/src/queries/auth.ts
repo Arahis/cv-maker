@@ -11,6 +11,7 @@ import {
 import { setAccessToken } from "@/api/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { accountResumeKeys } from "./resumes/accountResumes";
 
 export function useMeQuery() {
   return useQuery({
@@ -116,9 +117,11 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => {
+    onSettled: () => {
       setAccessToken(null);
-      queryClient.clear();
+      queryClient.setQueryData(["me"], null);
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.removeQueries({ queryKey: accountResumeKeys.all });
     },
   });
 }

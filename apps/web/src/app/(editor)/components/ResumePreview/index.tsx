@@ -6,6 +6,10 @@ import { ResumeForm } from "@/lib/validation";
 import { useFormContext, useWatch } from "react-hook-form";
 import usePaginateDom from "./hooks/usePaginateDom";
 import useAvatar from "../../store/hooks/useAvatar";
+import {
+  getResumeTemplateComponent,
+  ResumeTemplateKey,
+} from "@/components/templates/components";
 
 type ResumeWrapperProps = {
   children: React.ReactNode;
@@ -71,16 +75,16 @@ const ResumeWrapperDOM = ({
 
 const ResumePreview = ({
   resumeId,
-  resumeComponent,
+  template,
   ref: contentRefForPrint,
 }: {
   resumeId: string;
-  resumeComponent: React.ElementType;
+  template: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
 }) => {
-  const { control } = useFormContext();
-  const formData = useWatch<ResumeForm>({ control });
-  const { cropped } = useAvatar(resumeId);
+  const { control } = useFormContext<ResumeForm>();
+  const formData = useWatch({ control }) as ResumeForm;
+  const { croppedPreviewUrl } = useAvatar();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -90,12 +94,12 @@ const ResumePreview = ({
     // contentRefForPrint.current = node;
   };
 
-  const pages = usePaginateDom({ ref, data: formData, photo: cropped });
+  const pages = usePaginateDom({ ref, data: formData, photo: croppedPreviewUrl });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scaleControls = useStageScale(containerRef);
 
-  const Variant = resumeComponent;
+  const Variant = getResumeTemplateComponent(template);
 
   return (
     <div
@@ -107,7 +111,7 @@ const ResumePreview = ({
         className="pointer-events-none absolute z-40 mb-4 cursor-none opacity-0"
       >
         <ResumeWrapperDOM>
-          <Variant ref={setRefs} data={formData} photo={cropped} />
+          <Variant ref={setRefs} data={formData} photo={croppedPreviewUrl} />
         </ResumeWrapperDOM>
       </div>
       <div className="flex flex-col gap-4" ref={contentRefForPrint}>

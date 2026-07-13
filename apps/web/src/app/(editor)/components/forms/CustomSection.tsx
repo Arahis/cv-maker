@@ -158,6 +158,7 @@ const CustomSection = () => {
         type="button"
         onClick={() =>
           append({
+            id: crypto.randomUUID(),
             sectionName: "",
             sectionItems: [
               {

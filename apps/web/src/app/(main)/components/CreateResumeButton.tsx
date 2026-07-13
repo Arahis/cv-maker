@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, JSX } from "react";
-import { defaultFormValues } from "@/lib/formDefaults";
-import { createResume } from "@/lib/indexedDB";
-import { useRouter } from "next/navigation";
+import { JSX } from "react";
 import { TemplateKey } from "@/components/templates/previews";
+import { useCreateResumeController } from "../resumes/useCreateResumeController";
 
 const CreateResumeButton = ({
   button,
@@ -13,21 +11,15 @@ const CreateResumeButton = ({
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
   template?: TemplateKey;
 }) => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { createResume, isLoading } = useCreateResumeController();
 
   const handleCreateResume = async () => {
     if (isLoading) return;
 
-    setIsLoading(true);
-    const resumeId = crypto.randomUUID();
-
     try {
-      await createResume(resumeId, defaultFormValues, template);
-      router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
+      await createResume(template);
     } catch {
       alert("Error while creating resume. Please try again.");
-      setIsLoading(false);
     }
   };
 

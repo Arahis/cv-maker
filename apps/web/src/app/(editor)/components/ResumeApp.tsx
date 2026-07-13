@@ -6,21 +6,24 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/validation";
 import { Form } from "@/components/ui/form";
-import { notFound } from "next/navigation";
-import { loadResume } from "@/lib/indexedDB";
+import { notFound, useRouter } from "next/navigation";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import ResumePreviewWrapper from "./ResumePreviewWrapper";
 import { trackEvent } from "@/components/analytics/events";
 import { isDesktopLike } from "@/lib/utils";
 import { useReactToPrint } from "react-to-print";
 import Loading from "@/components/Loading";
+import { useResumeEditorController } from "../useResumeEditorController";
+import { defaultFormValues } from "@/lib/formDefaults";
+import { useResumePersistenceController } from "../useResumePersistenceController";
+import useAvatar from "../store/hooks/useAvatar";
 
 const useResumeForm = () =>
   useForm({
     resolver: zodResolver(resumeSchema),
     shouldUnregister: false,
     mode: "onBlur",
-    // defaultValues,
+    defaultValues: defaultFormValues(),
   });
 
 // TODO: Migrate to the new PDF generation API and uncomment this function
@@ -60,34 +63,48 @@ const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
 };
 
 const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
-  const [valid, setValid] = useState<null | boolean>(null);
+  const { status, resume, source } = useResumeEditorController(resumeId);
+  const { saveTemplate } = useResumePersistenceController({
+    resumeId,
+    source,
+  });
+
   const [resumeTemplate, setResumeTemplate] = useState<ResumeTemplateKey>();
   const f = useResumeForm();
+  const router = useRouter();
+  const { setAvatarState } = useAvatar();
 
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
+    setResumeTemplate(newVar);
+    try {
+      await saveTemplate(newVar);
+    } catch (e) {
+      console.error("Failed to save resume variant", e);
+    }
+  };
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
   });
 
-  // Check if the resume exists in IndexedDB
-  // If it exists, load the data into the form
-  // If it doesn't exist, show a not found page
   useEffect(() => {
-    const checkResumeExists = async () => {
-      const resume = await loadResume(resumeId);
-      if (resume) {
-        f.reset(resume.data);
-        setResumeTemplate(resume.template);
-      }
-      setValid(!!resume);
-    };
+    if (resume) {
+      f.reset(resume.data);
+      setResumeTemplate(resume.template);
+      setAvatarState(resume.media?.avatar);
+    }
+  }, [resumeId, f, resume?.data, resume?.template, resume?.media, setAvatarState]);
 
-    checkResumeExists();
-  }, [resumeId, f]);
+  useEffect(() => {
+    if (status === "forbidden") {
+      router.replace("/resumes");
+    }
+  }, [status, router]);
 
-  if (valid === null) return <Loading />;
-  if (!valid) return notFound();
+  if (status === "not_found") return notFound();
+  if (status === "loading" || status === "forbidden") return <Loading />;
 
   const handlePrintClick = async () => {
     const device = isDesktopLike() ? "web" : "touch";
@@ -115,13 +132,17 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     <div className="flex h-full min-h-0 w-full">
       <Form {...f}>
         <div className="w-full overflow-y-auto border-r md:w-1/2">
-          <ResumeForm resumeId={resumeId} onPrintClick={handlePrintClick} />
+          <ResumeForm
+            resumeId={resumeId}
+            onPrintClick={handlePrintClick}
+            source={source}
+          />
         </div>
 
         <ResumePreviewWrapper
           resumeId={resumeId}
           resumeTemplate={resumeTemplate}
-          setResumeTemplate={setResumeTemplate}
+          onResumeTemplateChange={onResumeTemplateChange}
           onPrintClick={handlePrintClick}
           ref={contentRef}
         />

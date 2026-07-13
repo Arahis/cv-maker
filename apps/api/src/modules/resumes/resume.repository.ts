@@ -1,16 +1,8 @@
-import type { PrismaClient, Prisma } from "../../generated/prisma/client.js";
-
-export type Resume = {
-  id: string;
-  userId: string;
-  title: string | null;
-  description: string | null;
-  template: string;
-  data: Prisma.JsonValue;
-  media: Prisma.JsonValue;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import type {
+  PrismaClient,
+  Prisma,
+  Resume,
+} from "../../generated/prisma/client.js";
 
 type ResumeDelegate = {
   findMany(args: unknown): Promise<Resume[]>;
@@ -25,6 +17,14 @@ type CreateResumeInput = {
   template: string;
   data: Prisma.InputJsonValue;
   media: Prisma.InputJsonValue;
+};
+
+type CreateFromLocalResumeInput = {
+  userId: string;
+  template: string;
+  data: Prisma.InputJsonValue;
+  media: Prisma.InputJsonValue;
+  localResumeId: string;
 };
 
 type UpdateResumeInput = {
@@ -53,6 +53,29 @@ export class ResumeRepository {
     return this.prisma.resume.create({
       data: {
         userId: input.userId,
+        template: input.template,
+        data: input.data,
+        media: input.media,
+      },
+    });
+  }
+
+  upsertResumeFromLocal(input: CreateFromLocalResumeInput): Promise<Resume> {
+    return this.prisma.resume.upsert({
+      where: {
+        userId_localResumeId: {
+          userId: input.userId,
+          localResumeId: input.localResumeId,
+        },
+      },
+      create: {
+        userId: input.userId,
+        localResumeId: input.localResumeId,
+        template: input.template,
+        data: input.data,
+        media: input.media,
+      },
+      update: {
         template: input.template,
         data: input.data,
         media: input.media,

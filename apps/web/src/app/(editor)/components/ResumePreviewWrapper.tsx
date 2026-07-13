@@ -1,4 +1,3 @@
-import { saveResumeTemplate } from "@/lib/indexedDB";
 import { isDesktopLike } from "@/lib/utils";
 import Toolbar from "./toolbar";
 import ResumePreview from "./ResumePreview";
@@ -10,33 +9,21 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import {
-  ResumeTemplateKey,
-  resumeTemplates,
-} from "@/components/templates/components";
+import { ResumeTemplateKey } from "@/components/templates/components";
 
 const ResumePreviewWrapper = ({
   resumeId,
   resumeTemplate,
   ref,
   onPrintClick,
-  setResumeTemplate,
+  onResumeTemplateChange,
 }: {
   resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   onPrintClick: () => void;
-  setResumeTemplate: (t: ResumeTemplateKey) => void;
+  onResumeTemplateChange: (t: ResumeTemplateKey) => void;
 }) => {
-  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
-    setResumeTemplate(newVar);
-    try {
-      await saveResumeTemplate(resumeId, newVar);
-    } catch (e) {
-      console.error("Failed to save resume variant", e);
-    }
-  };
-
   if (!isDesktopLike()) {
     return (
       <Drawer direction="bottom">
@@ -57,7 +44,7 @@ const ResumePreviewWrapper = ({
               key={resumeTemplate}
               resumeId={resumeId}
               ref={ref}
-              resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
+              template={resumeTemplate}
             />
           </div>
         </DrawerContent>
@@ -76,7 +63,7 @@ const ResumePreviewWrapper = ({
         key={resumeTemplate}
         resumeId={resumeId}
         ref={ref}
-        resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
+        template={resumeTemplate}
       />
     </div>
   );
