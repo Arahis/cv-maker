@@ -11,6 +11,7 @@
   "scripts": {
     "build": "npm run build:web",
     "dev:web": "npm run -w apps/web dev",
+    "dev:api": "npm run -w apps/api dev",
     "build:web": "npm run -w apps/web build",
     "build:cf:web": "npm run -w apps/web build:cf",
     "preview:web": "npm run -w apps/web preview",
