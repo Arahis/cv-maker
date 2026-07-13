@@ -8,6 +8,7 @@ import {
   updateResumeMedia,
   updateResumeTemplate,
 } from "@/api/resumes";
+import { uploadAvatar } from "@/api/uploads";
 import { deleteLocalResume, getLocalResume } from "@/lib/indexedDB";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localResumeKeys } from "./localResumes";
@@ -136,10 +137,23 @@ export function useSaveLocalResumeToAccountMutation() {
         throw new Error("Local resume not found");
       }
 
+      const localAvatar = localResume.media.avatar;
+
+      const media =
+        localAvatar?.croppedBlob
+          ? {
+              avatar: (
+                await uploadAvatar({
+                  croppedFile: localAvatar.croppedBlob,
+                })
+              ).avatar,
+            }
+          : {};
+
       const accountResume = await saveLocalResumeToAccount({
         localResumeId: localResume.id,
         data: localResume.data,
-        media: localResume.media,
+        media,
         template: localResume.template,
       });
 

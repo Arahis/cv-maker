@@ -154,7 +154,7 @@ const ResumeForm = ({
         setNextStep={handleGoToNextItem}
         setPrevStep={handleGoToPrevItem}
       />
-      <ResumeEditorProvider value={{ resumeId, saveMedia }}>
+      <ResumeEditorProvider value={{ resumeId, source, saveMedia }}>
         <div className="rounded-2xl border-2 border-gray-100 p-6">
           <Component {...(slug === "finalize" ? { onPrintClick } : {})} />
         </div>

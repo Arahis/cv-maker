@@ -84,7 +84,7 @@ const ResumePreview = ({
 }) => {
   const { control } = useFormContext<ResumeForm>();
   const formData = useWatch({ control }) as ResumeForm;
-  const { cropped } = useAvatar();
+  const { croppedPreviewUrl } = useAvatar();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -94,7 +94,7 @@ const ResumePreview = ({
     // contentRefForPrint.current = node;
   };
 
-  const pages = usePaginateDom({ ref, data: formData, photo: cropped });
+  const pages = usePaginateDom({ ref, data: formData, photo: croppedPreviewUrl });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scaleControls = useStageScale(containerRef);
@@ -111,7 +111,7 @@ const ResumePreview = ({
         className="pointer-events-none absolute z-40 mb-4 cursor-none opacity-0"
       >
         <ResumeWrapperDOM>
-          <Variant ref={setRefs} data={formData} photo={cropped} />
+          <Variant ref={setRefs} data={formData} photo={croppedPreviewUrl} />
         </ResumeWrapperDOM>
       </div>
       <div className="flex flex-col gap-4" ref={contentRefForPrint}>

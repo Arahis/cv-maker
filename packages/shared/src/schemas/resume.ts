@@ -9,17 +9,6 @@ export const generalFormSchema = z.object({
 
 export type GeneralResumeForm = z.infer<typeof generalFormSchema>;
 
-export const avatarCropDataSchema = z
-  .object({
-    x: z.number(),
-    y: z.number(),
-    zoom: z.number().min(1).max(4),
-    rotation: z.number().min(-90).max(90),
-  })
-  .optional();
-
-export type AvatarCropDataForm = z.infer<typeof avatarCropDataSchema>;
-
 const resumeEmailSchema = z
   .string()
   .trim()
@@ -30,7 +19,6 @@ const resumeEmailSchema = z
   .optional();
 
 export const personalInfoSchema = z.object({
-  avatarCropData: avatarCropDataSchema,
   firstName: optionalString,
   lastName: optionalString,
   jobTitle: optionalString,
@@ -222,8 +210,8 @@ export const resumeMediaSchema = z
   .object({
     avatar: z
       .object({
-        original: z.string().optional(),
-        cropped: z.string().optional(),
+        croppedUrl: z.string(),
+        croppedKey: z.string(),
       })
       .optional(),
   })

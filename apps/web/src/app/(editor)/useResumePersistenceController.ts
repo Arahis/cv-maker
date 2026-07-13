@@ -6,6 +6,7 @@ import { Source } from "@/api/resumes";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import { debounce } from "@/lib/debounce";
 import { updateLocalFormData } from "@/lib/indexedDB";
+import type { LocalResumeMedia } from "@/lib/indexedDB";
 import {
   useUpdateResume,
   useUpdateResumeMedia,
@@ -37,7 +38,7 @@ export function useResumePersistenceController({
     useUpdateLocalResumeTemplateMutation();
   const { mutateAsync: updateLocalResumeMedia } =
     useUpdateLocalResumeMediaMutation();
-  const canSaveToAccount = () => Boolean(getAccessToken());
+  const isAccessTokenActive = () => Boolean(getAccessToken());
 
   const debouncedLocalFormSave = useRef(
     debounce((latestData: ResumeForm) => {
@@ -50,7 +51,7 @@ export function useResumePersistenceController({
 
   const debouncedAccountFormSave = useRef(
     debounce((latestData: ResumeForm) => {
-      if (!canSaveToAccount()) {
+      if (!isAccessTokenActive()) {
         return;
       }
 
@@ -102,7 +103,7 @@ export function useResumePersistenceController({
       return;
     }
 
-    if (!canSaveToAccount()) {
+    if (!isAccessTokenActive()) {
       return;
     }
 
@@ -112,7 +113,7 @@ export function useResumePersistenceController({
     });
   };
 
-  const saveMedia = async (media: ResumeMedia) => {
+  const saveMedia = async (media: ResumeMedia | LocalResumeMedia) => {
     if (!source) {
       return;
     }
@@ -120,18 +121,18 @@ export function useResumePersistenceController({
     if (source === "local") {
       await updateLocalResumeMedia({
         resumeId,
-        data: media.avatar,
+        data: toLocalResumeAvatar(media),
       });
       return;
     }
 
-    if (!canSaveToAccount()) {
+    if (!isAccessTokenActive()) {
       return;
     }
 
     await updateAccountResumeMedia({
       resumeId,
-      media,
+      media: toAccountResumeMedia(media),
     });
   };
 
@@ -139,5 +140,35 @@ export function useResumePersistenceController({
     saveFormData,
     saveTemplate,
     saveMedia,
+  };
+}
+
+function toLocalResumeAvatar(
+  media: ResumeMedia | LocalResumeMedia,
+): LocalResumeMedia["avatar"] {
+  if (!media.avatar) {
+    return undefined;
+  }
+
+  if ("croppedBlob" in media.avatar) {
+    return media.avatar;
+  }
+
+  throw new Error("Expected local avatar blob");
+}
+
+function toAccountResumeMedia(
+  media: ResumeMedia | LocalResumeMedia,
+): ResumeMedia {
+  if (!media.avatar) {
+    return {};
+  }
+
+  if ("croppedBlob" in media.avatar) {
+    throw new Error("Expected uploaded avatar");
+  }
+
+  return {
+    avatar: media.avatar,
   };
 }

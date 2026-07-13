@@ -8,8 +8,6 @@ export const avatarCropInitialValues = { x: 0, y: 0, zoom: 1, rotation: 0 };
 export const defaultFormValues = (): ResumeForm => ({
   title: "My resume",
   description: "",
-
-  avatarCropData: avatarCropInitialValues,
   firstName: "",
   lastName: "",
   jobTitle: "",

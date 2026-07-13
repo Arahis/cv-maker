@@ -7,6 +7,14 @@ import { ResumeTemplateKey } from "@/components/templates/components";
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
 
+export type LocalResumeAvatar = {
+  croppedBlob: Blob;
+};
+
+export type LocalResumeMedia = {
+  avatar?: LocalResumeAvatar;
+};
+
 export interface ResumeRecord {
   id: string;
   updatedAt: number;
@@ -14,12 +22,7 @@ export interface ResumeRecord {
   data: ResumeForm;
   template: ResumeTemplateKey;
 
-  media: {
-    avatar?: {
-      original?: string;
-      cropped?: string;
-    };
-  };
+  media: LocalResumeMedia;
 }
 
 // Initialize IndexedDB
@@ -100,7 +103,7 @@ export async function updateLocalMediaData({
   data,
 }: {
   resumeId: string;
-  data: ResumeRecord["media"]["avatar"];
+  data?: LocalResumeAvatar;
 }): Promise<ResumeRecord | undefined> {
   const db = await getDB();
   const current = await db.get(STORE_NAME, resumeId);
