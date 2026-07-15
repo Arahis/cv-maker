@@ -139,16 +139,15 @@ export function useSaveLocalResumeToAccountMutation() {
 
       const localAvatar = localResume.media.avatar;
 
-      const media =
-        localAvatar?.croppedBlob
-          ? {
-              avatar: (
-                await uploadAvatar({
-                  croppedFile: localAvatar.croppedBlob,
-                })
-              ).avatar,
-            }
-          : {};
+      const media = localAvatar?.croppedBlob
+        ? {
+            avatar: (
+              await uploadAvatar({
+                croppedFile: localAvatar.croppedBlob,
+              })
+            ).avatar,
+          }
+        : {};
 
       const accountResume = await saveLocalResumeToAccount({
         localResumeId: localResume.id,

@@ -1,4 +1,3 @@
-import React from "react";
 import Icon from "../../icons/Icon";
 import { Paginate } from "../../Paginate";
 import { ResumeForm } from "@/lib/validation";
@@ -8,7 +7,7 @@ const HeaderSection = ({
   photo,
 }: {
   data: ResumeForm;
-  photo?: string;
+  photo?: string | null;
 }) => {
   return (
     <Paginate.Columns className="mb-4 gap-8">
