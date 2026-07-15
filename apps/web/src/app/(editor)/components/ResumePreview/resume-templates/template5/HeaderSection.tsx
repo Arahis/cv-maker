@@ -7,7 +7,7 @@ const HeaderSection = ({
   photo,
 }: {
   data: ResumeForm;
-  photo?: string;
+  photo?: string | null;
 }) => {
   return (
     <Paginate.Columns className="">

@@ -1,11 +1,12 @@
 import { ResumeForm, ResumeMedia } from "@cv-maker/shared";
 import { apiFetch } from "./api-fetch";
 import { ResumeTemplateKey } from "@/components/templates/components";
+import { LocalResumeMedia } from "@/lib/indexedDB";
 
 type CreateResumeInput = {
   template: ResumeTemplateKey;
   data: ResumeForm;
-  media: ResumeMedia;
+  media: ResumeMedia | LocalResumeMedia;
 };
 
 type UpdateResumeInput = {
@@ -100,10 +101,13 @@ export async function updateResumeMedia({
   resumeId: string;
   media: ResumeMedia;
 }) {
-  const response = await apiFetch<ResumeResponse>(`/resumes/${resumeId}/media`, {
-    method: "PATCH",
-    body: JSON.stringify({ media }),
-  });
+  const response = await apiFetch<ResumeResponse>(
+    `/resumes/${resumeId}/media`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ media }),
+    },
+  );
 
   return response.resume;
 }

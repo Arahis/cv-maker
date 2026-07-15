@@ -6,7 +6,7 @@ const HeaderSection = ({
   photo,
 }: {
   data: ResumeForm;
-  photo?: string;
+  photo?: string | null;
 }) => {
   return (
     <Paginate.Section className="border-b border-yellow-400 pb-8">
