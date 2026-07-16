@@ -104,8 +104,8 @@ export class AuthService {
     const rawRefreshToken = getRefreshTokenFromRequest(request);
 
     if (!rawRefreshToken) {
-      reply.code(401);
-      return { error: "Missing refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     const refreshTokenHash = hashToken(rawRefreshToken);
@@ -115,15 +115,15 @@ export class AuthService {
 
     if (!session) {
       clearRefreshTokenCookie(reply);
-      reply.code(401);
-      return { error: "Invalid or expired refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     if (session.expiresAt < new Date()) {
       clearRefreshTokenCookie(reply);
       await this.refreshSessions.deleteByTokenHash(session.tokenHash);
-      reply.code(401);
-      return { error: "Invalid or expired refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     const user = await this.users.findById(session.userId);
@@ -131,8 +131,8 @@ export class AuthService {
     if (!user) {
       clearRefreshTokenCookie(reply);
       await this.refreshSessions.deleteByTokenHash(session.tokenHash);
-      reply.code(401);
-      return { error: "User not found" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     const accessToken = signAccessToken({
