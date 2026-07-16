@@ -28,7 +28,7 @@ type AuthUser = {
 
 type AuthRes = {
   status: string;
-  accessToken: string;
+  accessToken: string | null;
 };
 
 // TODO: Check if this status type is correct, it should be "ok" or "error" instead of "success"

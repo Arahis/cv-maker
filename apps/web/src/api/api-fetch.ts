@@ -1,12 +1,17 @@
 import { getAccessToken, setAccessToken } from "./token";
 
-type AuthRes = {
-  accessToken: string;
-  user: {
-    id: string;
-    email: string;
-  };
-};
+type RefreshResponse =
+  | {
+      accessToken: string;
+      user: {
+        id: string;
+        email: string;
+      };
+    }
+  | {
+      status: "unauthenticated";
+      accessToken: null;
+    };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,7 +26,13 @@ async function refreshAccessToken(): Promise<string | null> {
     return null;
   }
 
-  const data = (await res.json()) as AuthRes;
+  const data = (await res.json()) as RefreshResponse;
+
+  if (!data.accessToken) {
+    setAccessToken(null);
+    return null;
+  }
+
   setAccessToken(data.accessToken);
 
   return data.accessToken;
