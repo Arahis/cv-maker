@@ -121,7 +121,6 @@ export function useLogout() {
     onSettled: () => {
       setAccessToken(null);
       queryClient.setQueryData(["me"], null);
-      queryClient.invalidateQueries({ queryKey: ["me"] });
       queryClient.removeQueries({ queryKey: accountResumeKeys.all });
     },
   });
