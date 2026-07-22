@@ -44,13 +44,34 @@ export class ResumeService {
       return this.handleUnauthorized(auth.error, reply);
     }
 
-    const resume = await this.resumes.findByUserIdAndId(auth.userId, id);
+    const resume = await this.resumes.findUserResumeById(auth.userId, id);
 
     if (!resume) {
       reply.code(404);
       return { error: "Resume not found" };
     }
 
+    return { resume };
+  }
+
+  async copy(id: string, request: FastifyRequest, reply: FastifyReply) {
+    const auth = await getAuthenticatedUserId({
+      request,
+      users: this.users,
+    });
+
+    if (!auth.userId) {
+      return this.handleUnauthorized(auth.error, reply);
+    }
+
+    const resume = await this.resumes.copyResume(auth.userId, id);
+
+    if (!resume) {
+      reply.code(404);
+      return { error: "Resume not found" };
+    }
+
+    reply.code(201);
     return { resume };
   }
 
@@ -122,7 +143,7 @@ export class ResumeService {
       return this.handleUnauthorized(auth.error, reply);
     }
 
-    const existingResume = await this.resumes.findByUserIdAndId(
+    const existingResume = await this.resumes.findUserResumeById(
       auth.userId,
       id,
     );
@@ -154,7 +175,7 @@ export class ResumeService {
       return this.handleUnauthorized(auth.error, reply);
     }
 
-    const existingResume = await this.resumes.findByUserIdAndId(
+    const existingResume = await this.resumes.findUserResumeById(
       auth.userId,
       id,
     );
@@ -186,7 +207,7 @@ export class ResumeService {
       return this.handleUnauthorized(auth.error, reply);
     }
 
-    const existingResume = await this.resumes.findByUserIdAndId(
+    const existingResume = await this.resumes.findUserResumeById(
       auth.userId,
       id,
     );

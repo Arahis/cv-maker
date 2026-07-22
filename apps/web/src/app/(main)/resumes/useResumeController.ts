@@ -2,11 +2,13 @@ import { Resume, Source } from "@/api/resumes";
 import { useMeQuery } from "@/queries/auth";
 import {
   useAccountResumesListQuery,
+  useCopyAccountResumeMutation,
   useDeleteAccountResumeMutation,
   useSaveLocalResumeToAccountMutation,
   useUpdateAccountResumeTitleMutation,
 } from "@/queries/resumes/accountResumes";
 import {
+  useCopyLocalResumeMutation,
   useDeleteLocalResumeMutation,
   useLocalResumeListQuery,
   useUpdateLocalResumeTitleMutation,
@@ -18,6 +20,7 @@ export type ResumeController = {
   resumes: Resume[];
   isLoading: boolean;
   openResume: (args: { resumeId: string; source: Source }) => void;
+  copyResume: (args: { resumeId: string; source: Source }) => void;
   deleteResume: (args: { resumeId: string; source: Source }) => void;
   renameResume: (args: {
     resumeId: string;
@@ -45,6 +48,8 @@ export function useResumeController() {
   const updateLocalResumeTitleMutation = useUpdateLocalResumeTitleMutation();
   const updateAccountResumeTitleMutation =
     useUpdateAccountResumeTitleMutation();
+  const copyLocalResumeMutation = useCopyLocalResumeMutation();
+  const copyAccountResumeMutation = useCopyAccountResumeMutation();
 
   const localResumes: Resume[] =
     localResumesQuery.data?.map((resume) => ({
@@ -75,6 +80,21 @@ export function useResumeController() {
     // If the resume is local and the user is logged in, save it to the account and then open it
     const accountResume = await saveLocalResumeToAccount(resumeId);
     router.push(`/resume-editor?id=${encodeURIComponent(accountResume.id)}`);
+  }
+
+  async function copyResume({
+    resumeId,
+    source,
+  }: {
+    resumeId: string;
+    source: "local" | "account";
+  }) {
+    if (source === "local") {
+      await copyLocalResumeMutation.mutateAsync(resumeId);
+      return;
+    }
+
+    await copyAccountResumeMutation.mutateAsync(resumeId);
   }
 
   async function saveLocalResumeToAccount(resumeId: string) {
@@ -129,6 +149,7 @@ export function useResumeController() {
       (!!me && isLoading),
 
     openResume,
+    copyResume,
     deleteResume,
     renameResume,
     saveLocalResumeToAccount,

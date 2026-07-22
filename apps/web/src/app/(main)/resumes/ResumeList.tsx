@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
@@ -25,6 +25,7 @@ const getScaleForA4 = (scale: number) => {
 
 const ResumeCard = ({
   resume,
+  copyResume,
   deleteResume,
   openResume,
 }: Omit<ResumeController, "resumes" | "isLoading"> & { resume: Resume }) => {
@@ -57,21 +58,30 @@ const ResumeCard = ({
           </div>
         </div>
       </div>
-      <div className="mt-2 flex items-center justify-between px-2">
+      <div className="mt-2 flex items-center justify-between">
         <p className="text-sm">{data.title || "Untitled"}</p>
-        <Button
-          onClick={() => deleteResume({ resumeId: id, source })}
-          variant="ghost"
-          size="icon"
-        >
-          <Trash2 />
-        </Button>
+        <div className="flex items-center gap-0.5">
+          <Button
+            onClick={() => copyResume({ resumeId: id, source })}
+            variant="ghost"
+            size="icon"
+          >
+            <Copy />
+          </Button>
+          <Button
+            onClick={() => deleteResume({ resumeId: id, source })}
+            variant="ghost"
+            size="icon"
+          >
+            <Trash2 />
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
-const ResumeClient = () => {
+const ResumeList = () => {
   const { isLoading, resumes, ...controls } = useResumeController();
 
   if (isLoading) {
@@ -100,4 +110,4 @@ const ResumeClient = () => {
   );
 };
 
-export default ResumeClient;
+export default ResumeList;

@@ -43,7 +43,7 @@ export class ResumeRepository {
     });
   }
 
-  findByUserIdAndId(userId: string, id: string): Promise<Resume | null> {
+  findUserResumeById(userId: string, id: string): Promise<Resume | null> {
     return this.prisma.resume.findFirst({
       where: { id, userId },
     });
@@ -57,6 +57,29 @@ export class ResumeRepository {
         data: input.data,
         media: input.media,
       },
+    });
+  }
+
+  async copyResume(userId: string, id: string): Promise<Resume | null> {
+    const resume = await this.findUserResumeById(userId, id);
+
+    if (!resume) {
+      return null;
+    }
+
+    const data = resume.data as Prisma.JsonObject;
+
+    return this.create({
+      userId,
+      template: resume.template,
+      data: {
+        ...data,
+        title:
+          typeof data.title === "string" && data.title
+            ? `${data.title} (Copy)`
+            : "Untitled (Copy)",
+      },
+      media: resume.media as Prisma.InputJsonValue,
     });
   }
 

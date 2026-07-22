@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import ResumeClient from "./ResumeClient";
 import CreateNewResumeButton from "./CreateNewResumeButton";
+import ResumeList from "./ResumeList";
 
 export const metadata: Metadata = {
   title: "Your resumes",
@@ -22,7 +22,7 @@ const Page = () => {
         <CreateNewResumeButton />
       </div>
       <div className="mx-20">
-        <ResumeClient />
+        <ResumeList />
       </div>
     </main>
   );

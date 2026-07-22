@@ -17,6 +17,20 @@ export default async function resumeRoutes(app: FastifyInstance) {
     return resumeService.list(request, reply);
   });
 
+  app.post("/:id/copy", async (request, reply) => {
+    const parsedParams = resumeParamsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      reply.code(400);
+      return {
+        error: "Invalid request params",
+        issues: parsedParams.error.issues,
+      };
+    }
+
+    return resumeService.copy(parsedParams.data.id, request, reply);
+  });
+
   app.get("/:id", async (request, reply) => {
     const parsedParams = resumeParamsSchema.safeParse(request.params);
 
