@@ -1,5 +1,6 @@
 import {
   createLocalResume,
+  copyLocalResume,
   deleteLocalResume,
   getLocalResume,
   loadAllResumes,
@@ -39,6 +40,21 @@ export function useCreateLocalResumeMutation() {
 
   return useMutation({
     mutationFn: createLocalResume,
+
+    onSuccess: async (data) => {
+      queryClient.setQueryData(localResumeKeys.detail(data.id), data);
+      await queryClient.invalidateQueries({
+        queryKey: localResumeKeys.all,
+      });
+    },
+  });
+}
+
+export function useCopyLocalResumeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: copyLocalResume,
 
     onSuccess: async (data) => {
       queryClient.setQueryData(localResumeKeys.detail(data.id), data);

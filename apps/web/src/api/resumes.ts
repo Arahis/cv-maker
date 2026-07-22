@@ -52,6 +52,14 @@ export async function getResume(id: string) {
   return response.resume;
 }
 
+export async function copyResume(id: string) {
+  const response = await apiFetch<ResumeResponse>(`/resumes/${id}/copy`, {
+    method: "POST",
+  });
+
+  return response.resume;
+}
+
 export async function createResume(input: CreateResumeInput) {
   const response = await apiFetch<ResumeResponse>("/resumes", {
     method: "POST",

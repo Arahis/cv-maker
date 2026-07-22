@@ -74,6 +74,29 @@ export async function createLocalResume({
   return record;
 }
 
+export async function copyLocalResume(resumeId: string) {
+  const db = await getDB();
+  const current = await db.get(STORE_NAME, resumeId);
+
+  if (!current) {
+    throw new Error("Local resume not found");
+  }
+
+  const copy: ResumeRecord = {
+    ...current,
+    id: crypto.randomUUID(),
+    updatedAt: Date.now(),
+    data: {
+      ...current.data,
+      title: `${current.data.title} (Copy)`,
+    },
+  };
+
+  await db.put(STORE_NAME, copy);
+
+  return copy;
+}
+
 export async function updateLocalFormData({
   resumeId,
   data,

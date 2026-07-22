@@ -1,5 +1,6 @@
 import {
   createResume,
+  copyResume,
   deleteResume,
   getResume,
   getResumeList,
@@ -34,6 +35,22 @@ export function useCreateResume() {
     mutationFn: createResume,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
+    },
+  });
+}
+
+export function useCopyAccountResumeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (resumeId: string) => {
+      return copyResume(resumeId);
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: accountResumeKeys.list,
+      });
     },
   });
 }
