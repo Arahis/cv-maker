@@ -1,11 +1,11 @@
 "use client";
 
 import { Resume, Source } from "@/api/resumes";
-import { getAccessToken } from "@/api/token";
 import { ResumeRecord } from "@/lib/indexedDB";
 import { useMeQuery } from "@/queries/auth";
 import { useAccountResumeQuery } from "@/queries/resumes/accountResumes";
 import { useLocalResumeQuery } from "@/queries/resumes/localResumes";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 type ResumeEditorControllerState = {
   status: "loading" | "ready" | "not_found" | "forbidden";
@@ -16,6 +16,7 @@ type ResumeEditorControllerState = {
 export function useResumeEditorController(
   resumeId: string | null,
 ): ResumeEditorControllerState {
+  const isAuthReady = useAuthBootstrap();
   const meQuery = useMeQuery();
 
   const { data: localResume, isLoading: isLocalResumeLoading } =
@@ -43,7 +44,12 @@ export function useResumeEditorController(
     };
   }
 
-  if (meQuery.isLoading || isLocalResumeLoading || isAccountResumeLoading) {
+  if (
+    !isAuthReady ||
+    meQuery.isLoading ||
+    isLocalResumeLoading ||
+    isAccountResumeLoading
+  ) {
     return {
       status: "loading",
       source: null,

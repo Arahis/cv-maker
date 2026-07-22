@@ -12,12 +12,15 @@ import { getAccessToken, setAccessToken } from "@/api/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { accountResumeKeys } from "./resumes/accountResumes";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 export function useMeQuery() {
+  const isAuthReady = useAuthBootstrap();
+
   return useQuery({
     queryKey: ["me"],
     queryFn: getMe,
-    enabled: Boolean(getAccessToken()),
+    enabled: isAuthReady && Boolean(getAccessToken()),
     retry: false,
   });
 }

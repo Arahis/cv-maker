@@ -3,7 +3,6 @@
 import Logo from "@/assets/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import DonateLink from "./DonateLink";
 import { Button } from "@/components/ui/button";
 import { useLogout, useMeQuery } from "@/queries/auth";
 import {
@@ -16,12 +15,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOutIcon } from "lucide-react";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 export function HeaderAuth() {
+  const isAuthReady = useAuthBootstrap();
   const { data: me, isLoading } = useMeQuery();
   const logoutMutation = useLogout();
 
-  if (isLoading) {
+  if (!isAuthReady || isLoading) {
     return (
       <Button
         variant="ghost"

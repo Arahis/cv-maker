@@ -1,10 +1,10 @@
-import { ResumeTemplate } from "@cv-maker/shared";
 import { useRouter } from "next/navigation";
 import { defaultFormValues } from "@/lib/formDefaults";
 import { useMeQuery } from "@/queries/auth";
 import { useCreateResume } from "@/queries/resumes/accountResumes";
 import { useCreateLocalResumeMutation } from "@/queries/resumes/localResumes";
 import { ResumeTemplateKey } from "@/components/templates/components";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 export type CreateResumeController = {
   createResume: (template?: ResumeTemplateKey) => Promise<void>;
@@ -13,6 +13,7 @@ export type CreateResumeController = {
 
 export function useCreateResumeController(): CreateResumeController {
   const router = useRouter();
+  const isAuthReady = useAuthBootstrap();
   const { data: me, isLoading: isMeLoading } = useMeQuery();
   const createAccountResumeMutation = useCreateResume();
   const createLocalResumeMutation = useCreateLocalResumeMutation();
@@ -45,6 +46,7 @@ export function useCreateResumeController(): CreateResumeController {
   return {
     createResume,
     isLoading:
+      !isAuthReady ||
       isMeLoading ||
       createAccountResumeMutation.isPending ||
       createLocalResumeMutation.isPending,
