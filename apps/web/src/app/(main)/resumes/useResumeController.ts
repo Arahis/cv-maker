@@ -12,6 +12,7 @@ import {
   useUpdateLocalResumeTitleMutation,
 } from "@/queries/resumes/localResumes";
 import { useRouter } from "next/navigation";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 export type ResumeController = {
   resumes: Resume[];
@@ -28,6 +29,7 @@ export type ResumeController = {
 
 export function useResumeController() {
   const router = useRouter();
+  const isAuthReady = useAuthBootstrap();
 
   const { data: me, isLoading: isMeLoading } = useMeQuery();
 
@@ -121,7 +123,10 @@ export function useResumeController() {
   return {
     resumes,
     isLoading:
-      isMeLoading || localResumesQuery.isLoading || (!!me && isLoading),
+      !isAuthReady ||
+      isMeLoading ||
+      localResumesQuery.isLoading ||
+      (!!me && isLoading),
 
     openResume,
     deleteResume,
