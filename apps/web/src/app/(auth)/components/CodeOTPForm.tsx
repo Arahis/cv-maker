@@ -34,7 +34,6 @@ export type VerifyCodeBody = z.infer<typeof verifyCodeBodySchema>;
 type CodeOTPFormProps = {
   submitForm: (data: VerifyCodeBody & { email: string }) => Promise<unknown>;
   isPending: boolean;
-  email: string;
 };
 
 const useCodeOTPForm = () =>
@@ -45,8 +44,10 @@ const useCodeOTPForm = () =>
     },
   });
 
-const CodeOTPForm = ({ submitForm, isPending, email }: CodeOTPFormProps) => {
+const CodeOTPForm = ({ submitForm, isPending }: CodeOTPFormProps) => {
   const [isNavigating, setIsNavigating] = useState(false);
+  const params = useSearchParams();
+  const email = params.get("email") ?? "";
   const isLoading = isPending || isNavigating;
 
   const form = useCodeOTPForm();
