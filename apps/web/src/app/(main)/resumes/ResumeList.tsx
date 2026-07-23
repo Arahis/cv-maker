@@ -2,13 +2,16 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Loader2, Trash2 } from "lucide-react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
 } from "@/components/templates/components";
-import { ResumeController, useResumeController } from "./useResumeController";
-import { Resume } from "@/api/resumes";
+import {
+  ResumeController,
+  ResumeListItem,
+  useResumeController,
+} from "./useResumeController";
 import {
   Tooltip,
   TooltipContent,
@@ -33,8 +36,10 @@ const ResumeCard = ({
   copyResume,
   deleteResume,
   openResume,
-}: Omit<ResumeController, "resumes" | "isLoading"> & { resume: Resume }) => {
-  const { id, template, data, source } = resume;
+}: Omit<ResumeController, "resumes" | "isLoading"> & {
+  resume: ResumeListItem;
+}) => {
+  const { id, template, data, source, isCopying, isDeleting } = resume;
   const Template =
     resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
 
@@ -72,8 +77,9 @@ const ResumeCard = ({
                 onClick={() => copyResume({ resumeId: id, source })}
                 variant="ghost"
                 size="icon"
+                disabled={isCopying}
               >
-                <Copy />
+                {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -87,8 +93,9 @@ const ResumeCard = ({
                 onClick={() => deleteResume({ resumeId: id, source })}
                 variant="ghost"
                 size="icon"
+                disabled={isDeleting}
               >
-                <Trash2 />
+                {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
