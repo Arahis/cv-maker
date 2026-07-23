@@ -9,6 +9,11 @@ import {
 } from "@/components/templates/components";
 import { ResumeController, useResumeController } from "./useResumeController";
 import { Resume } from "@/api/resumes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -59,22 +64,37 @@ const ResumeCard = ({
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-sm">{data.title || "Untitled"}</p>
+        <p className="text-left text-sm">{data.title || "Untitled"}</p>
         <div className="flex items-center gap-0.5">
-          <Button
-            onClick={() => copyResume({ resumeId: id, source })}
-            variant="ghost"
-            size="icon"
-          >
-            <Copy />
-          </Button>
-          <Button
-            onClick={() => deleteResume({ resumeId: id, source })}
-            variant="ghost"
-            size="icon"
-          >
-            <Trash2 />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => copyResume({ resumeId: id, source })}
+                variant="ghost"
+                size="icon"
+              >
+                <Copy />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy resume</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => deleteResume({ resumeId: id, source })}
+                variant="ghost"
+                size="icon"
+              >
+                <Trash2 />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete resume</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
@@ -83,6 +103,7 @@ const ResumeCard = ({
 
 const ResumeList = () => {
   const { isLoading, resumes, ...controls } = useResumeController();
+  const { scaledWidth } = getScaleForA4(0.25);
 
   if (isLoading) {
     return (
@@ -102,7 +123,12 @@ const ResumeList = () => {
   }
 
   return (
-    <div className="mx-auto flex w-[60%] flex-wrap justify-center gap-4">
+    <div
+      className="mx-auto grid w-[60%] justify-center gap-4"
+      style={{
+        gridTemplateColumns: `repeat(auto-fill, ${scaledWidth + 8}px)`,
+      }}
+    >
       {resumes.map((r) => (
         <ResumeCard key={r.id} resume={r} {...controls} />
       ))}
