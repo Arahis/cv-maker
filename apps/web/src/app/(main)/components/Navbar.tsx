@@ -49,7 +49,9 @@ export function HeaderAuth() {
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuLabel>{me.user.email}</DropdownMenuLabel>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/account-settings">Settings</Link>
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem

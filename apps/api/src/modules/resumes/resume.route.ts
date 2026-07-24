@@ -59,7 +59,6 @@ export default async function resumeRoutes(app: FastifyInstance) {
     return resumeService.create(parsedBody.data, request, reply);
   });
 
-  // Work. here right NOW
   app.post("/save-local-to-account", async (request, reply) => {
     const parsedBody = saveLocalResumeToAccountBodySchema.safeParse(
       request.body,
