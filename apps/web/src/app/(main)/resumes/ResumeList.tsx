@@ -71,21 +71,23 @@ const ResumeCard = ({
       <div className="mt-2 flex items-center justify-between">
         <p className="text-left text-sm">{data.title || "Untitled"}</p>
         <div className="flex items-center gap-0.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => copyResume({ resumeId: id, source })}
-                variant="ghost"
-                size="icon"
-                disabled={isCopying}
-              >
-                {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Copy resume</p>
-            </TooltipContent>
-          </Tooltip>
+          {source === "account" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => copyResume({ resumeId: id, source })}
+                  variant="ghost"
+                  size="icon"
+                  disabled={isCopying}
+                >
+                  {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Copy resume</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>

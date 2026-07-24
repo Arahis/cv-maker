@@ -8,7 +8,6 @@ import {
   useUpdateAccountResumeTitleMutation,
 } from "@/queries/resumes/accountResumes";
 import {
-  useCopyLocalResumeMutation,
   useDeleteLocalResumeMutation,
   useLocalResumeListQuery,
   useUpdateLocalResumeTitleMutation,
@@ -56,7 +55,6 @@ export function useResumeController() {
   const updateLocalResumeTitleMutation = useUpdateLocalResumeTitleMutation();
   const updateAccountResumeTitleMutation =
     useUpdateAccountResumeTitleMutation();
-  const copyLocalResumeMutation = useCopyLocalResumeMutation();
   const copyAccountResumeMutation = useCopyAccountResumeMutation();
 
   const localResumes: ResumeListItem[] =
@@ -101,14 +99,13 @@ export function useResumeController() {
     resumeId: string;
     source: "local" | "account";
   }) {
+    if (source !== "account") {
+      return;
+    }
+
     setCopyingResumeId(resumeId);
 
     try {
-      if (source === "local") {
-        await copyLocalResumeMutation.mutateAsync(resumeId);
-        return;
-      }
-
       await copyAccountResumeMutation.mutateAsync(resumeId);
     } finally {
       setCopyingResumeId(null);
