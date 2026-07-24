@@ -15,12 +15,13 @@ import {
 } from "@/queries/resumes/localResumes";
 import { useRouter } from "next/navigation";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+import { useState } from "react";
 
 export type ResumeController = {
-  resumes: Resume[];
+  resumes: ResumeListItem[];
   isLoading: boolean;
   openResume: (args: { resumeId: string; source: Source }) => void;
-  copyResume: (args: { resumeId: string; source: Source }) => void;
+  copyResume: (args: { resumeId: string; source: Source }) => Promise<void>;
   deleteResume: (args: { resumeId: string; source: Source }) => void;
   renameResume: (args: {
     resumeId: string;
@@ -30,9 +31,16 @@ export type ResumeController = {
   saveLocalResumeToAccount: (resumeId: string) => Promise<Resume>;
 };
 
+export type ResumeListItem = Resume & {
+  isCopying: boolean;
+  isDeleting: boolean;
+};
+
 export function useResumeController() {
   const router = useRouter();
   const isAuthReady = useAuthBootstrap();
+  const [copyingResumeId, setCopyingResumeId] = useState<string | null>(null);
+  const [deletingResumeId, setDeletingResumeId] = useState<string | null>(null);
 
   const { data: me, isLoading: isMeLoading } = useMeQuery();
 
@@ -51,16 +59,20 @@ export function useResumeController() {
   const copyLocalResumeMutation = useCopyLocalResumeMutation();
   const copyAccountResumeMutation = useCopyAccountResumeMutation();
 
-  const localResumes: Resume[] =
+  const localResumes: ResumeListItem[] =
     localResumesQuery.data?.map((resume) => ({
       ...resume,
       source: "local",
+      isCopying: copyingResumeId === resume.id,
+      isDeleting: deletingResumeId === resume.id,
     })) ?? [];
 
-  const accountResumes: Resume[] =
+  const accountResumes: ResumeListItem[] =
     accountResumesData?.map((resume) => ({
       ...resume,
       source: "account",
+      isCopying: copyingResumeId === resume.id,
+      isDeleting: deletingResumeId === resume.id,
     })) ?? [];
 
   const resumes = me ? [...accountResumes, ...localResumes] : localResumes;
@@ -89,12 +101,18 @@ export function useResumeController() {
     resumeId: string;
     source: "local" | "account";
   }) {
-    if (source === "local") {
-      await copyLocalResumeMutation.mutateAsync(resumeId);
-      return;
-    }
+    setCopyingResumeId(resumeId);
 
-    await copyAccountResumeMutation.mutateAsync(resumeId);
+    try {
+      if (source === "local") {
+        await copyLocalResumeMutation.mutateAsync(resumeId);
+        return;
+      }
+
+      await copyAccountResumeMutation.mutateAsync(resumeId);
+    } finally {
+      setCopyingResumeId(null);
+    }
   }
 
   async function saveLocalResumeToAccount(resumeId: string) {
@@ -111,13 +129,20 @@ export function useResumeController() {
     resumeId: string;
     source: "local" | "account";
   }) {
-    if (source === "local") {
-      const { mutateAsync } = deleteLocalResumeMutation;
+    setDeletingResumeId(resumeId);
+
+    try {
+      if (source === "local") {
+        const { mutateAsync } = deleteLocalResumeMutation;
+        await mutateAsync(resumeId);
+        return;
+      }
+
+      const { mutateAsync } = deleteAccountResumeMutation;
       await mutateAsync(resumeId);
-      return;
+    } finally {
+      setDeletingResumeId(null);
     }
-    const { mutateAsync } = deleteAccountResumeMutation;
-    await mutateAsync(resumeId);
   }
 
   async function renameResume({

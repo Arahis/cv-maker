@@ -18,6 +18,7 @@ export type LocalResumeMedia = {
 export interface ResumeRecord {
   id: string;
   updatedAt: number;
+  position: number;
 
   data: ResumeForm;
   template: ResumeTemplateKey;
@@ -27,12 +28,17 @@ export interface ResumeRecord {
 
 // Initialize IndexedDB
 async function getDB() {
-  return openDB(DB_NAME, 1, {
-    upgrade(db) {
+  return openDB(DB_NAME, 2, {
+    upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, {
           keyPath: "id",
         });
+      }
+
+      if (oldVersion < 2) {
+        // `position` is a regular record field, so no object-store migration
+        // is required. Existing records are backfilled in loadAllResumes.
       }
     },
   });
@@ -40,12 +46,29 @@ async function getDB() {
 
 export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
   const db = await getDB();
-  return await db.getAll(STORE_NAME);
+  const resumes = await db.getAll(STORE_NAME);
+  const needsMigration = resumes.some((resume) => resume.position == null);
+
+  if (!needsMigration) {
+    return resumes;
+  }
+
+  const migrated = resumes.map((resume, index) => ({
+    ...resume,
+    position: resume.position ?? (index + 1) * 1000,
+  }));
+
+  const transaction = db.transaction(STORE_NAME, "readwrite");
+  await Promise.all(migrated.map((resume) => transaction.store.put(resume)));
+  await transaction.done;
+
+  return migrated;
 }
 
 export async function getLocalResume(
   resumeId: string,
 ): Promise<ResumeRecord | null> {
+  await loadAllResumes();
   const db = await getDB();
   return (await db.get(STORE_NAME, resumeId)) || null;
 }
@@ -60,10 +83,15 @@ export async function createLocalResume({
   template: ResumeRecord["template"];
 }) {
   const db = await getDB();
+  const resumes = await db.getAll(STORE_NAME);
+  const position =
+    resumes.reduce((max, resume) => Math.max(max, resume.position ?? 0), 0) +
+    1000;
 
   const record: ResumeRecord = {
     id: resumeId,
     updatedAt: Date.now(),
+    position,
     data,
     media: {},
     template,
@@ -82,17 +110,48 @@ export async function copyLocalResume(resumeId: string) {
     throw new Error("Local resume not found");
   }
 
+  const resumes = await db.getAll(STORE_NAME);
+  const orderedResumes = resumes.sort((a, b) => a.position - b.position);
+  const nextResume = orderedResumes.find(
+    (resume) => resume.position > current.position,
+  );
+  let position = nextResume
+    ? Math.floor((current.position + nextResume.position) / 2)
+    : current.position + 1000;
+  const transaction = db.transaction(STORE_NAME, "readwrite");
+
+  if (nextResume && position <= current.position) {
+    await Promise.all(
+      orderedResumes.map((resume, index) => {
+        const normalizedPosition = (index + 1) * 1000;
+
+        if (resume.id === current.id) {
+          position = normalizedPosition + 500;
+        }
+
+        return transaction.store.put({
+          ...resume,
+          position: normalizedPosition,
+        });
+      }),
+    );
+  }
+
   const copy: ResumeRecord = {
     ...current,
     id: crypto.randomUUID(),
     updatedAt: Date.now(),
+    position,
     data: {
       ...current.data,
-      title: `${current.data.title} (Copy)`,
+      title: current.data.title
+        ? `${current.data.title} (Copy)`
+        : "Untitled (Copy)",
     },
   };
 
-  await db.put(STORE_NAME, copy);
+  await transaction.store.put(copy);
+  await transaction.done;
 
   return copy;
 }

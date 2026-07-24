@@ -2,13 +2,21 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Loader2, Trash2 } from "lucide-react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
 } from "@/components/templates/components";
-import { ResumeController, useResumeController } from "./useResumeController";
-import { Resume } from "@/api/resumes";
+import {
+  ResumeController,
+  ResumeListItem,
+  useResumeController,
+} from "./useResumeController";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -28,8 +36,10 @@ const ResumeCard = ({
   copyResume,
   deleteResume,
   openResume,
-}: Omit<ResumeController, "resumes" | "isLoading"> & { resume: Resume }) => {
-  const { id, template, data, source } = resume;
+}: Omit<ResumeController, "resumes" | "isLoading"> & {
+  resume: ResumeListItem;
+}) => {
+  const { id, template, data, source, isCopying, isDeleting } = resume;
   const Template =
     resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
 
@@ -59,22 +69,39 @@ const ResumeCard = ({
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-sm">{data.title || "Untitled"}</p>
+        <p className="text-left text-sm">{data.title || "Untitled"}</p>
         <div className="flex items-center gap-0.5">
-          <Button
-            onClick={() => copyResume({ resumeId: id, source })}
-            variant="ghost"
-            size="icon"
-          >
-            <Copy />
-          </Button>
-          <Button
-            onClick={() => deleteResume({ resumeId: id, source })}
-            variant="ghost"
-            size="icon"
-          >
-            <Trash2 />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => copyResume({ resumeId: id, source })}
+                variant="ghost"
+                size="icon"
+                disabled={isCopying}
+              >
+                {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy resume</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => deleteResume({ resumeId: id, source })}
+                variant="ghost"
+                size="icon"
+                disabled={isDeleting}
+              >
+                {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete resume</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
@@ -83,6 +110,7 @@ const ResumeCard = ({
 
 const ResumeList = () => {
   const { isLoading, resumes, ...controls } = useResumeController();
+  const { scaledWidth } = getScaleForA4(0.25);
 
   if (isLoading) {
     return (
@@ -102,7 +130,12 @@ const ResumeList = () => {
   }
 
   return (
-    <div className="mx-auto flex w-[60%] flex-wrap justify-center gap-4">
+    <div
+      className="mx-auto grid w-[60%] justify-center gap-4"
+      style={{
+        gridTemplateColumns: `repeat(auto-fill, ${scaledWidth + 8}px)`,
+      }}
+    >
       {resumes.map((r) => (
         <ResumeCard key={r.id} resume={r} {...controls} />
       ))}
