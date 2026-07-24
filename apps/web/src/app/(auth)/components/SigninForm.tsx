@@ -28,13 +28,23 @@ const useSigninForm = () =>
   });
 
 const SigninForm = () => {
-  const { mutate, isPending } = useLogin();
+  const { mutate, isPending, error } = useLogin();
   const form = useSigninForm();
 
   const onSubmit = (data: LoginBody) => {
     mutate(data);
     // TODO: handle success and error cases, e.g., show a notification or redirect on success
   };
+
+  const errorMessage = error
+    ? (() => {
+        try {
+          return JSON.parse(error.message).error ?? "Unable to log in";
+        } catch {
+          return "Unable to log in. Please try again.";
+        }
+      })()
+    : null;
 
   return (
     <Form {...form}>
@@ -78,14 +88,20 @@ const SigninForm = () => {
                     autoComplete="new-password"
                   />
                 </FormControl>
+                <FormMessage />
                 <FieldDescription>
                   Forgot your password?{" "}
                   <Link href="/forgot-password">Reset it here</Link>
                 </FieldDescription>
-                <FormMessage />
               </FormItem>
             )}
           />
+
+          {errorMessage && (
+            <p className="text-sm text-red-600" role="alert">
+              {errorMessage}
+            </p>
+          )}
 
           <Button type="submit" disabled={isPending}>
             {isPending ? "Logging in..." : "Enter Account"}
