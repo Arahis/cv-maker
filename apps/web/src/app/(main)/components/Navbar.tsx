@@ -27,9 +27,9 @@ export function HeaderAuth() {
       <Button
         variant="ghost"
         disabled
-        className="px-4 py-2 font-bold opacity-70"
+        className="px-4 py-2 text-base font-bold opacity-70"
       >
-        My Account
+        Loading...
       </Button>
     );
   }
@@ -40,7 +40,7 @@ export function HeaderAuth() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="link-hover"
+            className="link-hover px-4 py-2 text-base font-bold"
             disabled={logoutMutation.isPending}
           >
             {logoutMutation.isPending ? "Logging out..." : "My Account"}
@@ -68,10 +68,12 @@ export function HeaderAuth() {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="ghost" asChild className="px-4 py-2 font-bold">
-        <Link href="/sign-in" className="link-hover">
-          Sign in
-        </Link>
+      <Button
+        variant="ghost"
+        asChild
+        className="link-hover px-4 py-2 text-base font-bold"
+      >
+        <Link href="/sign-in">Sign in</Link>
       </Button>
     </div>
   );
@@ -99,9 +101,14 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
 
         {/* Links */}
         <div className="flex items-center gap-4">
-          <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
-            Your resumes
-          </Link>
+          <Button
+            variant="ghost"
+            asChild
+            className="link-hover px-4 py-2 text-base font-bold"
+          >
+            <Link href="/resumes">Your resumes</Link>
+          </Button>
+
           <HeaderAuth />
         </div>
       </nav>
