@@ -107,6 +107,7 @@ model Resume {
   template      String   @default("template1")
   data          Json
   media         Json
+  position      Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -114,4 +115,5 @@ model Resume {
 
   @@unique([userId, localResumeId])
   @@index([userId, updatedAt])
+  @@index([userId, position])
 }
