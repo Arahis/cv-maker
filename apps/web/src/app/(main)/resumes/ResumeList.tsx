@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { format, isValid, parseISO } from "date-fns";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -49,12 +50,19 @@ const ResumeCard = ({
     isCopying,
     isSyncing,
     isDeleting,
+    updatedAt,
   } = resume;
   const Template =
     resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
 
   const { scaledWidth, scaledHeight, scale, width, height } =
     getScaleForA4(0.25);
+
+  const updatedAtDate =
+    typeof updatedAt === "number" ? new Date(updatedAt) : parseISO(updatedAt);
+  const updatedResumeDate = isValid(updatedAtDate)
+    ? format(updatedAtDate, "dd.MM.yyyy")
+    : "";
 
   return (
     <div key={id}>
@@ -79,7 +87,10 @@ const ResumeCard = ({
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-left text-sm">{data.title || "Untitled"}</p>
+        <div>
+          <p className="text-left text-sm">{data.title || "Untitled"}</p>
+          <p className="text-left text-xs text-gray-400">{updatedResumeDate}</p>
+        </div>
         <div className="flex items-center gap-0.5">
           {source === "account" && (
             <Tooltip>
