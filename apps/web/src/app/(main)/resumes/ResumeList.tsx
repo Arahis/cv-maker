@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Copy, Loader2, Trash2 } from "lucide-react";
+import { RefreshCcw, Copy, Loader2, Trash2 } from "lucide-react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
@@ -34,12 +34,22 @@ const getScaleForA4 = (scale: number) => {
 const ResumeCard = ({
   resume,
   copyResume,
+  syncResume,
   deleteResume,
   openResume,
 }: Omit<ResumeController, "resumes" | "isLoading"> & {
   resume: ResumeListItem;
 }) => {
-  const { id, template, data, source, isCopying, isDeleting } = resume;
+  const {
+    id,
+    template,
+    data,
+    source,
+    isAuthenticated,
+    isCopying,
+    isSyncing,
+    isDeleting,
+  } = resume;
   const Template =
     resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
 
@@ -85,6 +95,28 @@ const ResumeCard = ({
               </TooltipTrigger>
               <TooltipContent>
                 <p>Copy resume</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {source === "local" && isAuthenticated && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => syncResume(id)}
+                  variant="ghost"
+                  size="icon"
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <RefreshCcw />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Sync Local resume to Account</p>
               </TooltipContent>
             </Tooltip>
           )}
