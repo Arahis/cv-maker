@@ -61,6 +61,10 @@ export default async function authRoutes(app: FastifyInstance) {
     return authService.logout(request, reply);
   });
 
+  app.post("/delete-account", async (request, reply) => {
+    return authService.deleteAccount(request, reply);
+  });
+
   app.get("/me", async (request, reply) => {
     return authService.me(request, reply);
   });

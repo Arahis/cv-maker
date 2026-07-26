@@ -8,7 +8,6 @@ import {
   useUpdateAccountResumeTitleMutation,
 } from "@/queries/resumes/accountResumes";
 import {
-  useCopyLocalResumeMutation,
   useDeleteLocalResumeMutation,
   useLocalResumeListQuery,
   useUpdateLocalResumeTitleMutation,
@@ -22,6 +21,7 @@ export type ResumeController = {
   isLoading: boolean;
   openResume: (args: { resumeId: string; source: Source }) => void;
   copyResume: (args: { resumeId: string; source: Source }) => Promise<void>;
+  syncResume: (resumeId: string) => Promise<void>;
   deleteResume: (args: { resumeId: string; source: Source }) => void;
   renameResume: (args: {
     resumeId: string;
@@ -33,6 +33,8 @@ export type ResumeController = {
 
 export type ResumeListItem = Resume & {
   isCopying: boolean;
+  isAuthenticated: boolean;
+  isSyncing: boolean;
   isDeleting: boolean;
 };
 
@@ -40,6 +42,7 @@ export function useResumeController() {
   const router = useRouter();
   const isAuthReady = useAuthBootstrap();
   const [copyingResumeId, setCopyingResumeId] = useState<string | null>(null);
+  const [syncingResumeId, setSyncingResumeId] = useState<string | null>(null);
   const [deletingResumeId, setDeletingResumeId] = useState<string | null>(null);
 
   const { data: me, isLoading: isMeLoading } = useMeQuery();
@@ -56,7 +59,6 @@ export function useResumeController() {
   const updateLocalResumeTitleMutation = useUpdateLocalResumeTitleMutation();
   const updateAccountResumeTitleMutation =
     useUpdateAccountResumeTitleMutation();
-  const copyLocalResumeMutation = useCopyLocalResumeMutation();
   const copyAccountResumeMutation = useCopyAccountResumeMutation();
 
   const localResumes: ResumeListItem[] =
@@ -64,6 +66,8 @@ export function useResumeController() {
       ...resume,
       source: "local",
       isCopying: copyingResumeId === resume.id,
+      isAuthenticated: Boolean(me),
+      isSyncing: syncingResumeId === resume.id,
       isDeleting: deletingResumeId === resume.id,
     })) ?? [];
 
@@ -72,6 +76,8 @@ export function useResumeController() {
       ...resume,
       source: "account",
       isCopying: copyingResumeId === resume.id,
+      isAuthenticated: Boolean(me),
+      isSyncing: syncingResumeId === resume.id,
       isDeleting: deletingResumeId === resume.id,
     })) ?? [];
 
@@ -101,14 +107,13 @@ export function useResumeController() {
     resumeId: string;
     source: "local" | "account";
   }) {
+    if (source !== "account") {
+      return;
+    }
+
     setCopyingResumeId(resumeId);
 
     try {
-      if (source === "local") {
-        await copyLocalResumeMutation.mutateAsync(resumeId);
-        return;
-      }
-
       await copyAccountResumeMutation.mutateAsync(resumeId);
     } finally {
       setCopyingResumeId(null);
@@ -120,6 +125,16 @@ export function useResumeController() {
     const accountResume = await mutateAsync(resumeId);
 
     return accountResume;
+  }
+
+  async function syncResume(resumeId: string) {
+    setSyncingResumeId(resumeId);
+
+    try {
+      await saveLocalResumeToAccount(resumeId);
+    } finally {
+      setSyncingResumeId(null);
+    }
   }
 
   async function deleteResume({
@@ -175,6 +190,7 @@ export function useResumeController() {
 
     openResume,
     copyResume,
+    syncResume,
     deleteResume,
     renameResume,
     saveLocalResumeToAccount,

@@ -13,8 +13,10 @@ import { EmailVerificationService } from "../email-verification/email-verificati
 import { PasswordResetSessionRepository } from "../password-reset/password-reset-session.repository.js";
 import { clearPasswordResetSessionCookie } from "../../lib/reset-pass-cookie.js";
 import { AuthSessionService } from "./auth-session.service.js";
+import { getAuthenticatedUserId } from "../../lib/get-authenticated-user-id.js";
 
 export class AuthService {
+  private readonly prisma;
   private readonly users;
   private readonly refreshSessions;
   private readonly emailVerification;
@@ -22,6 +24,7 @@ export class AuthService {
   private readonly authSessionService;
 
   constructor(app: FastifyInstance) {
+    this.prisma = app.prisma;
     this.users = new UserRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
     this.passwordResetSessions = new PasswordResetSessionRepository(app.prisma);
@@ -167,6 +170,25 @@ export class AuthService {
     return {
       success: true,
     };
+  }
+
+  async deleteAccount(request: FastifyRequest, reply: FastifyReply) {
+    const auth = await getAuthenticatedUserId({
+      request,
+      users: this.users,
+    });
+
+    if (!auth.userId) {
+      reply.code(401);
+      return { error: "Unauthorized" };
+    }
+
+    // Related records are deleted by the database through ON DELETE CASCADE.
+    await this.users.delete(auth.userId);
+
+    clearRefreshTokenCookie(reply);
+
+    return { success: true };
   }
 
   async me(request: FastifyRequest, reply: FastifyReply) {

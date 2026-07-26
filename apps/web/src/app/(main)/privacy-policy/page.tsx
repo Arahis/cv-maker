@@ -14,7 +14,7 @@ export const metadata = {
 
 const Page = async () => {
   return (
-    <main className="policy_page mx-auto max-w-250 flex-1 px-4 py-20">
+    <main className="policy_page mx-auto max-w-250 px-4 py-20">
       <p className="mb-2">
         <strong>Last updated:</strong> February 2026
       </p>

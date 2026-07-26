@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Copy, Loader2, Trash2 } from "lucide-react";
+import { RefreshCcw, Copy, Loader2, Trash2 } from "lucide-react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { format, isValid, parseISO } from "date-fns";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -34,17 +35,34 @@ const getScaleForA4 = (scale: number) => {
 const ResumeCard = ({
   resume,
   copyResume,
+  syncResume,
   deleteResume,
   openResume,
 }: Omit<ResumeController, "resumes" | "isLoading"> & {
   resume: ResumeListItem;
 }) => {
-  const { id, template, data, source, isCopying, isDeleting } = resume;
+  const {
+    id,
+    template,
+    data,
+    source,
+    isAuthenticated,
+    isCopying,
+    isSyncing,
+    isDeleting,
+    updatedAt,
+  } = resume;
   const Template =
     resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
 
   const { scaledWidth, scaledHeight, scale, width, height } =
     getScaleForA4(0.25);
+
+  const updatedAtDate =
+    typeof updatedAt === "number" ? new Date(updatedAt) : parseISO(updatedAt);
+  const updatedResumeDate = isValid(updatedAtDate)
+    ? format(updatedAtDate, "dd.MM.yyyy")
+    : "";
 
   return (
     <div key={id}>
@@ -69,23 +87,50 @@ const ResumeCard = ({
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-left text-sm">{data.title || "Untitled"}</p>
+        <div>
+          <p className="text-left text-sm">{data.title || "Untitled"}</p>
+          <p className="text-left text-xs text-gray-400">{updatedResumeDate}</p>
+        </div>
         <div className="flex items-center gap-0.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => copyResume({ resumeId: id, source })}
-                variant="ghost"
-                size="icon"
-                disabled={isCopying}
-              >
-                {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Copy resume</p>
-            </TooltipContent>
-          </Tooltip>
+          {source === "account" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => copyResume({ resumeId: id, source })}
+                  variant="ghost"
+                  size="icon"
+                  disabled={isCopying}
+                >
+                  {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Copy resume</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {source === "local" && isAuthenticated && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => syncResume(id)}
+                  variant="ghost"
+                  size="icon"
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <RefreshCcw />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Sync Local resume to Account</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>

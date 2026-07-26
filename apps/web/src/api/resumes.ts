@@ -24,7 +24,7 @@ export type Source = "local" | "account";
 
 export type Resume = CreateResumeInput & {
   id: string;
-  updatedAt: number;
+  updatedAt: string | number;
   position: number;
   source: Source;
 };

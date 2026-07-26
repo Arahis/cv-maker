@@ -9,8 +9,10 @@ import {
   updateResumeMedia,
   updateResumeTemplate,
 } from "@/api/resumes";
+import type { Resume } from "@/api/resumes";
 import { uploadAvatar } from "@/api/uploads";
 import { deleteLocalResume, getLocalResume } from "@/lib/indexedDB";
+import type { ResumeRecord } from "@/lib/indexedDB";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { localResumeKeys } from "./localResumes";
 
@@ -178,12 +180,26 @@ export function useSaveLocalResumeToAccountMutation() {
       return accountResume;
     },
 
-    onSuccess: async () => {
+    onSuccess: async (accountResume, localResumeId) => {
+      queryClient.setQueryData<ResumeRecord[]>(localResumeKeys.list, (old) =>
+        old?.filter((resume) => resume.id !== localResumeId),
+      );
+
+      queryClient.setQueryData<Resume[]>(accountResumeKeys.list, (old) => {
+        const resumes = old ?? [];
+
+        // If the account resume already exists in the list when refetch happened earlier then setQueryData, we don't need to add it again
+        if (resumes.some((resume) => resume.id === accountResume.id)) {
+          return resumes;
+        }
+
+        return [...resumes, accountResume].sort(
+          (first, second) => first.position - second.position,
+        );
+      });
+
       await queryClient.invalidateQueries({
         queryKey: accountResumeKeys.list,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: localResumeKeys.list,
       });
     },
   });

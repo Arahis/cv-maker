@@ -1,5 +1,6 @@
 import {
   forgotPassword,
+  deleteAccount,
   getMe,
   login,
   logout,
@@ -10,9 +11,9 @@ import {
 } from "@/api/auth";
 import { getAccessToken, setAccessToken } from "@/api/token";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { accountResumeKeys } from "./resumes/accountResumes";
-import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+import { useAuthBootstrap, useAuthLogout } from "@/providers/auth-bootstrap";
 
 export function useMeQuery() {
   const isAuthReady = useAuthBootstrap();
@@ -118,13 +119,45 @@ export function useLogin() {
 
 export function useLogout() {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { setIsLoggingOut } = useAuthLogout();
 
   return useMutation({
     mutationFn: logout,
+    onMutate: () => {
+      setIsLoggingOut(true);
+    },
     onSettled: () => {
       setAccessToken(null);
       queryClient.setQueryData(["me"], null);
       queryClient.removeQueries({ queryKey: accountResumeKeys.all });
+
+      if (pathname !== "/resumes") {
+        router.replace("/");
+      }
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { setIsLoggingOut } = useAuthLogout();
+
+  return useMutation({
+    mutationFn: deleteAccount,
+    onMutate: () => {
+      setIsLoggingOut(true);
+    },
+    onError: () => {
+      setIsLoggingOut(false);
+    },
+    onSuccess: () => {
+      setAccessToken(null);
+      queryClient.setQueryData(["me"], null);
+      queryClient.removeQueries({ queryKey: accountResumeKeys.all });
+      router.push("/");
     },
   });
 }

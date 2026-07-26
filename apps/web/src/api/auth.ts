@@ -115,6 +115,14 @@ export async function logout() {
   return res;
 }
 
+export async function deleteAccount() {
+  const res = await apiFetch<SuccessRes>("/auth/delete-account", {
+    method: "POST",
+  });
+
+  return res;
+}
+
 export function getMe() {
   return apiFetch<MeRes>("/auth/me");
 }

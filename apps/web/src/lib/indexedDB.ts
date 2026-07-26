@@ -102,60 +102,6 @@ export async function createLocalResume({
   return record;
 }
 
-export async function copyLocalResume(resumeId: string) {
-  const db = await getDB();
-  const current = await db.get(STORE_NAME, resumeId);
-
-  if (!current) {
-    throw new Error("Local resume not found");
-  }
-
-  const resumes = await db.getAll(STORE_NAME);
-  const orderedResumes = resumes.sort((a, b) => a.position - b.position);
-  const nextResume = orderedResumes.find(
-    (resume) => resume.position > current.position,
-  );
-  let position = nextResume
-    ? Math.floor((current.position + nextResume.position) / 2)
-    : current.position + 1000;
-  const transaction = db.transaction(STORE_NAME, "readwrite");
-
-  if (nextResume && position <= current.position) {
-    await Promise.all(
-      orderedResumes.map((resume, index) => {
-        const normalizedPosition = (index + 1) * 1000;
-
-        if (resume.id === current.id) {
-          position = normalizedPosition + 500;
-        }
-
-        return transaction.store.put({
-          ...resume,
-          position: normalizedPosition,
-        });
-      }),
-    );
-  }
-
-  const copy: ResumeRecord = {
-    ...current,
-    id: crypto.randomUUID(),
-    updatedAt: Date.now(),
-    position,
-    data: {
-      ...current.data,
-      title: current.data.title
-        ? `${current.data.title} (Copy)`
-        : "Untitled (Copy)",
-    },
-  };
-
-  await transaction.store.put(copy);
-  await transaction.done;
-
-  return copy;
-}
-
 export async function updateLocalFormData({
   resumeId,
   data,
