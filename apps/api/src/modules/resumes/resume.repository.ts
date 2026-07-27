@@ -4,14 +4,6 @@ import type {
   Resume,
 } from "../../generated/prisma/client.js";
 
-type ResumeDelegate = {
-  findMany(args: unknown): Promise<Resume[]>;
-  findFirst(args: unknown): Promise<Resume | null>;
-  create(args: unknown): Promise<Resume>;
-  update(args: unknown): Promise<Resume>;
-  deleteMany(args: unknown): Promise<{ count: number }>;
-};
-
 type CreateResumeInput = {
   userId: string;
   template: string;
