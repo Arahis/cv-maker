@@ -4,7 +4,7 @@ import { trackEvent } from "@/components/analytics/events";
 import CreateResumeButton from "./CreateResumeButton";
 import { Button } from "@/components/ui/button";
 
-const MainCreateNewResumeButton = () => {
+const CreateResumeButtonHero = () => {
   const handleClick = (onClick: () => void) => {
     trackEvent("create_resume_click", {
       location: "Home_page",
@@ -21,13 +21,13 @@ const MainCreateNewResumeButton = () => {
           disabled={isDisabled}
           variant="default"
           size="lg"
-          className="cursor-pointer font-semibold"
+          className="cursor-pointer py-6 text-xl font-semibold"
         >
-          {"Build your resume for free".toUpperCase()}
+          Create From Scratch
         </Button>
       )}
     />
   );
 };
 
-export default MainCreateNewResumeButton;
+export default CreateResumeButtonHero;
