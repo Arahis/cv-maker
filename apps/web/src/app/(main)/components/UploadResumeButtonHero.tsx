@@ -23,7 +23,7 @@ const UploadResumeButtonHero = () => {
           size="lg"
           className="cursor-pointer py-6 text-xl font-semibold"
         >
-          Upload Resume
+          Upload & Parse Existing CV
         </Button>
       )}
     />

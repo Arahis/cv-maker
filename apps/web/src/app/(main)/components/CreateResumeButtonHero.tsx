@@ -23,7 +23,7 @@ const CreateResumeButtonHero = () => {
           size="lg"
           className="cursor-pointer py-6 text-xl font-semibold"
         >
-          Create New Resume
+          Create From Scratch
         </Button>
       )}
     />
