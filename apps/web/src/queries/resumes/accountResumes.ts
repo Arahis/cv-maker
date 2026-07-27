@@ -10,7 +10,7 @@ import {
   updateResumeTemplate,
 } from "@/api/resumes";
 import type { Resume } from "@/api/resumes";
-import { uploadAvatar } from "@/api/uploads";
+import { parseResume, uploadAvatar } from "@/api/uploads";
 import { deleteLocalResume, getLocalResume } from "@/lib/indexedDB";
 import type { ResumeRecord } from "@/lib/indexedDB";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -198,6 +198,23 @@ export function useSaveLocalResumeToAccountMutation() {
         );
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: accountResumeKeys.list,
+      });
+    },
+  });
+}
+
+export function useUploadExistingResumeToAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const parsedResume = await parseResume(file);
+
+      return createResume(parsedResume.resume);
+    },
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: accountResumeKeys.list,
       });

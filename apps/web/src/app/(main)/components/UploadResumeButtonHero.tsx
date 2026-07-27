@@ -1,12 +1,12 @@
 "use client";
 
 import { trackEvent } from "@/components/analytics/events";
-import CreateResumeButton from "./CreateResumeButton";
 import { Button } from "@/components/ui/button";
+import UploadResumeButton from "./UploadResumeButton";
 
-const MainCreateNewResumeButton = () => {
+const UploadResumeButtonHero = () => {
   const handleClick = (onClick: () => void) => {
-    trackEvent("create_resume_click", {
+    trackEvent("upload_resume_click", {
       location: "Home_page",
       var: "default",
     });
@@ -14,20 +14,20 @@ const MainCreateNewResumeButton = () => {
   };
 
   return (
-    <CreateResumeButton
+    <UploadResumeButton
       button={(onClick, isDisabled) => (
         <Button
           onClick={() => handleClick(onClick)}
           disabled={isDisabled}
-          variant="default"
+          variant="outline"
           size="lg"
-          className="cursor-pointer font-semibold"
+          className="cursor-pointer py-6 text-xl font-semibold"
         >
-          {"Build your resume for free".toUpperCase()}
+          Upload Resume
         </Button>
       )}
     />
   );
 };
 
-export default MainCreateNewResumeButton;
+export default UploadResumeButtonHero;

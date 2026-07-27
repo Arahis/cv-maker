@@ -1,3 +1,4 @@
+import { parseResume } from "@/api/uploads";
 import {
   createLocalResume,
   deleteLocalResume,
@@ -44,6 +45,33 @@ export function useCreateLocalResumeMutation() {
       queryClient.setQueryData(localResumeKeys.detail(data.id), data);
       await queryClient.invalidateQueries({
         queryKey: localResumeKeys.all,
+      });
+    },
+  });
+}
+
+export function useUploadExistingResumeLocal() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      file,
+      resumeId,
+    }: {
+      file: File;
+      resumeId: string;
+    }) => {
+      const parsedResume = await parseResume(file);
+
+      return createLocalResume({
+        resumeId,
+        data: parsedResume.resume.data,
+        template: parsedResume.resume.template,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: localResumeKeys.list,
       });
     },
   });

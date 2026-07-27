@@ -1,5 +1,6 @@
 import Highlights from "./Highlights";
-import MainCreateNewResumeButton from "./MainCreateNewResumeButton";
+import UploadResumeButtonHero from "./UploadResumeButtonHero";
+import CreateResumeButtonHero from "./CreateResumeButtonHero";
 
 const Hero = () => {
   return (
@@ -22,7 +23,10 @@ const Hero = () => {
             worldwide.
           </h3>
         </div>
-        <MainCreateNewResumeButton />
+        <div className="flex gap-8">
+          <CreateResumeButtonHero />
+          <UploadResumeButtonHero />
+        </div>
       </div>
       <Highlights />
     </div>

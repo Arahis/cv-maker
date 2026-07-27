@@ -1,6 +1,23 @@
+import { isValid } from "date-fns";
 import { CreateResumeBody } from "../../resumes/resume.schema.js";
 import { ImportedResume } from "../pars.schema.js";
 import { EMPTY_LEXICAL_STATE, plainTextToLexicalState } from "./lexical.js";
+
+function normalizeImportedDate(value: string): string {
+  const dateValue = value.trim();
+
+  if (/^\d{4}$/.test(dateValue)) {
+    return `${dateValue}-01-01`;
+  }
+
+  const date = new Date(dateValue);
+
+  if (!isValid(date)) {
+    return "";
+  }
+
+  return date.toISOString().slice(0, 10);
+}
 
 export function mapImportedResumeToCreateBody(
   imported: ImportedResume,
@@ -25,8 +42,8 @@ export function mapImportedResumeToCreateBody(
               position: experience.position,
               company: experience.company,
               city: experience.city,
-              startDate: experience.startDate,
-              endDate: experience.endDate,
+              startDate: normalizeImportedDate(experience.startDate),
+              endDate: normalizeImportedDate(experience.endDate),
               description: plainTextToLexicalState(experience.description),
               isFullDate: false,
             }))
@@ -49,8 +66,8 @@ export function mapImportedResumeToCreateBody(
               id: crypto.randomUUID(),
               degree: education.degree,
               institution: education.institution,
-              startDate: education.startDate,
-              endDate: education.endDate,
+              startDate: normalizeImportedDate(education.startDate),
+              endDate: normalizeImportedDate(education.endDate),
               city: education.city,
               isFullDate: false,
             }))
