@@ -117,3 +117,12 @@ model Resume {
   @@index([userId, updatedAt])
   @@index([userId, position])
 }
+
+model AnonymousResumeQuota {
+  id              String   @id @default(cuid())
+  tokenHash       String   @unique
+  fingerprintHmac String?  @unique
+  localResumeId   String   @unique
+  claimedAt       DateTime @default(now())
+
+}

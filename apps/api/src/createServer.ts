@@ -8,6 +8,7 @@ import authRoutes from "./modules/auth/auth.route.js";
 import resumeRoutes from "./modules/resumes/resume.route.js";
 import uploadRoutes from "./modules/uploads/upload.route.js";
 import openapiTestRoutes from "./modules/pars-resume/pars.route.js";
+import anonymousResumeRoutes from "./modules/anonymous-resumes/anonymous-resume.route.js";
 
 export function createServer() {
   const app = Fastify({
@@ -28,6 +29,7 @@ export function createServer() {
   app.register(authRoutes, { prefix: "/auth" });
   app.register(resumeRoutes, { prefix: "/resumes" });
   app.register(uploadRoutes, { prefix: "/uploads" });
+  app.register(anonymousResumeRoutes, { prefix: "/anonymous-resumes" });
   app.register(openapiTestRoutes, { prefix: "/" });
 
   return app;
