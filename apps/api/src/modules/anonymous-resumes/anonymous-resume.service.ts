@@ -7,7 +7,10 @@ import {
 } from "../../lib/anonymous-resume-cookie.js";
 import { createSecureToken, hashToken } from "../../lib/tokens.js";
 import { env } from "../../config/env.js";
-import type { ClaimAnonymousResumeBody } from "./anonymous-resume.schema.js";
+import type {
+  CheckAnonymousResumeQuotaBody,
+  ClaimAnonymousResumeBody,
+} from "./anonymous-resume.schema.js";
 import { AnonymousResumeRepository } from "./anonymous-resume.repository.js";
 
 function hashFingerprint(fingerprint: string): string {
@@ -24,19 +27,40 @@ export class AnonymousResumeService {
     this.anonymousResumes = new AnonymousResumeRepository(app.prisma);
   }
 
+  async check(
+    input: CheckAnonymousResumeQuotaBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const { tokenHash } = this.getOrCreateToken(request, reply);
+
+    const existingTokenQuota =
+      await this.anonymousResumes.findByTokenHash(tokenHash);
+
+    if (existingTokenQuota) {
+      return this.quotaExhausted(reply);
+    }
+
+    if (input.fingerprint) {
+      const existingFingerprintQuota =
+        await this.anonymousResumes.findByFingerprintHmac(
+          hashFingerprint(input.fingerprint),
+        );
+
+      if (existingFingerprintQuota) {
+        return this.quotaExhausted(reply);
+      }
+    }
+
+    return { status: "available" };
+  }
+
   async claim(
     input: ClaimAnonymousResumeBody,
     request: FastifyRequest,
     reply: FastifyReply,
   ) {
-    const existingToken = getAnonymousResumeToken(request);
-    const { token, tokenHash } = existingToken
-      ? { token: existingToken, tokenHash: hashToken(existingToken) }
-      : createSecureToken();
-
-    if (!existingToken) {
-      setAnonymousResumeCookie(reply, token);
-    }
+    const { tokenHash } = this.getOrCreateToken(request, reply);
 
     const existingLocalResume = await this.anonymousResumes.findByLocalResumeId(
       input.localResumeId,
@@ -90,5 +114,18 @@ export class AnonymousResumeService {
   private quotaExhausted(reply: FastifyReply) {
     reply.code(409);
     return { error: "Anonymous resume quota exhausted" };
+  }
+
+  private getOrCreateToken(request: FastifyRequest, reply: FastifyReply) {
+    const existingToken = getAnonymousResumeToken(request);
+
+    if (existingToken) {
+      return { tokenHash: hashToken(existingToken) };
+    }
+
+    const { token, tokenHash } = createSecureToken();
+    setAnonymousResumeCookie(reply, token);
+
+    return { tokenHash };
   }
 }

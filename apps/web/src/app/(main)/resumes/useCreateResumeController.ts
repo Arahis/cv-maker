@@ -12,11 +12,15 @@ import {
 import { ResumeTemplateKey } from "@/components/templates/components";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 import { getVisitorFingerprint } from "@/lib/thumbmark";
-import { useClaimAnonymousResumeMutation } from "@/queries/resumes/anonymousResumes";
+import {
+  useCheckAnonymousResumeQuotaMutation,
+  useClaimAnonymousResumeMutation,
+} from "@/queries/resumes/anonymousResumes";
 
 export type CreateResumeController = {
   createResumeFromUploaded: (file: File) => Promise<void>;
   createResume: (template?: ResumeTemplateKey) => Promise<void>;
+  checkGuestResumeQuota: () => Promise<void>;
   isUploadedLoading: boolean;
   isLoading: boolean;
 };
@@ -30,8 +34,10 @@ export function useCreateResumeController(): CreateResumeController {
   const uploadExistingResumeToAccount = useUploadExistingResumeToAccount();
   const uploadExistingResumeLocal = useUploadExistingResumeLocal();
   const claimAnonymousResumeMutation = useClaimAnonymousResumeMutation();
+  const checkAnonymousResumeQuotaMutation =
+    useCheckAnonymousResumeQuotaMutation();
 
-  async function claimGuestResumeQuota(localResumeId: string) {
+  async function getGuestResumeFingerprint() {
     let fingerprint: string | null = null;
 
     try {
@@ -40,9 +46,23 @@ export function useCreateResumeController(): CreateResumeController {
       console.warn("Could not generate a visitor fingerprint", error);
     }
 
+    return fingerprint;
+  }
+
+  async function checkGuestResumeQuota() {
+    if (me) {
+      return;
+    }
+
+    await checkAnonymousResumeQuotaMutation.mutateAsync({
+      fingerprint: await getGuestResumeFingerprint(),
+    });
+  }
+
+  async function claimGuestResumeQuota(localResumeId: string) {
     await claimAnonymousResumeMutation.mutateAsync({
       localResumeId,
-      fingerprint,
+      fingerprint: await getGuestResumeFingerprint(),
     });
   }
 
@@ -96,12 +116,14 @@ export function useCreateResumeController(): CreateResumeController {
   return {
     createResumeFromUploaded,
     createResume,
+    checkGuestResumeQuota,
     isUploadedLoading:
       !isAuthReady ||
       isMeLoading ||
       uploadExistingResumeToAccount.isPending ||
       uploadExistingResumeLocal.isPending ||
-      claimAnonymousResumeMutation.isPending,
+      claimAnonymousResumeMutation.isPending ||
+      checkAnonymousResumeQuotaMutation.isPending,
     isLoading:
       !isAuthReady ||
       isMeLoading ||

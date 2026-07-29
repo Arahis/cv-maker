@@ -1,7 +1,9 @@
 "use client";
 
-import { type ChangeEvent, type JSX, useRef } from "react";
+import { type ChangeEvent, type JSX, useRef, useState } from "react";
 import { useCreateResumeController } from "../resumes/useCreateResumeController";
+import { ApiError } from "@/api/api-fetch";
+import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
 
 const UploadResumeButton = ({
   button,
@@ -9,12 +11,27 @@ const UploadResumeButton = ({
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { createResumeFromUploaded, isUploadedLoading } =
+  const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
+  const {
+    checkGuestResumeQuota,
+    createResumeFromUploaded,
+    isUploadedLoading,
+  } =
     useCreateResumeController();
 
-  const handleButtonClick = () => {
-    if (!isUploadedLoading) {
+  const handleButtonClick = async () => {
+    if (isUploadedLoading) return;
+
+    try {
+      await checkGuestResumeQuota();
       inputRef.current?.click();
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setIsQuotaDialogOpen(true);
+        return;
+      }
+
+      alert("Error while checking the resume limit. Please try again.");
     }
   };
 
@@ -28,7 +45,12 @@ const UploadResumeButton = ({
 
     try {
       await createResumeFromUploaded(file);
-    } catch {
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setIsQuotaDialogOpen(true);
+        return;
+      }
+
       alert("Error while creating resume. Please try again.");
     }
   };
@@ -43,6 +65,10 @@ const UploadResumeButton = ({
         onChange={handleFileChange}
       />
       {button(handleButtonClick, isUploadedLoading)}
+      <GuestResumeQuotaDialog
+        open={isQuotaDialogOpen}
+        onOpenChange={setIsQuotaDialogOpen}
+      />
     </>
   );
 };

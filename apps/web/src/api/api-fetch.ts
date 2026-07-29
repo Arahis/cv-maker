@@ -15,6 +15,16 @@ type RefreshResponse =
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const res = await fetch(`${API_URL}/auth/refresh`, {
     method: "POST",
@@ -78,7 +88,7 @@ async function apiFetchInternal<T>(
   }
 
   if (!res.ok) {
-    throw new Error(await res.text());
+    throw new ApiError(res.status, await res.text());
   }
 
   return res.json();
