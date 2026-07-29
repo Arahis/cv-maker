@@ -2,17 +2,11 @@
 
 import { useVerifyResetPasswordCode } from "@/queries/auth";
 import CodeOTPForm from "./CodeOTPForm";
-import { Suspense } from "react";
-import Loading from "@/components/Loading";
 
-const CodeFormResetPassword = () => {
+const CodeFormResetPassword = ({ email }: { email: string }) => {
   const { mutateAsync, isPending } = useVerifyResetPasswordCode();
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <CodeOTPForm submitForm={mutateAsync} isPending={isPending} />
-    </Suspense>
-  );
+  return <CodeOTPForm email={email} submitForm={mutateAsync} isPending={isPending} />;
 };
 
 export default CodeFormResetPassword;

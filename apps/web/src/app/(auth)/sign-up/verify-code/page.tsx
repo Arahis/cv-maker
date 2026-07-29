@@ -1,11 +1,11 @@
-import { Suspense } from "react";
 import CodeFormSignup from "../../components/CodeFormSignup";
-import Loading from "@/components/Loading";
 
-export default async function CodeOTPPage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <CodeFormSignup />
-    </Suspense>
-  );
+export default async function CodeOTPPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>;
+}) {
+  const { email } = await searchParams;
+
+  return <CodeFormSignup email={email ?? ""} />;
 }
