@@ -2,10 +2,12 @@
 import { useVerifyCode } from "@/queries/auth";
 import CodeOTPForm from "./CodeOTPForm";
 
-const CodeFormSignup = () => {
+const CodeFormSignup = ({ email }: { email: string }) => {
   const { mutateAsync, isPending } = useVerifyCode();
 
-  return <CodeOTPForm submitForm={mutateAsync} isPending={isPending} />;
+  return (
+    <CodeOTPForm email={email} submitForm={mutateAsync} isPending={isPending} />
+  );
 };
 
 export default CodeFormSignup;

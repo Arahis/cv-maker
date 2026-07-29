@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +31,7 @@ export const verifyCodeBodySchema = z.object({
 export type VerifyCodeBody = z.infer<typeof verifyCodeBodySchema>;
 
 type CodeOTPFormProps = {
+  email: string;
   submitForm: (data: VerifyCodeBody & { email: string }) => Promise<unknown>;
   isPending: boolean;
 };
@@ -44,10 +44,8 @@ const useCodeOTPForm = () =>
     },
   });
 
-const CodeOTPForm = ({ submitForm, isPending }: CodeOTPFormProps) => {
+const CodeOTPForm = ({ email, submitForm, isPending }: CodeOTPFormProps) => {
   const [isNavigating, setIsNavigating] = useState(false);
-  const params = useSearchParams();
-  const email = params.get("email") ?? "";
   const isLoading = isPending || isNavigating;
 
   const form = useCodeOTPForm();
