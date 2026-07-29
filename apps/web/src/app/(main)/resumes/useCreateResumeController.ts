@@ -11,6 +11,8 @@ import {
 } from "@/queries/resumes/localResumes";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+import { getVisitorFingerprint } from "@/lib/thumbmark";
+import { useClaimAnonymousResumeMutation } from "@/queries/resumes/anonymousResumes";
 
 export type CreateResumeController = {
   createResumeFromUploaded: (file: File) => Promise<void>;
@@ -27,6 +29,22 @@ export function useCreateResumeController(): CreateResumeController {
   const createLocalResumeMutation = useCreateLocalResumeMutation();
   const uploadExistingResumeToAccount = useUploadExistingResumeToAccount();
   const uploadExistingResumeLocal = useUploadExistingResumeLocal();
+  const claimAnonymousResumeMutation = useClaimAnonymousResumeMutation();
+
+  async function claimGuestResumeQuota(localResumeId: string) {
+    let fingerprint: string | null = null;
+
+    try {
+      fingerprint = await getVisitorFingerprint();
+    } catch (error) {
+      console.warn("Could not generate a visitor fingerprint", error);
+    }
+
+    await claimAnonymousResumeMutation.mutateAsync({
+      localResumeId,
+      fingerprint,
+    });
+  }
 
   async function createResume(template: ResumeTemplateKey = "template1") {
     const data = defaultFormValues();
@@ -43,6 +61,8 @@ export function useCreateResumeController(): CreateResumeController {
     }
 
     const resumeId = crypto.randomUUID();
+
+    await claimGuestResumeQuota(resumeId);
 
     await createLocalResumeMutation.mutateAsync({
       resumeId,
@@ -64,7 +84,11 @@ export function useCreateResumeController(): CreateResumeController {
 
     const resumeId = crypto.randomUUID();
 
-    await uploadExistingResumeLocal.mutateAsync({ resumeId, file });
+    await uploadExistingResumeLocal.mutateAsync({
+      resumeId,
+      file,
+      reserveQuota: () => claimGuestResumeQuota(resumeId),
+    });
 
     router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
   }
@@ -76,11 +100,13 @@ export function useCreateResumeController(): CreateResumeController {
       !isAuthReady ||
       isMeLoading ||
       uploadExistingResumeToAccount.isPending ||
-      uploadExistingResumeLocal.isPending,
+      uploadExistingResumeLocal.isPending ||
+      claimAnonymousResumeMutation.isPending,
     isLoading:
       !isAuthReady ||
       isMeLoading ||
       createAccountResumeMutation.isPending ||
-      createLocalResumeMutation.isPending,
+      createLocalResumeMutation.isPending ||
+      claimAnonymousResumeMutation.isPending,
   };
 }
