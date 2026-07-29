@@ -27,7 +27,13 @@ const useSigninForm = () =>
     },
   });
 
-const SigninForm = () => {
+const SigninForm = ({
+  embedded = false,
+  onShowSignup,
+}: {
+  embedded?: boolean;
+  onShowSignup?: () => void;
+}) => {
   const { mutate, isPending, error } = useLogin();
   const form = useSigninForm();
 
@@ -53,9 +59,11 @@ const SigninForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h1 className="text-2xl font-bold">Log in to your account</h1>
-          </div>
+          {!embedded && (
+            <div className="flex flex-col items-center gap-1 text-center">
+              <h1 className="text-2xl font-bold">Log in to your account</h1>
+            </div>
+          )}
           <FormField
             control={form.control}
             name="email"
@@ -107,7 +115,18 @@ const SigninForm = () => {
             {isPending ? "Logging in..." : "Enter Account"}
           </Button>
           <FieldDescription className="px-6 text-center">
-            Don't have an account? <Link href="/sign-up">Sign up</Link>
+            Don't have an account?{" "}
+            {onShowSignup ? (
+              <button
+                type="button"
+                className="text-primary underline-offset-4 hover:underline"
+                onClick={onShowSignup}
+              >
+                Sign up
+              </button>
+            ) : (
+              <Link href="/sign-up">Sign up</Link>
+            )}
           </FieldDescription>
         </FieldGroup>
       </form>

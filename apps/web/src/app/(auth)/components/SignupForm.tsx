@@ -27,7 +27,13 @@ const useSignupForm = () =>
     },
   });
 
-const SignupForm = () => {
+const SignupForm = ({
+  embedded = false,
+  onShowSignin,
+}: {
+  embedded?: boolean;
+  onShowSignin?: () => void;
+}) => {
   const { mutateAsync, isPending } = useSignUp();
   const form = useSignupForm();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -53,9 +59,11 @@ const SignupForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h1 className="text-2xl font-bold">Create new account</h1>
-          </div>
+          {!embedded && (
+            <div className="flex flex-col items-center gap-1 text-center">
+              <h1 className="text-2xl font-bold">Create new account</h1>
+            </div>
+          )}
           <FormField
             control={form.control}
             name="email"
@@ -100,7 +108,18 @@ const SignupForm = () => {
             {isLoading ? "Creating ..." : "Create Account"}
           </Button>
           <FieldDescription className="px-6 text-center">
-            Already have an account? <Link href="/sign-in">Sign in</Link>
+            Already have an account?{" "}
+            {onShowSignin ? (
+              <button
+                type="button"
+                className="text-primary underline-offset-4 hover:underline"
+                onClick={onShowSignin}
+              >
+                Sign in
+              </button>
+            ) : (
+              <Link href="/sign-in">Sign in</Link>
+            )}
           </FieldDescription>
         </FieldGroup>
       </form>

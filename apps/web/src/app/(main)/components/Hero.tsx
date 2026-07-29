@@ -21,9 +21,14 @@ const Hero = () => {
             ATS-friendly templates.
           </h3>
         </div>
-        <div className="flex gap-8">
+        <div className="flex gap-8 align-top">
           <CreateResumeButtonHero />
-          <UploadResumeButtonHero />
+          <div>
+            <UploadResumeButtonHero />
+            <p className="mt-2 text-sm font-semibold text-gray-400">
+              PDF supported (DOCX and TXT coming soon)
+            </p>
+          </div>
         </div>
       </div>
       {/* <Highlights /> */}
