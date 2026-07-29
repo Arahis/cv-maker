@@ -11,6 +11,7 @@ const requiredEnv = [
   "ACCESS_TOKEN_TTL_MINUTES",
   "REFRESH_COOKIE_NAME",
   "REFRESH_TOKEN_TTL_DAYS",
+  "ANONYMOUS_RESUME_FINGERPRINT_SECRET",
   "OPENAI_API_KEY",
   "OPENAI_MODEL",
 ] as const;
@@ -38,6 +39,8 @@ export const env = {
     `${Number(process.env.ACCESS_TOKEN_TTL_MINUTES ?? 10)}m` as StringValue,
   refreshCookieName: process.env.REFRESH_COOKIE_NAME!,
   refreshTokenTtlDays: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30),
+  anonymousResumeFingerprintSecret:
+    process.env.ANONYMOUS_RESUME_FINGERPRINT_SECRET!,
   isProduction: process.env.NODE_ENV === "production",
 
   openAiApiKey: process.env.OPENAI_API_KEY!,

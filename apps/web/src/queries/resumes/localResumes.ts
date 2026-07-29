@@ -57,11 +57,15 @@ export function useUploadExistingResumeLocal() {
     mutationFn: async ({
       file,
       resumeId,
+      reserveQuota,
     }: {
       file: File;
       resumeId: string;
+      reserveQuota: () => Promise<void>;
     }) => {
       const parsedResume = await parseResume(file);
+
+      await reserveQuota();
 
       return createLocalResume({
         resumeId,

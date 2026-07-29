@@ -1,8 +1,10 @@
 "use client";
 
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { TemplateKey } from "@/components/templates/previews";
 import { useCreateResumeController } from "../resumes/useCreateResumeController";
+import { ApiError } from "@/api/api-fetch";
+import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
 
 const CreateResumeButton = ({
   button,
@@ -12,18 +14,32 @@ const CreateResumeButton = ({
   template?: TemplateKey;
 }) => {
   const { createResume, isLoading } = useCreateResumeController();
+  const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
 
   const handleCreateResume = async () => {
     if (isLoading) return;
 
     try {
       await createResume(template);
-    } catch {
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setIsQuotaDialogOpen(true);
+        return;
+      }
+
       alert("Error while creating resume. Please try again.");
     }
   };
 
-  return button(handleCreateResume, isLoading);
+  return (
+    <>
+      {button(handleCreateResume, isLoading)}
+      <GuestResumeQuotaDialog
+        open={isQuotaDialogOpen}
+        onOpenChange={setIsQuotaDialogOpen}
+      />
+    </>
+  );
 };
 
 export default CreateResumeButton;

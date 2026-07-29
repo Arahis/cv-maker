@@ -22,7 +22,7 @@
     "@fastify/multipart": "^9.2.1",
     "@google/genai": "^2.13.0",
     "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^7.9.1",
     "argon2": "^0.44.0",
     "date-fns": "^4.4.0",
     "dotenv": "^16.6.1",
@@ -30,12 +30,12 @@
     "jsonwebtoken": "^9.0.3",
     "openai": "^6.49.0",
     "playwright": "1.58.2",
-    "prisma": "^7.8.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
+    "prisma": "^7.9.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
