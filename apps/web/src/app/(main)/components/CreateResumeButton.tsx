@@ -2,9 +2,11 @@
 
 import { JSX, useState } from "react";
 import { TemplateKey } from "@/components/templates/previews";
-import { useCreateResumeController } from "../resumes/useCreateResumeController";
+import { useCreateResumeController } from "../hooks/useCreateResumeController";
 import { ApiError } from "@/api/api-fetch";
 import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
+import { FullscreenLoading } from "./FullscreenLoading";
+import { useResumeAction } from "../providers/ResumeActionProvider";
 
 const CreateResumeButton = ({
   button,
@@ -13,11 +15,14 @@ const CreateResumeButton = ({
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
   template?: TemplateKey;
 }) => {
-  const { createResume, isLoading } = useCreateResumeController();
+  const { createResume, isLoading, isProcessing } = useCreateResumeController();
+  const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
 
   const handleCreateResume = async () => {
-    if (isLoading) return;
+    if (isLoading || isResumeActionPending) return;
+
+    setIsResumeActionPending(true);
 
     try {
       await createResume(template);
@@ -28,16 +33,19 @@ const CreateResumeButton = ({
       }
 
       alert("Error while creating resume. Please try again.");
+    } finally {
+      setIsResumeActionPending(false);
     }
   };
 
   return (
     <>
-      {button(handleCreateResume, isLoading)}
+      {button(handleCreateResume, isLoading || isResumeActionPending)}
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
       />
+      {isProcessing && <FullscreenLoading />}
     </>
   );
 };

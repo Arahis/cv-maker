@@ -1,6 +1,7 @@
 import { Metadata } from "next";
-import CreateNewResumeButton from "./CreateNewResumeButton";
-import ResumeList from "./ResumeList";
+import CreateResumeButtonResumeList from "./components/CreateResumeButtonResumeList";
+import UploadResumeButtonResumeList from "./components/UploadResumeButtonResumeList";
+import ResumeList from "./components/ResumeList";
 
 export const metadata: Metadata = {
   title: "Your resumes",
@@ -18,8 +19,9 @@ const Page = () => {
       <h1 className="mb-10 text-2xl font-semibold md:text-3xl">
         Wow! All these are your resumes
       </h1>
-      <div className="mb-12">
-        <CreateNewResumeButton />
+      <div className="mb-12 flex justify-center gap-4">
+        <CreateResumeButtonResumeList />
+        <UploadResumeButtonResumeList />
       </div>
       <div className="mx-20">
         <ResumeList />

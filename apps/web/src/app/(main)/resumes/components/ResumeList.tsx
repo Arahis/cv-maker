@@ -7,17 +7,18 @@ import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
 } from "@/components/templates/components";
-import {
-  ResumeController,
-  ResumeListItem,
-  useResumeController,
-} from "./useResumeController";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { format, isValid, parseISO } from "date-fns";
+import {
+  ResumeController,
+  ResumeListItem,
+  useResumeController,
+} from "../../hooks/useResumeController";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {

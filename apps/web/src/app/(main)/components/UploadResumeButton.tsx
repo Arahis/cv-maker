@@ -1,9 +1,11 @@
 "use client";
 
 import { type ChangeEvent, type JSX, useRef, useState } from "react";
-import { useCreateResumeController } from "../resumes/useCreateResumeController";
+import { useCreateResumeController } from "../hooks/useCreateResumeController";
 import { ApiError } from "@/api/api-fetch";
 import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
+import { FullscreenLoading } from "./FullscreenLoading";
+import { useResumeAction } from "../providers/ResumeActionProvider";
 
 const UploadResumeButton = ({
   button,
@@ -15,15 +17,23 @@ const UploadResumeButton = ({
   const {
     checkGuestResumeQuota,
     createResumeFromUploaded,
-    isUploadedLoading,
-  } =
-    useCreateResumeController();
+    isLoading,
+    isProcessing,
+  } = useCreateResumeController();
+  const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
 
   const handleButtonClick = async () => {
-    if (isUploadedLoading) return;
+    if (isLoading || isResumeActionPending) return;
+
+    setIsResumeActionPending(true);
 
     try {
-      await checkGuestResumeQuota();
+      const canChooseFile = await checkGuestResumeQuota();
+
+      if (!canChooseFile) {
+        return;
+      }
+
       inputRef.current?.click();
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
@@ -32,6 +42,8 @@ const UploadResumeButton = ({
       }
 
       alert("Error while checking the resume limit. Please try again.");
+    } finally {
+      setIsResumeActionPending(false);
     }
   };
 
@@ -41,7 +53,9 @@ const UploadResumeButton = ({
     // Allow selecting the same file again after an error or a retry.
     event.target.value = "";
 
-    if (!file || isUploadedLoading) return;
+    if (!file || isLoading || isResumeActionPending) return;
+
+    setIsResumeActionPending(true);
 
     try {
       await createResumeFromUploaded(file);
@@ -52,6 +66,8 @@ const UploadResumeButton = ({
       }
 
       alert("Error while creating resume. Please try again.");
+    } finally {
+      setIsResumeActionPending(false);
     }
   };
 
@@ -64,11 +80,12 @@ const UploadResumeButton = ({
         className="hidden"
         onChange={handleFileChange}
       />
-      {button(handleButtonClick, isUploadedLoading)}
+      {button(handleButtonClick, isLoading || isResumeActionPending)}
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
       />
+      {isProcessing && <FullscreenLoading />}
     </>
   );
 };

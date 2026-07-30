@@ -6,6 +6,7 @@ import { ResumeTemplateKey } from "@/components/templates/components";
 
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
+const PENDING_CREATION_STORE_NAME = "pending-resume-creations";
 
 export type LocalResumeAvatar = {
   croppedBlob: Blob;
@@ -28,7 +29,7 @@ export interface ResumeRecord {
 
 // Initialize IndexedDB
 async function getDB() {
-  return openDB(DB_NAME, 2, {
+  return openDB(DB_NAME, 4, {
     upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, {
@@ -40,6 +41,14 @@ async function getDB() {
         // `position` is a regular record field, so no object-store migration
         // is required. Existing records are backfilled in loadAllResumes.
       }
+
+      if (
+        oldVersion < 4 &&
+        db.objectStoreNames.contains(PENDING_CREATION_STORE_NAME)
+      ) {
+        db.deleteObjectStore(PENDING_CREATION_STORE_NAME);
+      }
+
     },
   });
 }

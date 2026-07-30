@@ -1,0 +1,24 @@
+"use client";
+
+import CreateResumeButton from "../../components/CreateResumeButton";
+import { Button } from "@/components/ui/button";
+
+const CreateResumeButtonResumeList = () => {
+  return (
+    <CreateResumeButton
+      button={(onClick, isDisabled) => (
+        <Button
+          onClick={onClick}
+          disabled={isDisabled}
+          variant="secondary"
+          size="lg"
+          className="cursor-pointer"
+        >
+          Create New Resume
+        </Button>
+      )}
+    />
+  );
+};
+
+export default CreateResumeButtonResumeList;

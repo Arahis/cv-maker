@@ -1,24 +1,22 @@
 "use client";
 
-import CreateResumeButton from "../components/CreateResumeButton";
 import { Button } from "@/components/ui/button";
+import UploadResumeButton from "../../components/UploadResumeButton";
 
-const CreateNewResumeButton = () => {
+export default function UploadResumeButtonResumeList() {
   return (
-    <CreateResumeButton
+    <UploadResumeButton
       button={(onClick, isDisabled) => (
         <Button
           onClick={onClick}
           disabled={isDisabled}
-          variant="secondary"
+          variant="outline"
           size="lg"
           className="cursor-pointer"
         >
-          Psss! Create New Resume
+          Upload Existing Resume
         </Button>
       )}
     />
   );
-};
-
-export default CreateNewResumeButton;
+}

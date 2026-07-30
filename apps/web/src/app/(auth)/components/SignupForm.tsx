@@ -34,7 +34,7 @@ const SignupForm = ({
   embedded?: boolean;
   onShowSignin?: () => void;
 }) => {
-  const { mutateAsync, isPending } = useSignUp();
+  const { mutateAsync, isPending, error } = useSignUp();
   const form = useSignupForm();
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -51,6 +51,16 @@ const SignupForm = ({
     }
     // TODO: handle success and error cases, e.g., show a notification or redirect on success
   };
+
+  const errorMessage = error
+    ? (() => {
+        try {
+          return JSON.parse(error.message).error ?? "Unable to sign up";
+        } catch {
+          return "Unable to sign up. Please try again.";
+        }
+      })()
+    : null;
 
   return (
     <Form {...form}>
@@ -96,13 +106,19 @@ const SignupForm = ({
                     autoComplete="new-password"
                   />
                 </FormControl>
+                <FormMessage />
                 <FieldDescription>
                   Must be at least 8 characters long.
                 </FieldDescription>
-                <FormMessage />
               </FormItem>
             )}
           />
+
+          {errorMessage && (
+            <p className="text-sm text-red-600" role="alert">
+              {errorMessage}
+            </p>
+          )}
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Creating ..." : "Create Account"}
