@@ -19,6 +19,14 @@ function normalizeImportedDate(value: string): string {
   return date.toISOString().slice(0, 10);
 }
 
+function normalizeImportedPhone(value: string): string {
+  const normalized = value.trim().replace(/[^0-9+()\s]/g, "");
+  const hasPlus = normalized.includes("+");
+  const phoneWithoutPlus = normalized.replace(/\+/g, "");
+
+  return hasPlus ? `+${phoneWithoutPlus}` : phoneWithoutPlus;
+}
+
 export function mapImportedResumeToCreateBody(
   imported: ImportedResume,
 ): CreateResumeBody {
@@ -32,7 +40,7 @@ export function mapImportedResumeToCreateBody(
       jobTitle: imported.jobTitle,
       city: imported.city,
       country: imported.country,
-      phone: imported.phone,
+      phone: normalizeImportedPhone(imported.phone),
       email: imported.email,
 
       workExperiences:

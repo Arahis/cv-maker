@@ -13,7 +13,7 @@ type RefreshResponse =
       accessToken: null;
     };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export class ApiError extends Error {
   constructor(
@@ -29,6 +29,10 @@ async function refreshAccessToken(): Promise<string | null> {
   const res = await fetch(`${API_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "ngrok-skip-browser-warning": "true",
+    },
   });
 
   if (!res.ok) {
@@ -72,6 +76,10 @@ async function apiFetchInternal<T>(
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+
+  // setup for Ngrok
+  headers.set("ngrok-skip-browser-warning", "true");
+  headers.set("Accept", "application/json");
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
