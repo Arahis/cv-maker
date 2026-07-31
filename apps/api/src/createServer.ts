@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import { env } from "./config/env.js";
 import multipart from "@fastify/multipart";
 import corsPlugin from "./plugins/cors.js";
 import cookiePlugin from "./plugins/cookie.js";
@@ -21,7 +22,7 @@ export function createServer() {
   app.register(multipart, {
     limits: {
       files: 1,
-      fileSize: 10 * 1024 * 1024,
+      fileSize: env.resumeImportMaxFileSizeBytes,
     },
   });
 

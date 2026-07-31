@@ -120,9 +120,13 @@ model Resume {
 
 model AnonymousResumeQuota {
   id              String   @id @default(cuid())
-  tokenHash       String   @unique
-  fingerprintHmac String?  @unique
+  tokenHash       String
+  fingerprintHmac String?
   localResumeId   String   @unique
+  hasEverUploaded Boolean  @default(false)
+  active          Boolean  @default(true)
   claimedAt       DateTime @default(now())
 
+  @@unique([tokenHash, hasEverUploaded])
+  @@unique([fingerprintHmac, hasEverUploaded])
 }

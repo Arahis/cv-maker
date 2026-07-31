@@ -7,6 +7,34 @@ import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
 import { FullscreenLoading } from "./FullscreenLoading";
 import { useResumeAction } from "../providers/ResumeActionProvider";
 
+const MAX_RESUME_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof ApiError) {
+    try {
+      const body = JSON.parse(error.message) as {
+        message?: string;
+        error?: string;
+      };
+      const message = body.message ?? body.error;
+
+      if (message) {
+        return `${message} (HTTP ${error.status})`;
+      }
+    } catch {
+      // The API may return a non-JSON error body.
+    }
+
+    return `${fallback} (HTTP ${error.status})`;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 const UploadResumeButton = ({
   button,
 }: {
@@ -28,7 +56,7 @@ const UploadResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
-      const canChooseFile = await checkGuestResumeQuota();
+      const canChooseFile = await checkGuestResumeQuota(true);
 
       if (!canChooseFile) {
         return;
@@ -41,7 +69,12 @@ const UploadResumeButton = ({
         return;
       }
 
-      alert("Error while checking the resume limit. Please try again.");
+      alert(
+        getErrorMessage(
+          error,
+          "Error while checking the resume limit. Please try again.",
+        ),
+      );
     } finally {
       setIsResumeActionPending(false);
     }
@@ -55,6 +88,11 @@ const UploadResumeButton = ({
 
     if (!file || isLoading || isResumeActionPending) return;
 
+    if (file.size > MAX_RESUME_FILE_SIZE_BYTES) {
+      alert("File is too large. The maximum allowed size is 5 MB.");
+      return;
+    }
+
     setIsResumeActionPending(true);
 
     try {
@@ -65,7 +103,9 @@ const UploadResumeButton = ({
         return;
       }
 
-      alert("Error while creating resume. Please try again.");
+      alert(
+        getErrorMessage(error, "Error while creating resume."),
+      );
     } finally {
       setIsResumeActionPending(false);
     }

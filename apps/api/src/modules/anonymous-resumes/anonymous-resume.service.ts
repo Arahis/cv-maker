@@ -10,6 +10,7 @@ import { env } from "../../config/env.js";
 import type {
   CheckAnonymousResumeQuotaBody,
   ClaimAnonymousResumeBody,
+  ReleaseAnonymousResumeBody,
 } from "./anonymous-resume.schema.js";
 import { AnonymousResumeRepository } from "./anonymous-resume.repository.js";
 
@@ -35,7 +36,9 @@ export class AnonymousResumeService {
     const { tokenHash } = this.getOrCreateToken(request, reply);
 
     const existingTokenQuota =
-      await this.anonymousResumes.findByTokenHash(tokenHash);
+      input.hasEverUploaded
+        ? await this.anonymousResumes.findAnyByTokenHash(tokenHash)
+        : await this.anonymousResumes.findActiveByTokenHash(tokenHash);
 
     if (existingTokenQuota) {
       return this.quotaExhausted(reply);
@@ -43,9 +46,13 @@ export class AnonymousResumeService {
 
     if (input.fingerprint) {
       const existingFingerprintQuota =
-        await this.anonymousResumes.findByFingerprintHmac(
-          hashFingerprint(input.fingerprint),
-        );
+        input.hasEverUploaded
+          ? await this.anonymousResumes.findAnyByFingerprintHmac(
+              hashFingerprint(input.fingerprint),
+            )
+          : await this.anonymousResumes.findActiveByFingerprintHmac(
+              hashFingerprint(input.fingerprint),
+            );
 
       if (existingFingerprintQuota) {
         return this.quotaExhausted(reply);
@@ -71,7 +78,9 @@ export class AnonymousResumeService {
     }
 
     const existingTokenQuota =
-      await this.anonymousResumes.findByTokenHash(tokenHash);
+      input.hasEverUploaded
+        ? await this.anonymousResumes.findAnyByTokenHash(tokenHash)
+        : await this.anonymousResumes.findActiveByTokenHash(tokenHash);
 
     if (existingTokenQuota) {
       return this.quotaExhausted(reply);
@@ -83,7 +92,13 @@ export class AnonymousResumeService {
 
     if (fingerprintHmac) {
       const existingFingerprintQuota =
-        await this.anonymousResumes.findByFingerprintHmac(fingerprintHmac);
+        input.hasEverUploaded
+          ? await this.anonymousResumes.findAnyByFingerprintHmac(
+              fingerprintHmac,
+            )
+          : await this.anonymousResumes.findActiveByFingerprintHmac(
+              fingerprintHmac,
+            );
 
       if (existingFingerprintQuota) {
         return this.quotaExhausted(reply);
@@ -95,6 +110,7 @@ export class AnonymousResumeService {
         tokenHash,
         fingerprintHmac,
         localResumeId: input.localResumeId,
+        hasEverUploaded: input.hasEverUploaded,
       });
     } catch (error) {
       if (
@@ -109,6 +125,40 @@ export class AnonymousResumeService {
 
     reply.code(201);
     return { status: "claimed" };
+  }
+
+  async release(
+    input: ReleaseAnonymousResumeBody,
+    request: FastifyRequest,
+    _reply: FastifyReply,
+  ) {
+    const existingToken = getAnonymousResumeToken(request);
+
+    if (!existingToken) {
+      return { status: "ignored" };
+    }
+
+    const tokenHash = hashToken(existingToken);
+    const quota = (await this.anonymousResumes.findByLocalResumeId(
+      input.localResumeId,
+    )) as
+      | ({
+          id: string;
+          tokenHash: string;
+          hasEverUploaded: boolean;
+        } | null);
+
+    if (!quota || quota.tokenHash !== tokenHash) {
+      return { status: "ignored" };
+    }
+
+    if (!quota.hasEverUploaded) {
+      await this.anonymousResumes.deleteById(quota.id);
+    } else {
+      await this.anonymousResumes.markInactive(quota.id);
+    }
+
+    return { status: "released" };
   }
 
   private quotaExhausted(reply: FastifyReply) {

@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import {
   checkAnonymousResumeQuotaBodySchema,
   claimAnonymousResumeBodySchema,
+  releaseAnonymousResumeBodySchema,
 } from "./anonymous-resume.schema.js";
 import { AnonymousResumeService } from "./anonymous-resume.service.js";
 
@@ -36,5 +37,21 @@ export default async function anonymousResumeRoutes(app: FastifyInstance) {
     }
 
     return anonymousResumeService.claim(parsedBody.data, request, reply);
+  });
+
+  app.post("/release", async (request, reply) => {
+    const parsedBody = releaseAnonymousResumeBodySchema.safeParse(
+      request.body,
+    );
+
+    if (!parsedBody.success) {
+      reply.code(400);
+      return {
+        error: "Invalid request body",
+        issues: parsedBody.error.issues,
+      };
+    }
+
+    return anonymousResumeService.release(parsedBody.data, request, reply);
   });
 }
