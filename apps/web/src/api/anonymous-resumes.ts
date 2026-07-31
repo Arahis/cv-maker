@@ -3,10 +3,12 @@ import { apiFetch } from "./api-fetch";
 type ClaimAnonymousResumeInput = {
   localResumeId: string;
   fingerprint: string | null;
+  hasEverUploaded: boolean;
 };
 
 type CheckAnonymousResumeQuotaInput = {
   fingerprint: string | null;
+  hasEverUploaded: boolean;
 };
 
 type ClaimAnonymousResumeResponse = {
@@ -15,6 +17,10 @@ type ClaimAnonymousResumeResponse = {
 
 type CheckAnonymousResumeQuotaResponse = {
   status: "available";
+};
+
+type ReleaseAnonymousResumeInput = {
+  localResumeId: string;
 };
 
 export function checkAnonymousResumeQuota(
@@ -34,4 +40,14 @@ export function claimAnonymousResume(input: ClaimAnonymousResumeInput) {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function releaseAnonymousResume(input: ReleaseAnonymousResumeInput) {
+  return apiFetch<{ status: "released" | "ignored" }>(
+    "/anonymous-resumes/release",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
 }

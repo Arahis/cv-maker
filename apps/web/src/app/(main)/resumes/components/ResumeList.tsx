@@ -136,7 +136,11 @@ const ResumeCard = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                onClick={() => deleteResume({ resumeId: id, source })}
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to delete this resume?")) {
+                    deleteResume({ resumeId: id, source });
+                  }
+                }}
                 variant="ghost"
                 size="icon"
                 disabled={isDeleting}

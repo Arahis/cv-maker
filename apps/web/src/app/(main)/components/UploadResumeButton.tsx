@@ -56,7 +56,7 @@ const UploadResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
-      const canChooseFile = await checkGuestResumeQuota();
+      const canChooseFile = await checkGuestResumeQuota(true);
 
       if (!canChooseFile) {
         return;

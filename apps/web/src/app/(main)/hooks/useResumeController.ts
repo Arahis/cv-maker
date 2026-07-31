@@ -14,6 +14,7 @@ import {
 } from "@/queries/resumes/localResumes";
 import { useRouter } from "next/navigation";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+import { useReleaseAnonymousResumeMutation } from "@/queries/resumes/anonymousResumes";
 import { useState } from "react";
 
 export type ResumeController = {
@@ -56,6 +57,8 @@ export function useResumeController() {
   const saveLocalToAccountMutation = useSaveLocalResumeToAccountMutation();
   const deleteAccountResumeMutation = useDeleteAccountResumeMutation();
   const deleteLocalResumeMutation = useDeleteLocalResumeMutation();
+  const releaseAnonymousResumeMutation =
+    useReleaseAnonymousResumeMutation();
   const updateLocalResumeTitleMutation = useUpdateLocalResumeTitleMutation();
   const updateAccountResumeTitleMutation =
     useUpdateAccountResumeTitleMutation();
@@ -137,6 +140,28 @@ export function useResumeController() {
     }
   }
 
+  async function releaseGuestQuota(resumeId: string) {
+    try {
+      await releaseAnonymousResumeMutation.mutateAsync({
+        localResumeId: resumeId,
+      });
+    } catch {
+      const shouldRetry = window.confirm(
+        "The resume was deleted, but your guest quota could not be reset. Try again?",
+      );
+
+      if (!shouldRetry) return;
+
+      try {
+        await releaseAnonymousResumeMutation.mutateAsync({
+          localResumeId: resumeId,
+        });
+      } catch {
+        window.alert("The quota could not be reset. Please try again later.");
+      }
+    }
+  }
+
   async function deleteResume({
     resumeId,
     source,
@@ -150,6 +175,11 @@ export function useResumeController() {
       if (source === "local") {
         const { mutateAsync } = deleteLocalResumeMutation;
         await mutateAsync(resumeId);
+
+        if (!me) {
+          await releaseGuestQuota(resumeId);
+        }
+
         return;
       }
 

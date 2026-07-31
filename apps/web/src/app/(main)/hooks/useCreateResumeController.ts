@@ -21,7 +21,9 @@ import {
 export type CreateResumeController = {
   createResumeFromUploaded: (file: File) => Promise<void>;
   createResume: (template?: ResumeTemplateKey) => Promise<void>;
-  checkGuestResumeQuota: () => Promise<boolean>;
+  checkGuestResumeQuota: (
+    hasEverUploaded: boolean,
+  ) => Promise<boolean>;
   isLoading: boolean;
   isProcessing: boolean;
 };
@@ -52,7 +54,9 @@ export function useCreateResumeController(): CreateResumeController {
     return fingerprint;
   }
 
-  async function checkGuestResumeQuota() {
+  async function checkGuestResumeQuota(
+    hasEverUploaded: boolean,
+  ) {
     // `useMeQuery` starts only after the refresh-token bootstrap has finished.
     // Do not treat an authenticated user as a guest in the gap before then.
     if (!isAuthReady || isMeLoading) {
@@ -65,16 +69,21 @@ export function useCreateResumeController(): CreateResumeController {
 
     await checkAnonymousResumeQuotaMutation.mutateAsync({
       fingerprint: await getGuestResumeFingerprint(),
+      hasEverUploaded,
     });
 
     return true;
   }
 
   // Create Record for an unauthenticated visitor that has created his one allowed resume.
-  async function claimGuestResumeQuota(localResumeId: string) {
+  async function claimGuestResumeQuota(
+    localResumeId: string,
+    hasEverUploaded: boolean,
+  ) {
     await claimAnonymousResumeMutation.mutateAsync({
       localResumeId,
       fingerprint: await getGuestResumeFingerprint(),
+      hasEverUploaded,
     });
   }
 
@@ -84,7 +93,7 @@ export function useCreateResumeController(): CreateResumeController {
     }
 
     if (!me) {
-      const canCreateResume = await checkGuestResumeQuota();
+      const canCreateResume = await checkGuestResumeQuota(false);
 
       if (!canCreateResume) {
         return;
@@ -116,7 +125,7 @@ export function useCreateResumeController(): CreateResumeController {
 
       const resumeId = crypto.randomUUID();
 
-      await claimGuestResumeQuota(resumeId);
+      await claimGuestResumeQuota(resumeId, false);
 
       await createLocalResumeMutation.mutateAsync({
         resumeId,
@@ -158,7 +167,7 @@ export function useCreateResumeController(): CreateResumeController {
       await uploadExistingResumeLocal.mutateAsync({
         resumeId,
         file,
-        reserveQuota: () => claimGuestResumeQuota(resumeId),
+        reserveQuota: () => claimGuestResumeQuota(resumeId, true),
       });
 
       router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
