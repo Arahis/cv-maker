@@ -19,6 +19,7 @@ import {
   ResumeListItem,
   useResumeController,
 } from "../../hooks/useResumeController";
+import { ErrorDialog } from "../../components/ErrorDialog";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -39,7 +40,10 @@ const ResumeCard = ({
   syncResume,
   deleteResume,
   openResume,
-}: Omit<ResumeController, "resumes" | "isLoading"> & {
+}: Omit<
+  ResumeController,
+  "resumes" | "isLoading" | "quotaResetError" | "clearQuotaResetError"
+> & {
   resume: ResumeListItem;
 }) => {
   const {
@@ -159,37 +163,62 @@ const ResumeCard = ({
 };
 
 const ResumeList = () => {
-  const { isLoading, resumes, ...controls } = useResumeController();
+  const {
+    isLoading,
+    resumes,
+    quotaResetError,
+    clearQuotaResetError,
+    ...controls
+  } = useResumeController();
   const { scaledWidth } = getScaleForA4(0.25);
+
+  const errorDialog = (
+    <ErrorDialog
+      open={Boolean(quotaResetError)}
+      onOpenChange={(open) => {
+        if (!open) clearQuotaResetError();
+      }}
+      message={quotaResetError ?? ""}
+    />
+  );
 
   if (isLoading) {
     return (
-      <div className="py-24 leading-7">
-        <p>Loading...</p>
-      </div>
+      <>
+        <div className="py-24 leading-7">
+          <p>Loading...</p>
+        </div>
+        {errorDialog}
+      </>
     );
   }
 
   if (resumes.length === 0) {
     return (
-      <div className="py-24 leading-7">
-        <p>Looks like it is a lot of empty space here!</p>
-        <p>Try and Create you first resume!</p>
-      </div>
+      <>
+        <div className="py-24 leading-7">
+          <p>Looks like it is a lot of empty space here!</p>
+          <p>Try and Create you first resume!</p>
+        </div>
+        {errorDialog}
+      </>
     );
   }
 
   return (
-    <div
-      className="mx-auto grid w-[60%] justify-center gap-4"
-      style={{
-        gridTemplateColumns: `repeat(auto-fill, ${scaledWidth + 8}px)`,
-      }}
-    >
-      {resumes.map((r) => (
-        <ResumeCard key={r.id} resume={r} {...controls} />
-      ))}
-    </div>
+    <>
+      <div
+        className="mx-auto grid w-[60%] justify-center gap-4"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, ${scaledWidth + 8}px)`,
+        }}
+      >
+        {resumes.map((r) => (
+          <ResumeCard key={r.id} resume={r} {...controls} />
+        ))}
+      </div>
+      {errorDialog}
+    </>
   );
 };
 

@@ -4,6 +4,9 @@ import { type ChangeEvent, type JSX, useRef, useState } from "react";
 import { useCreateResumeController } from "../hooks/useCreateResumeController";
 import { ApiError } from "@/api/api-fetch";
 import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
+import { PdfParseLimitDialog } from "./PdfParseLimitDialog";
+import { FileSizeLimitDialog } from "./FileSizeLimitDialog";
+import { ErrorDialog } from "./ErrorDialog";
 import { FullscreenLoading } from "./FullscreenLoading";
 import { useResumeAction } from "../providers/ResumeActionProvider";
 
@@ -42,6 +45,9 @@ const UploadResumeButton = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
+  const [isPdfLimitDialogOpen, setIsPdfLimitDialogOpen] = useState(false);
+  const [isFileSizeDialogOpen, setIsFileSizeDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
     checkGuestResumeQuota,
     checkPdfParseLimit,
@@ -72,7 +78,12 @@ const UploadResumeButton = ({
         return;
       }
 
-      alert(
+      if (error instanceof ApiError && error.status === 429) {
+        setIsPdfLimitDialogOpen(true);
+        return;
+      }
+
+      setErrorMessage(
         getErrorMessage(
           error,
           "Error while checking the resume limit. Please try again.",
@@ -92,7 +103,7 @@ const UploadResumeButton = ({
     if (!file || isLoading || isResumeActionPending) return;
 
     if (file.size > MAX_RESUME_FILE_SIZE_BYTES) {
-      alert("File is too large. The maximum allowed size is 5 MB.");
+      setIsFileSizeDialogOpen(true);
       return;
     }
 
@@ -106,9 +117,12 @@ const UploadResumeButton = ({
         return;
       }
 
-      alert(
-        getErrorMessage(error, "Error while creating resume."),
-      );
+      if (error instanceof ApiError && error.status === 429) {
+        setIsPdfLimitDialogOpen(true);
+        return;
+      }
+
+      setErrorMessage(getErrorMessage(error, "Error while creating resume."));
     } finally {
       setIsResumeActionPending(false);
     }
@@ -127,6 +141,21 @@ const UploadResumeButton = ({
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
+      />
+      <PdfParseLimitDialog
+        open={isPdfLimitDialogOpen}
+        onOpenChange={setIsPdfLimitDialogOpen}
+      />
+      <FileSizeLimitDialog
+        open={isFileSizeDialogOpen}
+        onOpenChange={setIsFileSizeDialogOpen}
+      />
+      <ErrorDialog
+        open={Boolean(errorMessage)}
+        onOpenChange={(open) => {
+          if (!open) setErrorMessage(null);
+        }}
+        message={errorMessage ?? ""}
       />
       {isProcessing && <FullscreenLoading />}
     </>
