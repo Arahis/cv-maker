@@ -44,6 +44,7 @@ const UploadResumeButton = ({
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
   const {
     checkGuestResumeQuota,
+    checkPdfParseLimit,
     createResumeFromUploaded,
     isLoading,
     isProcessing,
@@ -61,6 +62,8 @@ const UploadResumeButton = ({
       if (!canChooseFile) {
         return;
       }
+
+      await checkPdfParseLimit();
 
       inputRef.current?.click();
     } catch (error) {

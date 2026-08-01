@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 const planFeatures = [
   ["Active resumes", "1", "Unlimited"],
-  ["PDF import", "1 successful", "2 successful"],
+  ["PDF import", "1 successful", "3 successful"],
   ["Cloud storage", "No", "Yes"],
   ["Copy resumes", "No", "Yes"],
   ["Free templates", "Yes", "Yes"],

@@ -14,6 +14,16 @@ type ParseResumeResponse = {
   };
 };
 
+type CheckPdfParseLimitResponse = {
+  canParse: boolean;
+};
+
+export async function checkPdfParseLimit() {
+  return apiFetch<CheckPdfParseLimitResponse>("/pars-resume/check", {
+    method: "POST",
+  });
+}
+
 export async function uploadAvatar(input: { croppedFile: Blob }) {
   const formData = new FormData();
   formData.append("file", input.croppedFile, "avatar.webp");
