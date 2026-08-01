@@ -5,6 +5,7 @@ import { TemplateKey } from "@/components/templates/previews";
 import { useCreateResumeController } from "../hooks/useCreateResumeController";
 import { ApiError } from "@/api/api-fetch";
 import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
+import { ErrorDialog } from "./ErrorDialog";
 import { FullscreenLoading } from "./FullscreenLoading";
 import { useResumeAction } from "../providers/ResumeActionProvider";
 
@@ -18,6 +19,7 @@ const CreateResumeButton = ({
   const { createResume, isLoading, isProcessing } = useCreateResumeController();
   const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCreateResume = async () => {
     if (isLoading || isResumeActionPending) return;
@@ -32,7 +34,7 @@ const CreateResumeButton = ({
         return;
       }
 
-      alert("Error while creating resume. Please try again.");
+      setErrorMessage("Error while creating resume. Please try again.");
     } finally {
       setIsResumeActionPending(false);
     }
@@ -44,6 +46,13 @@ const CreateResumeButton = ({
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
+      />
+      <ErrorDialog
+        open={Boolean(errorMessage)}
+        onOpenChange={(open) => {
+          if (!open) setErrorMessage(null);
+        }}
+        message={errorMessage ?? ""}
       />
       {isProcessing && <FullscreenLoading />}
     </>

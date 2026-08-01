@@ -17,6 +17,32 @@ export class UserRepository {
     });
   }
 
+  async pdfParse(userId: string, limit: number): Promise<boolean> {
+    const result = await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        pdfParseCount: { lt: limit },
+      } as never,
+      data: {
+        pdfParseCount: { increment: 1 },
+      } as never,
+    });
+
+    return result.count === 1;
+  }
+
+  async canParsePdf(userId: string, limit: number): Promise<boolean> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        pdfParseCount: { lt: limit },
+      } as never,
+      select: { id: true },
+    });
+
+    return Boolean(user);
+  }
+
   create(email: string, passwordHash: string): Promise<User> {
     return this.prisma.user.create({
       data: {

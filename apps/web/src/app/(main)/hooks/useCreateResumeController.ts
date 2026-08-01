@@ -12,6 +12,7 @@ import {
 } from "@/queries/resumes/localResumes";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+import { checkPdfParseLimit } from "@/api/uploads";
 import { getVisitorFingerprint } from "@/lib/thumbmark";
 import {
   useCheckAnonymousResumeQuotaMutation,
@@ -24,6 +25,7 @@ export type CreateResumeController = {
   checkGuestResumeQuota: (
     hasEverUploaded: boolean,
   ) => Promise<boolean>;
+  checkPdfParseLimit: () => Promise<boolean>;
   isLoading: boolean;
   isProcessing: boolean;
 };
@@ -72,6 +74,19 @@ export function useCreateResumeController(): CreateResumeController {
       hasEverUploaded,
     });
 
+    return true;
+  }
+
+  async function checkAccountPdfParseLimit() {
+    if (!isAuthReady || isMeLoading) {
+      return false;
+    }
+
+    if (!me) {
+      return true;
+    }
+
+    await checkPdfParseLimit();
     return true;
   }
 
@@ -183,6 +198,7 @@ export function useCreateResumeController(): CreateResumeController {
     createResumeFromUploaded,
     createResume,
     checkGuestResumeQuota,
+    checkPdfParseLimit: checkAccountPdfParseLimit,
     isProcessing,
     isLoading:
       isProcessing ||

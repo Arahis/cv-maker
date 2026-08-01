@@ -30,6 +30,8 @@ export type ResumeController = {
     title: string;
   }) => void;
   saveLocalResumeToAccount: (resumeId: string) => Promise<Resume>;
+  quotaResetError: string | null;
+  clearQuotaResetError: () => void;
 };
 
 export type ResumeListItem = Resume & {
@@ -45,6 +47,7 @@ export function useResumeController() {
   const [copyingResumeId, setCopyingResumeId] = useState<string | null>(null);
   const [syncingResumeId, setSyncingResumeId] = useState<string | null>(null);
   const [deletingResumeId, setDeletingResumeId] = useState<string | null>(null);
+  const [quotaResetError, setQuotaResetError] = useState<string | null>(null);
 
   const { data: me, isLoading: isMeLoading } = useMeQuery();
 
@@ -157,7 +160,7 @@ export function useResumeController() {
           localResumeId: resumeId,
         });
       } catch {
-        window.alert("The quota could not be reset. Please try again later.");
+        setQuotaResetError("The quota could not be reset. Please try again later.");
       }
     }
   }
@@ -224,5 +227,7 @@ export function useResumeController() {
     deleteResume,
     renameResume,
     saveLocalResumeToAccount,
+    quotaResetError,
+    clearQuotaResetError: () => setQuotaResetError(null),
   };
 }
