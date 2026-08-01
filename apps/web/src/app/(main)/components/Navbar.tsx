@@ -106,6 +106,14 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
             asChild
             className="link-hover px-4 py-2 text-base font-bold"
           >
+            <Link href="/plans">Plans</Link>
+          </Button>
+
+          <Button
+            variant="ghost"
+            asChild
+            className="link-hover px-4 py-2 text-base font-bold"
+          >
             <Link href="/resumes">Your resumes</Link>
           </Button>
 
