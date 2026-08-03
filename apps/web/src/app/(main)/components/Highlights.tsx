@@ -21,7 +21,7 @@ const highlightsItems: HighlightsItem[] = [
   },
   {
     text: "Private by default",
-    subtext: "Your data stays on your device.",
+    subtext: "Guest resumes stay in your browser.",
     color: "red",
   },
 ];
