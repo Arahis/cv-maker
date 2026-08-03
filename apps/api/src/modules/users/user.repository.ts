@@ -43,11 +43,16 @@ export class UserRepository {
     return Boolean(user);
   }
 
-  create(email: string, passwordHash: string): Promise<User> {
+  create(
+    email: string,
+    passwordHash: string,
+    emailVerifiedAt?: Date,
+  ): Promise<User> {
     return this.prisma.user.create({
       data: {
         email,
         passwordHash,
+        ...(emailVerifiedAt ? { emailVerifiedAt } : {}),
       },
     });
   }

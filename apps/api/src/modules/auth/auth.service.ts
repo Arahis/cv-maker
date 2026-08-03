@@ -14,6 +14,12 @@ import { PasswordResetSessionRepository } from "../password-reset/password-reset
 import { clearPasswordResetSessionCookie } from "../../lib/reset-pass-cookie.js";
 import { AuthSessionService } from "./auth-session.service.js";
 import { getAuthenticatedUserId } from "../../lib/get-authenticated-user-id.js";
+import { AuthAccountRepository } from "./auth.repository.js";
+import {
+  GoogleTokenService,
+  GoogleTokenVerificationError,
+} from "./google-token.service.js";
+import { randomBytes } from "node:crypto";
 
 export class AuthService {
   private readonly prisma;
@@ -22,6 +28,8 @@ export class AuthService {
   private readonly emailVerification;
   private readonly passwordResetSessions;
   private readonly authSessionService;
+  private readonly authAccounts;
+  private readonly googleTokenService;
 
   constructor(app: FastifyInstance) {
     this.prisma = app.prisma;
@@ -30,6 +38,8 @@ export class AuthService {
     this.passwordResetSessions = new PasswordResetSessionRepository(app.prisma);
     this.emailVerification = new EmailVerificationService(app);
     this.authSessionService = new AuthSessionService(app);
+    this.authAccounts = new AuthAccountRepository(app.prisma);
+    this.googleTokenService = new GoogleTokenService();
   }
 
   async signup(
@@ -101,6 +111,62 @@ export class AuthService {
     return {
       accessToken,
     };
+  }
+
+  async googleLogin(
+    input: { credential: string },
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    let googleUser;
+
+    try {
+      googleUser = await this.googleTokenService.verifyIdToken(
+        input.credential,
+      );
+    } catch (error) {
+      if (error instanceof GoogleTokenVerificationError) {
+        throw error;
+      }
+
+      throw error;
+    }
+
+    const linkedAccount = await this.authAccounts.findByProviderAccountId(
+      "google",
+      googleUser.providerAccountId,
+    );
+
+    let user =
+      linkedAccount?.user ?? (await this.users.findByEmail(googleUser.email));
+
+    if (!user) {
+      const unusablePasswordHash = await hashPassword(
+        randomBytes(32).toString("hex"),
+      );
+
+      user = await this.users.create(
+        googleUser.email,
+        unusablePasswordHash,
+        new Date(),
+      );
+    } else if (!user.emailVerifiedAt) {
+      user = await this.users.markEmailAsVerified(user.id);
+    }
+
+    await this.authAccounts.upsertGoogleAccount({
+      userId: user.id,
+      providerAccountId: googleUser.providerAccountId,
+    });
+
+    const { accessToken } = await this.authSessionService.createSession({
+      userId: user.id,
+      email: user.email,
+      request,
+      reply,
+    });
+
+    return { accessToken };
   }
 
   async refresh(request: FastifyRequest, reply: FastifyReply) {

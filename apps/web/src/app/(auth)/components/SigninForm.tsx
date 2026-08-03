@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginBody, loginBodySchema } from "@cv-maker/shared";
 import { useLogin } from "@/queries/auth";
 import Link from "next/link";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 const useSigninForm = () =>
   useForm({
@@ -114,6 +115,7 @@ const SigninForm = ({
           <Button type="submit" disabled={isPending}>
             {isPending ? "Logging in..." : "Enter Account"}
           </Button>
+          <GoogleSignInButton />
           <FieldDescription className="px-6 text-center">
             Don't have an account?{" "}
             {onShowSignup ? (
