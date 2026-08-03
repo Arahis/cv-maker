@@ -19,13 +19,15 @@ const Templates = () => {
 
   return (
     <section aria-labelledby="templates-list">
-      <h2 className="font-brand mb-4 text-2xl font-semibold md:text-4xl">
-        Free resume templates
-      </h2>
-      <p className="font-brand mx-auto mb-8 text-lg md:mb-20 md:w-[60%] md:text-2xl">
-        Choose from modern resume templates and build a professional resume
-        directly in your browser.
-      </p>
+      <div className="mb-8 md:mb-20">
+        <h2 className="font-brand mb-4 text-2xl font-semibold md:text-4xl">
+          Choose resume template
+        </h2>
+        <p className="font-brand sr-only text-lg md:not-sr-only md:mx-auto md:w-[60%] md:text-2xl">
+          Choose from modern resume templates and build a professional resume
+          directly in your browser.
+        </p>
+      </div>
 
       <div className="mx-auto grid grid-cols-[repeat(auto-fit,140px)] justify-center gap-4 sm:grid-cols-[repeat(auto-fit,160px)] md:grid-cols-[repeat(auto-fit,200px)] md:px-20 lg:px-40">
         {Object.entries(resumeTemplatesPreview).map(([key, src]) => {

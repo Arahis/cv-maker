@@ -22,7 +22,7 @@ const CreateResumeButtonHero = () => {
           disabled={isDisabled}
           variant="default"
           size="lg"
-          className="cursor-pointer py-6 text-xl font-semibold"
+          className="cursor-pointer py-6 text-lg font-semibold md:text-xl"
         >
           Create From Scratch
         </Button>

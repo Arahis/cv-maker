@@ -5,25 +5,24 @@ import CreateResumeButtonHero from "./CreateResumeButtonHero";
 const Hero = () => {
   return (
     <div>
-      <div className="flex h-[50vh] flex-col items-start justify-center md:h-[60vh]">
-        <div className="font-brand mb-8 pt-12 text-left md:mb-16 md:pt-24">
+      <div className="flex flex-col items-start justify-center">
+        <div className="font-brand mb-8 pt-12 text-left md:mb-16 md:pt-18">
           <h1 className="mb-8 text-4xl leading-[1.1] font-bold md:text-6xl">
             Build and Download
             <br /> Your First Resume <br />
             Completely <span className="gradient-underline">Free</span>
           </h1>
-          <h2 className="mb-2 text-2xl font-bold md:text-4xl">
+          <h2 className="sr-only text-2xl font-bold md:not-sr-only md:mb-8 md:text-4xl">
             Choose from our modern templates
           </h2>
-          <h3 className="font-tech w-[50%] font-semibold md:text-xl">
-            No registration required for your first CV. Upload your old resume
-            to parse data instantly, or build from scratch using modern,
-            ATS-friendly templates.
+          <h3 className="font-tech font-semibold md:w-[50%] md:text-xl">
+            No registration required. Start from scratch or upload your existing
+            resume.
           </h3>
         </div>
-        <div className="flex gap-8 align-top">
+        <div className="align-center flex w-full flex-col gap-4 md:flex-row md:gap-8 md:align-top">
           <CreateResumeButtonHero />
-          <div>
+          <div className="flex flex-col">
             <UploadResumeButtonHero />
             <p className="mt-2 text-sm font-semibold text-gray-400">
               PDF supported (DOCX and TXT coming soon)
