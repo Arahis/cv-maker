@@ -113,12 +113,11 @@ const ResumeCard = ({
               event.stopPropagation();
               setIsDeleteDialogOpen(true);
             }}
-            variant="outline"
+            variant="ghost"
             size="sm"
             disabled={isDeleting}
           >
             {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
-            Delete
           </Button>
         ) : (
           <DropdownMenu>
