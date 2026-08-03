@@ -15,6 +15,7 @@ const CreateResumeButtonHero = () => {
 
   return (
     <CreateResumeButton
+      withRedirect
       button={(onClick, isDisabled) => (
         <Button
           onClick={() => handleClick(onClick)}

@@ -15,6 +15,7 @@ const UploadResumeButtonHero = () => {
 
   return (
     <UploadResumeButton
+      withRedirect
       button={(onClick, isDisabled) => (
         <Button
           onClick={() => handleClick(onClick)}

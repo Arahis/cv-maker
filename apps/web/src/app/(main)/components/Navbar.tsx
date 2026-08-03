@@ -80,6 +80,9 @@ export function HeaderAuth() {
 }
 
 const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
+  const isAuthReady = useAuthBootstrap();
+  const { data: me, isLoading: isMeLoading } = useMeQuery();
+
   return (
     <header
       className={cn(
@@ -109,13 +112,15 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
             <Link href="/plans">Plans</Link>
           </Button>
 
-          <Button
-            variant="ghost"
-            asChild
-            className="link-hover px-4 py-2 text-base font-bold"
-          >
-            <Link href="/resumes">Your resumes</Link>
-          </Button>
+          {isAuthReady && !isMeLoading && me && (
+            <Button
+              variant="ghost"
+              asChild
+              className="link-hover px-4 py-2 text-base font-bold"
+            >
+              <Link href="/resumes">Your resumes</Link>
+            </Button>
+          )}
 
           <HeaderAuth />
         </div>

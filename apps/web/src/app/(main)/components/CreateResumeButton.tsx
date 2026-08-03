@@ -12,11 +12,14 @@ import { useResumeAction } from "../providers/ResumeActionProvider";
 const CreateResumeButton = ({
   button,
   template = "template1",
+  withRedirect = false,
 }: {
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
   template?: TemplateKey;
+  withRedirect?: boolean;
 }) => {
-  const { createResume, isLoading, isProcessing } = useCreateResumeController();
+  const { createResume, isLoading, isProcessing, redirectGuestToResumes } =
+    useCreateResumeController();
   const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -27,6 +30,10 @@ const CreateResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
+      if (withRedirect && (await redirectGuestToResumes())) {
+        return;
+      }
+
       await createResume(template);
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
