@@ -14,7 +14,7 @@ export default async function authRoutes(app: FastifyInstance) {
   const authService = new AuthService(app);
   const emailVerificationService = new EmailVerificationService(app);
   const passwordResetService = new PasswordResetService(app);
-  const webAppUrl = (env.corsOrigins[0] ?? "").replace(/\/$/, "");
+  const webAppUrl = env.webAppUrl;
 
   app.post("/signup", async (request, reply) => {
     const parsedBody = signupBodySchema.safeParse(request.body);
