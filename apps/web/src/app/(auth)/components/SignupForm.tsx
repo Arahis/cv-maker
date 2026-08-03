@@ -17,6 +17,7 @@ import { useSignUp } from "@/queries/auth";
 import { SignupBody, signupBodySchema } from "@cv-maker/shared";
 import Link from "next/link";
 import { useState } from "react";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 const useSignupForm = () =>
   useForm({
@@ -123,6 +124,7 @@ const SignupForm = ({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Creating ..." : "Create Account"}
           </Button>
+          <GoogleSignInButton />
           <FieldDescription className="px-6 text-center">
             Already have an account?{" "}
             {onShowSignin ? (

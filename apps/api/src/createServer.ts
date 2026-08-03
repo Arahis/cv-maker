@@ -16,6 +16,15 @@ export function createServer() {
     logger: true,
   });
 
+  app.addContentTypeParser(
+    "application/x-www-form-urlencoded",
+    { parseAs: "string" },
+    (_request, body, done) => {
+      const params = new URLSearchParams(body as string);
+      done(null, Object.fromEntries(params.entries()));
+    },
+  );
+
   app.register(corsPlugin);
   app.register(cookiePlugin);
   app.register(prismaPlugin);

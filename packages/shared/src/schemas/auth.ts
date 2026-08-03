@@ -67,8 +67,13 @@ export const forgotPasswordResetPasswordBodySchema = z
     message: "Passwords do not match",
   });
 
+export const googleAuthBodySchema = z.object({
+  credential: z.string().min(1, "Google credential is required"),
+});
+
 export type SignupBody = z.infer<typeof signupBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;
+export type GoogleAuthBody = z.infer<typeof googleAuthBodySchema>;
 export type ForgotPasswordVerifyBody = z.infer<
   typeof forgotPasswordVerifyBodySchema
 >;
