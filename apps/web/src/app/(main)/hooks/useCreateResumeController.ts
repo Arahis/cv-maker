@@ -8,6 +8,7 @@ import {
 } from "@/queries/resumes/accountResumes";
 import {
   useCreateLocalResumeMutation,
+  useLocalResumeListQuery,
   useUploadExistingResumeLocal,
 } from "@/queries/resumes/localResumes";
 import { ResumeTemplateKey } from "@/components/templates/components";
@@ -22,10 +23,9 @@ import {
 export type CreateResumeController = {
   createResumeFromUploaded: (file: File) => Promise<void>;
   createResume: (template?: ResumeTemplateKey) => Promise<void>;
-  checkGuestResumeQuota: (
-    hasEverUploaded: boolean,
-  ) => Promise<boolean>;
+  checkGuestResumeQuota: (hasEverUploaded: boolean) => Promise<boolean>;
   checkPdfParseLimit: () => Promise<boolean>;
+  redirectGuestToResumes: () => Promise<boolean>;
   isLoading: boolean;
   isProcessing: boolean;
 };
@@ -43,6 +43,7 @@ export function useCreateResumeController(): CreateResumeController {
   const claimAnonymousResumeMutation = useClaimAnonymousResumeMutation();
   const checkAnonymousResumeQuotaMutation =
     useCheckAnonymousResumeQuotaMutation();
+  const localResumesQuery = useLocalResumeListQuery();
 
   async function getGuestResumeFingerprint() {
     let fingerprint: string | null = null;
@@ -56,9 +57,7 @@ export function useCreateResumeController(): CreateResumeController {
     return fingerprint;
   }
 
-  async function checkGuestResumeQuota(
-    hasEverUploaded: boolean,
-  ) {
+  async function checkGuestResumeQuota(hasEverUploaded: boolean) {
     // `useMeQuery` starts only after the refresh-token bootstrap has finished.
     // Do not treat an authenticated user as a guest in the gap before then.
     if (!isAuthReady || isMeLoading) {
@@ -87,6 +86,19 @@ export function useCreateResumeController(): CreateResumeController {
     }
 
     await checkPdfParseLimit();
+    return true;
+  }
+
+  async function redirectGuestToResumes() {
+    if (!isAuthReady || isMeLoading || me || localResumesQuery.isLoading) {
+      return false;
+    }
+
+    if ((localResumesQuery.data?.length ?? 0) === 0) {
+      return false;
+    }
+
+    router.push("/resumes");
     return true;
   }
 
@@ -199,9 +211,11 @@ export function useCreateResumeController(): CreateResumeController {
     createResume,
     checkGuestResumeQuota,
     checkPdfParseLimit: checkAccountPdfParseLimit,
+    redirectGuestToResumes,
     isProcessing,
     isLoading:
       isProcessing ||
+      localResumesQuery.isLoading ||
       createAccountResumeMutation.isPending ||
       createLocalResumeMutation.isPending ||
       claimAnonymousResumeMutation.isPending ||

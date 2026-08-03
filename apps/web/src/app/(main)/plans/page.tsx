@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CircleCheck, CircleHelp, Minus } from "lucide-react";
+import { Check, Minus, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Plans",
@@ -23,18 +23,18 @@ const planFeatures = [
 function FeatureValue({ value }: { value: string }) {
   if (value === "Yes") {
     return (
-      <CircleCheck
+      <Check
         aria-label="Included"
-        className="mx-auto size-4.5 stroke-[2.5]"
+        className="text-primary mx-auto size-6 stroke-[2.5]"
       />
     );
   }
 
   if (value === "No") {
     return (
-      <Minus
+      <Lock
         aria-label="Not included"
-        className="mx-auto size-4.5 text-gray-400"
+        className="text-primary-pink mx-auto size-5 stroke-[2.5]"
       />
     );
   }
@@ -94,13 +94,13 @@ export default function PlansPage() {
             </div>
             <div
               role="cell"
-              className="flex items-center justify-center border-t border-gray-100 px-6 py-7 text-sm text-gray-600 md:border-0 md:px-6 md:py-4"
+              className="flex items-center justify-center border-t border-gray-100 px-6 py-7 text-base font-bold text-gray-900 md:border-0 md:px-6 md:py-4"
             >
               <FeatureValue value={guest} />
             </div>
             <div
               role="cell"
-              className="flex items-center justify-center border-t border-l border-gray-100 px-6 py-7 text-sm text-gray-600 md:border-0 md:px-6 md:py-4"
+              className="flex items-center justify-center border-t border-l border-gray-100 px-6 py-7 text-base font-bold text-gray-900 md:border-0 md:px-6 md:py-4"
             >
               <FeatureValue value={freeAccount} />
             </div>

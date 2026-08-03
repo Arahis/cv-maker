@@ -17,12 +17,24 @@ import {
 import { LogOutIcon } from "lucide-react";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
+function SignInButton() {
+  return (
+    <Button
+      variant="ghost"
+      asChild
+      className="link-hover px-4 py-2 text-base font-bold"
+    >
+      <Link href="/sign-in">Sign in</Link>
+    </Button>
+  );
+}
+
 export function HeaderAuth() {
   const isAuthReady = useAuthBootstrap();
   const { data: me, isLoading } = useMeQuery();
   const logoutMutation = useLogout();
 
-  if (!isAuthReady || isLoading) {
+  if (isAuthReady && isLoading) {
     return (
       <Button
         variant="ghost"
@@ -66,20 +78,13 @@ export function HeaderAuth() {
     );
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      <Button
-        variant="ghost"
-        asChild
-        className="link-hover px-4 py-2 text-base font-bold"
-      >
-        <Link href="/sign-in">Sign in</Link>
-      </Button>
-    </div>
-  );
+  return <SignInButton />;
 }
 
 const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
+  const isAuthReady = useAuthBootstrap();
+  const { data: me, isLoading: isMeLoading } = useMeQuery();
+
   return (
     <header
       className={cn(
@@ -109,13 +114,15 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
             <Link href="/plans">Plans</Link>
           </Button>
 
-          <Button
-            variant="ghost"
-            asChild
-            className="link-hover px-4 py-2 text-base font-bold"
-          >
-            <Link href="/resumes">Your resumes</Link>
-          </Button>
+          {isAuthReady && !isMeLoading && me && (
+            <Button
+              variant="ghost"
+              asChild
+              className="link-hover px-4 py-2 text-base font-bold"
+            >
+              <Link href="/resumes">Your resumes</Link>
+            </Button>
+          )}
 
           <HeaderAuth />
         </div>

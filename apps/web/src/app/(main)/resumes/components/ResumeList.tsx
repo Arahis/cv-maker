@@ -2,17 +2,19 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Copy, Loader2, Trash2 } from "lucide-react";
+import {
+  Copy,
+  EllipsisVertical,
+  Loader2,
+  RefreshCcw,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
   resumeTemplates,
 } from "@/components/templates/components";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { format, isValid, parseISO } from "date-fns";
 import {
   ResumeController,
@@ -20,6 +22,14 @@ import {
   useResumeController,
 } from "../../hooks/useResumeController";
 import { ErrorDialog } from "../../components/ErrorDialog";
+import { DeleteResumeDialog } from "./DeleteResumeDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -46,6 +56,7 @@ const ResumeCard = ({
 > & {
   resume: ResumeListItem;
 }) => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const {
     id,
     template,
@@ -96,68 +107,77 @@ const ResumeCard = ({
           <p className="text-left text-sm">{data.title || "Untitled"}</p>
           <p className="text-left text-xs text-gray-400">{updatedResumeDate}</p>
         </div>
-        <div className="flex items-center gap-0.5">
-          {source === "account" && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={() => copyResume({ resumeId: id, source })}
-                  variant="ghost"
-                  size="icon"
-                  disabled={isCopying}
-                >
-                  {isCopying ? <Loader2 className="animate-spin" /> : <Copy />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Copy resume</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {source === "local" && isAuthenticated && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={() => syncResume(id)}
-                  variant="ghost"
-                  size="icon"
-                  disabled={isSyncing}
-                >
-                  {isSyncing ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <RefreshCcw />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Sync Local resume to Account</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          <Tooltip>
-            <TooltipTrigger asChild>
+        {!isAuthenticated ? (
+          <Button
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsDeleteDialogOpen(true);
+            }}
+            variant="ghost"
+            size="sm"
+            disabled={isDeleting}
+          >
+            {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+          </Button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to delete this resume?")) {
-                    deleteResume({ resumeId: id, source });
-                  }
-                }}
                 variant="ghost"
                 size="icon"
-                disabled={isDeleting}
+                disabled={isDeleting || isCopying || isSyncing}
+                aria-label="Resume actions"
               >
-                {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                {isDeleting || isCopying || isSyncing ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <EllipsisVertical />
+                )}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete resume</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={source === "local" || isCopying}
+                onSelect={() => {
+                  if (source === "account") {
+                    copyResume({ resumeId: id, source });
+                  }
+                }}
+              >
+                <Copy />
+                Copy
+              </DropdownMenuItem>
+              {source === "local" && (
+                <DropdownMenuItem
+                  disabled={isSyncing}
+                  onSelect={() => syncResume(id)}
+                >
+                  <RefreshCcw />
+                  Sync to account
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isDeleting}
+                onSelect={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
+      <DeleteResumeDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        isDeleting={isDeleting}
+        onConfirm={() => {
+          deleteResume({ resumeId: id, source });
+          setIsDeleteDialogOpen(false);
+        }}
+      />
     </div>
   );
 };

@@ -40,8 +40,10 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 const UploadResumeButton = ({
   button,
+  withRedirect = false,
 }: {
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
+  withRedirect?: boolean;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
@@ -52,6 +54,7 @@ const UploadResumeButton = ({
     checkGuestResumeQuota,
     checkPdfParseLimit,
     createResumeFromUploaded,
+    redirectGuestToResumes,
     isLoading,
     isProcessing,
   } = useCreateResumeController();
@@ -63,6 +66,10 @@ const UploadResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
+      if (withRedirect && (await redirectGuestToResumes())) {
+        return;
+      }
+
       const canChooseFile = await checkGuestResumeQuota(true);
 
       if (!canChooseFile) {
