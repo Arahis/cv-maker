@@ -3,6 +3,7 @@ import { Inter, Outfit, Source_Code_Pro, Cantata_One } from "next/font/google";
 import "./globals.css";
 import "./main.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import CookieBanner from "@/components/analytics/CookieBanner";
 import Providers from "./providers";
 
 const inter = Inter({
@@ -57,6 +58,7 @@ export default function RootLayout({
       >
         <Providers>{children}</Providers>
         <GoogleAnalytics />
+        <CookieBanner />
       </body>
     </html>
   );
