@@ -17,6 +17,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.3,
     },
     {
+      url: `${baseUrl}/cookie-policy`,
+      lastModified: new Date(),
+      priority: 0.3,
+    },
+    {
       url: `${baseUrl}/terms`,
       lastModified: new Date(),
       priority: 0.3,
