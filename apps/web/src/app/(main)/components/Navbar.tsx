@@ -62,6 +62,9 @@ export function HeaderAuth() {
           <DropdownMenuGroup>
             <DropdownMenuLabel>{me.user.email}</DropdownMenuLabel>
             <DropdownMenuItem asChild>
+              <Link href="/resumes">Your resumes</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link href="/account-settings">Settings</Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -118,7 +121,7 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
             <Button
               variant="ghost"
               asChild
-              className="link-hover px-4 py-2 text-base font-bold"
+              className="link-hover hidden px-4 py-2 text-base font-bold lg:inline-flex"
             >
               <Link href="/resumes">Your resumes</Link>
             </Button>

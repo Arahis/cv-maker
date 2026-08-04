@@ -70,8 +70,8 @@ const CookieBanner = () => {
       aria-label="Cookie consent"
       className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
     >
-      <div className="flex items-center gap-6">
-        <div className="flex h-22 w-22 shrink-0 items-center justify-center rounded-full bg-blue-50">
+      <div className="flex flex-col items-center gap-2 md:flex-row md:gap-6">
+        <div className="hidden h-22 w-22 shrink-0 items-center justify-center rounded-full bg-blue-50 md:flex">
           <CookieIcon />
         </div>
         <p className="text-sm leading-6 text-slate-700">
@@ -86,16 +86,16 @@ const CookieBanner = () => {
           </Link>
           .
         </p>
-        <div className="mt-4 flex flex-col justify-center gap-1">
-          <Button variant="default" onClick={() => saveConsent("accepted")}>
-            Accept analytics
-          </Button>
+        <div className="mt-4 flex justify-center gap-1 md:flex-col-reverse">
           <Button
             variant="ghost"
             className="text-gray-500"
             onClick={() => saveConsent("rejected")}
           >
             Decline
+          </Button>
+          <Button variant="default" onClick={() => saveConsent("accepted")}>
+            Accept
           </Button>
         </div>
       </div>
