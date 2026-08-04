@@ -53,9 +53,7 @@ const GoogleSignInButton = () => {
     window.google.accounts.id.initialize({
       client_id: clientId,
       ux_mode: "redirect",
-      login_uri:
-        (process.env.NEXT_PUBLIC_API_URL || window.location.origin + "/api") +
-        "/auth/google",
+      login_uri: process.env.NEXT_PUBLIC_API_URL + "/auth/google",
     });
     window.google.accounts.id.renderButton(buttonElement, {
       theme: "outline",

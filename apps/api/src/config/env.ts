@@ -31,8 +31,7 @@ for (const key of requiredEnv) {
 
 export const env = {
   corsOrigins: process.env.CORS_ORIGINS!.split(","),
-  webAppUrl: (process.env.WEB_APP_URL ??
-    process.env.CORS_ORIGINS!.split(",")[0])!.replace(/\/$/, ""),
+  webAppUrl: process.env.WEB_APP_URL,
   databaseUrl: process.env.DATABASE_URL!,
   port: Number(process.env.PORT),
   nodeEnv: process.env.NODE_ENV!,

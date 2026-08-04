@@ -13,7 +13,7 @@ type RefreshResponse =
       accessToken: null;
     };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export class ApiError extends Error {
   constructor(
