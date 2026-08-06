@@ -1,11 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-html,
-body {
-  overflow-x: clip;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

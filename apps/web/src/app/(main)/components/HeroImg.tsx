@@ -7,7 +7,7 @@ export const HeroBgSvg = ({ className }: { className?: string }) => {
       fill="none"
       viewBox="0 0 2708 2676"
       style={{ overflow: "visible" }}
-      className={cn("block h-auto w-[130%] min-w-full", className)}
+      className={cn("block h-auto w-[110%] min-w-full", className)}
     >
       <g filter="url(#hero-background-filter)">
         <circle
