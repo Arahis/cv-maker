@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOutIcon } from "lucide-react";
+import { User, LogOutIcon, LoaderCircle } from "lucide-react";
 import { useAuthBootstrap } from "@/providers/auth-bootstrap";
 
 function SignInButton() {
@@ -41,7 +41,7 @@ export function HeaderAuth() {
         disabled
         className="px-4 py-2 text-base font-bold opacity-70"
       >
-        Loading...
+        <LoaderCircle className="size-5 animate-spin" />
       </Button>
     );
   }
@@ -52,10 +52,15 @@ export function HeaderAuth() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
+            size={logoutMutation.isPending ? "default" : "icon"}
             className="link-hover px-4 py-2 text-base font-bold"
             disabled={logoutMutation.isPending}
           >
-            {logoutMutation.isPending ? "Logging out..." : "My Account"}
+            {logoutMutation.isPending ? (
+              <LoaderCircle className="size-5 animate-spin" />
+            ) : (
+              <User className="size-5" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
