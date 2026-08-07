@@ -109,7 +109,8 @@ const SignupForm = ({
                 </FormControl>
                 <FormMessage />
                 <FieldDescription>
-                  Must be at least 8 characters long.
+                  8–40 characters with an uppercase letter, number, and symbol
+                  (e.g. !, @, #, $)
                 </FieldDescription>
               </FormItem>
             )}
@@ -124,6 +125,11 @@ const SignupForm = ({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Creating ..." : "Create Account"}
           </Button>
+          <div className="text-muted-foreground flex items-center gap-3 text-xs">
+            <div className="bg-border h-px flex-1" />
+            <span>OR</span>
+            <div className="bg-border h-px flex-1" />
+          </div>
           <GoogleSignInButton />
           <FieldDescription className="px-4 text-center">
             Already have an account?{" "}

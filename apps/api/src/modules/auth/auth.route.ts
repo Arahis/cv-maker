@@ -8,13 +8,11 @@ import { AuthService } from "./auth.service.js";
 import { GoogleTokenVerificationError } from "./google-token.service.js";
 import { EmailVerificationService } from "../email-verification/email-verification.service.js";
 import { PasswordResetService } from "../password-reset/password-reset.service.js";
-import { env } from "../../config/env.js";
 
 export default async function authRoutes(app: FastifyInstance) {
   const authService = new AuthService(app);
   const emailVerificationService = new EmailVerificationService(app);
   const passwordResetService = new PasswordResetService(app);
-  const webAppUrl = env.webAppUrl;
 
   app.post("/signup", async (request, reply) => {
     const parsedBody = signupBodySchema.safeParse(request.body);
@@ -48,17 +46,15 @@ export default async function authRoutes(app: FastifyInstance) {
     const parsedBody = googleAuthBodySchema.safeParse(request.body);
 
     if (!parsedBody.success) {
-      return reply.redirect(webAppUrl + "/sign-in?oauth_error=invalid_request");
+      return reply.code(400).send({ error: "Invalid Google authorization code" });
     }
 
     try {
-      await authService.googleLogin(parsedBody.data, request, reply);
-      return reply.redirect(webAppUrl + "/resumes");
+      const result = await authService.googleLogin(parsedBody.data, request, reply);
+      return result;
     } catch (error) {
       if (error instanceof GoogleTokenVerificationError) {
-        return reply.redirect(
-          webAppUrl + "/sign-in?oauth_error=invalid_google_credential",
-        );
+        return reply.code(401).send({ error: "Invalid Google authorization code" });
       }
 
       throw error;

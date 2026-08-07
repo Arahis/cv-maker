@@ -52,7 +52,7 @@ export class AuthService {
     if (existingUser?.emailVerifiedAt) {
       reply.code(409);
       return {
-        error: "Email is already in use",
+        error: "An account with this email already exists.",
       };
     }
 
@@ -114,15 +114,15 @@ export class AuthService {
   }
 
   async googleLogin(
-    input: { credential: string },
+    input: { code: string },
     request: FastifyRequest,
     reply: FastifyReply,
   ) {
     let googleUser;
 
     try {
-      googleUser = await this.googleTokenService.verifyIdToken(
-        input.credential,
+      googleUser = await this.googleTokenService.verifyAuthorizationCode(
+        input.code,
       );
     } catch (error) {
       if (error instanceof GoogleTokenVerificationError) {

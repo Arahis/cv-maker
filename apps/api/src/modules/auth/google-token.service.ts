@@ -16,7 +16,32 @@ export class GoogleTokenVerificationError extends Error {
 }
 
 export class GoogleTokenService {
-  private readonly client = new OAuth2Client();
+  private readonly client = new OAuth2Client(
+    env.googleClientId,
+    env.googleClientSecret,
+  );
+
+  async verifyAuthorizationCode(code: string): Promise<VerifiedGoogleUser> {
+    if (!code || code.length > 4096) {
+      throw new GoogleTokenVerificationError();
+    }
+
+    try {
+      const { tokens } = await this.client.getToken({
+        code,
+        redirect_uri: "postmessage",
+      });
+
+      if (!tokens.id_token) {
+        throw new GoogleTokenVerificationError();
+      }
+
+      return this.verifyIdToken(tokens.id_token);
+    } catch (error) {
+      if (error instanceof GoogleTokenVerificationError) throw error;
+      throw new GoogleTokenVerificationError();
+    }
+  }
 
   async verifyIdToken(idToken: string): Promise<VerifiedGoogleUser> {
     if (!idToken || typeof idToken !== "string" || idToken.length > 16_384) {
