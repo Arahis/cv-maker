@@ -23,9 +23,9 @@ import {
 export type CreateResumeController = {
   createResumeFromUploaded: (file: File) => Promise<void>;
   createResume: (template?: ResumeTemplateKey) => Promise<void>;
-  checkGuestResumeQuota: (hasEverUploaded: boolean) => Promise<boolean>;
+  checkGuestResumeQuota: () => Promise<boolean>;
   checkPdfParseLimit: () => Promise<boolean>;
-  redirectGuestToResumes: () => Promise<boolean>;
+  hasGuestLocalResumes: () => boolean;
   isLoading: boolean;
   isProcessing: boolean;
 };
@@ -57,7 +57,7 @@ export function useCreateResumeController(): CreateResumeController {
     return fingerprint;
   }
 
-  async function checkGuestResumeQuota(hasEverUploaded: boolean) {
+  async function checkGuestResumeQuota() {
     // `useMeQuery` starts only after the refresh-token bootstrap has finished.
     // Do not treat an authenticated user as a guest in the gap before then.
     if (!isAuthReady || isMeLoading) {
@@ -65,15 +65,15 @@ export function useCreateResumeController(): CreateResumeController {
     }
 
     if (me) {
-      return true;
+      return false;
     }
 
-    await checkAnonymousResumeQuotaMutation.mutateAsync({
-      fingerprint: await getGuestResumeFingerprint(),
-      hasEverUploaded,
-    });
+    const { hasEverUploaded } =
+      await checkAnonymousResumeQuotaMutation.mutateAsync({
+        fingerprint: await getGuestResumeFingerprint(),
+      });
 
-    return true;
+    return hasEverUploaded;
   }
 
   async function checkAccountPdfParseLimit() {
@@ -89,42 +89,27 @@ export function useCreateResumeController(): CreateResumeController {
     return true;
   }
 
-  async function redirectGuestToResumes() {
-    if (!isAuthReady || isMeLoading || me || localResumesQuery.isLoading) {
-      return false;
-    }
-
-    if ((localResumesQuery.data?.length ?? 0) === 0) {
-      return false;
-    }
-
-    router.push("/resumes");
-    return true;
+  function hasGuestLocalResumes() {
+    return Boolean(
+      isAuthReady &&
+        !isMeLoading &&
+        !me &&
+        !localResumesQuery.isLoading &&
+        (localResumesQuery.data?.length ?? 0) > 0,
+    );
   }
 
   // Create Record for an unauthenticated visitor that has created his one allowed resume.
-  async function claimGuestResumeQuota(
-    localResumeId: string,
-    hasEverUploaded: boolean,
-  ) {
+  async function claimGuestResumeQuota(localResumeId: string) {
     await claimAnonymousResumeMutation.mutateAsync({
       localResumeId,
       fingerprint: await getGuestResumeFingerprint(),
-      hasEverUploaded,
     });
   }
 
   async function createResume(template: ResumeTemplateKey = "template1") {
     if (!isAuthReady || isMeLoading) {
       return;
-    }
-
-    if (!me) {
-      const canCreateResume = await checkGuestResumeQuota(false);
-
-      if (!canCreateResume) {
-        return;
-      }
     }
 
     setIsProcessing(true);
@@ -151,8 +136,6 @@ export function useCreateResumeController(): CreateResumeController {
       }
 
       const resumeId = crypto.randomUUID();
-
-      await claimGuestResumeQuota(resumeId, false);
 
       await createLocalResumeMutation.mutateAsync({
         resumeId,
@@ -194,7 +177,7 @@ export function useCreateResumeController(): CreateResumeController {
       await uploadExistingResumeLocal.mutateAsync({
         resumeId,
         file,
-        reserveQuota: () => claimGuestResumeQuota(resumeId, true),
+        reserveQuota: () => claimGuestResumeQuota(resumeId),
       });
 
       router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
@@ -211,7 +194,7 @@ export function useCreateResumeController(): CreateResumeController {
     createResume,
     checkGuestResumeQuota,
     checkPdfParseLimit: checkAccountPdfParseLimit,
-    redirectGuestToResumes,
+    hasGuestLocalResumes,
     isProcessing,
     isLoading:
       isProcessing ||

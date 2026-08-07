@@ -1,89 +1,107 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/api/api-fetch";
+import { setAccessToken } from "@/api/token";
 
-type GoogleIdentity = {
-  accounts: {
-    id: {
-      initialize: (options: {
-        client_id: string;
-        login_uri: string;
-        ux_mode: "redirect";
-      }) => void;
-      renderButton: (
-        element: HTMLElement,
-        options: {
-          theme: "outline";
-          size: "medium";
-          text: "continue_with";
-          shape: "rectangular";
-          width: number;
-        },
-      ) => void;
-    };
-  };
+type GoogleCodeClient = {
+  requestCode: () => void;
 };
 
 declare global {
   interface Window {
-    google?: GoogleIdentity;
+    google?: {
+      accounts: {
+        oauth2: {
+          initCodeClient: (options: {
+            client_id: string;
+            scope: string;
+            ux_mode?: "popup";
+            callback: (response: { code?: string; error?: string }) => void;
+            error_callback?: (response: { type?: string }) => void;
+          }) => GoogleCodeClient;
+        };
+      };
+    };
   }
 }
 
 const GoogleSignInButton = () => {
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const isInitializedRef = useRef(false);
-  const [isScriptReady, setIsScriptReady] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (
-      !isScriptReady ||
-      !clientId ||
-      !buttonRef.current ||
-      !window.google ||
-      isInitializedRef.current
-    ) {
-      return;
-    }
+  if (!clientId) return null;
 
-    const buttonElement = buttonRef.current;
+  const handleGoogleLogin = () => {
+    if (!window.google || isLoading) return;
 
-    window.google.accounts.id.initialize({
+    const client = window.google.accounts.oauth2.initCodeClient({
       client_id: clientId,
-      ux_mode: "redirect",
-      login_uri: process.env.NEXT_PUBLIC_API_URL + "/auth/google",
-    });
-    window.google.accounts.id.renderButton(buttonElement, {
-      theme: "outline",
-      size: "medium",
-      text: "continue_with",
-      shape: "rectangular",
-      width: 320,
-    });
-    isInitializedRef.current = true;
-  }, [clientId, isScriptReady]);
+      scope: "openid email profile",
+      ux_mode: "popup",
+      error_callback: () => {
+        setIsLoading(false);
+      },
+      callback: async ({ code, error }) => {
+        if (error || !code) {
+          setIsLoading(false);
+          return;
+        }
 
-  if (!clientId) {
-    return null;
-  }
+        try {
+          const response = await apiFetch<{ accessToken: string }>(
+            "/auth/google",
+            {
+              method: "POST",
+              body: JSON.stringify({ code }),
+            },
+          );
+          setAccessToken(response.accessToken);
+          await queryClient.invalidateQueries({ queryKey: ["me"] });
+          router.replace("/resumes");
+        } catch {
+          setIsLoading(false);
+        }
+      },
+    });
+
+    setIsLoading(true);
+    client.requestCode();
+  };
 
   return (
-    <div className="flex flex-col gap-3">
+    <>
+      {isLoading && (
+        <div className="bg-background fixed inset-0 z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto size-10 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+            <p className="mt-4 text-sm text-slate-600">
+              Signing in with Google...
+            </p>
+          </div>
+        </div>
+      )}
       <Script
-        id="google-identity-services"
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
-        onReady={() => setIsScriptReady(true)}
       />
-      <div className="flex items-center gap-3 text-sm text-gray-500">
-        <div className="h-px flex-1 bg-gray-200" />
-        <span>or</span>
-        <div className="h-px flex-1 bg-gray-200" />
-      </div>
-      <div ref={buttonRef} className="flex min-h-10 justify-center" />
-    </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={handleGoogleLogin}
+        disabled={isLoading}
+      >
+        <span className="text-base font-bold text-blue-600">G</span>
+        {isLoading ? "Signing in..." : "Continue with Google"}
+      </Button>
+    </>
   );
 };
 

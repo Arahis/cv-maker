@@ -68,7 +68,7 @@ export const forgotPasswordResetPasswordBodySchema = z
   });
 
 export const googleAuthBodySchema = z.object({
-  credential: z.string().min(1, "Google credential is required"),
+  code: z.string().min(1, "Google authorization code is required"),
 });
 
 export type SignupBody = z.infer<typeof signupBodySchema>;

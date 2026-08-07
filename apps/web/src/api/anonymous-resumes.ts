@@ -3,21 +3,17 @@ import { apiFetch } from "./api-fetch";
 type ClaimAnonymousResumeInput = {
   localResumeId: string;
   fingerprint: string | null;
-  hasEverUploaded: boolean;
 };
 
 type CheckAnonymousResumeQuotaInput = {
   fingerprint: string | null;
-  hasEverUploaded: boolean;
 };
 
 type ClaimAnonymousResumeResponse = {
   status: "claimed";
 };
 
-type CheckAnonymousResumeQuotaResponse = {
-  status: "available";
-};
+type CheckAnonymousResumeQuotaResponse = { hasEverUploaded: boolean };
 
 type ReleaseAnonymousResumeInput = {
   localResumeId: string;

@@ -115,6 +115,11 @@ const SigninForm = ({
           <Button type="submit" disabled={isPending}>
             {isPending ? "Logging in..." : "Enter Account"}
           </Button>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="h-px flex-1 bg-border" />
+            <span>OR</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
           <GoogleSignInButton />
           <FieldDescription className="px-6 text-center">
             Don't have an account?{" "}

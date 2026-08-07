@@ -15,6 +15,7 @@ const requiredEnv = [
   "OPENAI_API_KEY",
   "OPENAI_MODEL",
   "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
 ] as const;
 
 const resumeImportMaxPages = Number(process.env.RESUME_IMPORT_MAX_PAGES ?? 5);
@@ -38,6 +39,7 @@ export const env = {
   cookieSecret: process.env.COOKIE_SECRET!,
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET!,
   googleClientId: process.env.GOOGLE_CLIENT_ID!,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET!,
   accessTokenTtlMinutes:
     `${Number(process.env.ACCESS_TOKEN_TTL_MINUTES ?? 10)}m` as StringValue,
   refreshCookieName: process.env.REFRESH_COOKIE_NAME!,
