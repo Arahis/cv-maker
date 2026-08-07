@@ -6,6 +6,7 @@ import UploadResumeButton from "../../components/UploadResumeButton";
 export default function UploadResumeButtonResumeList() {
   return (
     <UploadResumeButton
+      withRedirect
       button={(onClick, isDisabled) => (
         <Button
           onClick={onClick}

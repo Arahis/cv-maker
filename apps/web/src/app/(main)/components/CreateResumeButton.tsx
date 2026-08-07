@@ -18,7 +18,7 @@ const CreateResumeButton = ({
   template?: TemplateKey;
   withRedirect?: boolean;
 }) => {
-  const { createResume, isLoading, isProcessing, redirectGuestToResumes } =
+  const { createResume, isLoading, isProcessing, hasGuestLocalResumes } =
     useCreateResumeController();
   const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
@@ -30,7 +30,8 @@ const CreateResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
-      if (withRedirect && (await redirectGuestToResumes())) {
+      if (withRedirect && hasGuestLocalResumes()) {
+        setIsQuotaDialogOpen(true);
         return;
       }
 
@@ -53,6 +54,8 @@ const CreateResumeButton = ({
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
+        source="create"
+        hasEverUploaded={false}
       />
       <ErrorDialog
         open={Boolean(errorMessage)}

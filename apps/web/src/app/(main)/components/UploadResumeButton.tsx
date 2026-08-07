@@ -47,6 +47,7 @@ const UploadResumeButton = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
+  const [hasEverUploaded, setHasEverUploaded] = useState(false);
   const [isPdfLimitDialogOpen, setIsPdfLimitDialogOpen] = useState(false);
   const [isFileSizeDialogOpen, setIsFileSizeDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,7 +55,7 @@ const UploadResumeButton = ({
     checkGuestResumeQuota,
     checkPdfParseLimit,
     createResumeFromUploaded,
-    redirectGuestToResumes,
+    hasGuestLocalResumes,
     isLoading,
     isProcessing,
   } = useCreateResumeController();
@@ -66,13 +67,16 @@ const UploadResumeButton = ({
     setIsResumeActionPending(true);
 
     try {
-      if (withRedirect && (await redirectGuestToResumes())) {
+      const hasUploaded = await checkGuestResumeQuota();
+      setHasEverUploaded(hasUploaded);
+
+      if (withRedirect && hasGuestLocalResumes()) {
+        setIsQuotaDialogOpen(true);
         return;
       }
 
-      const canChooseFile = await checkGuestResumeQuota(true);
-
-      if (!canChooseFile) {
+      if (hasUploaded) {
+        setIsQuotaDialogOpen(true);
         return;
       }
 
@@ -148,6 +152,8 @@ const UploadResumeButton = ({
       <GuestResumeQuotaDialog
         open={isQuotaDialogOpen}
         onOpenChange={setIsQuotaDialogOpen}
+        source="upload"
+        hasEverUploaded={hasEverUploaded}
       />
       <PdfParseLimitDialog
         open={isPdfLimitDialogOpen}

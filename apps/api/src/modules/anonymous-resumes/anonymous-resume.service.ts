@@ -35,31 +35,20 @@ export class AnonymousResumeService {
   ) {
     const { tokenHash } = this.getOrCreateToken(request, reply);
 
-    const existingTokenQuota =
-      input.hasEverUploaded
-        ? await this.anonymousResumes.findAnyByTokenHash(tokenHash)
-        : await this.anonymousResumes.findActiveByTokenHash(tokenHash);
-
-    if (existingTokenQuota) {
-      return this.quotaExhausted(reply);
-    }
+    const existingTokenQuota = await this.anonymousResumes.findAnyByTokenHash(
+      tokenHash,
+    );
+    let hasEverUploaded = Boolean(existingTokenQuota?.hasEverUploaded);
 
     if (input.fingerprint) {
       const existingFingerprintQuota =
-        input.hasEverUploaded
-          ? await this.anonymousResumes.findAnyByFingerprintHmac(
-              hashFingerprint(input.fingerprint),
-            )
-          : await this.anonymousResumes.findActiveByFingerprintHmac(
-              hashFingerprint(input.fingerprint),
-            );
-
-      if (existingFingerprintQuota) {
-        return this.quotaExhausted(reply);
-      }
+        await this.anonymousResumes.findAnyByFingerprintHmac(
+          hashFingerprint(input.fingerprint),
+        );
+      hasEverUploaded ||= Boolean(existingFingerprintQuota?.hasEverUploaded);
     }
 
-    return { status: "available" };
+    return { hasEverUploaded };
   }
 
   async claim(
@@ -77,10 +66,9 @@ export class AnonymousResumeService {
       return { status: "claimed" };
     }
 
-    const existingTokenQuota =
-      input.hasEverUploaded
-        ? await this.anonymousResumes.findAnyByTokenHash(tokenHash)
-        : await this.anonymousResumes.findActiveByTokenHash(tokenHash);
+    const existingTokenQuota = await this.anonymousResumes.findAnyByTokenHash(
+      tokenHash,
+    );
 
     if (existingTokenQuota) {
       return this.quotaExhausted(reply);
@@ -92,13 +80,7 @@ export class AnonymousResumeService {
 
     if (fingerprintHmac) {
       const existingFingerprintQuota =
-        input.hasEverUploaded
-          ? await this.anonymousResumes.findAnyByFingerprintHmac(
-              fingerprintHmac,
-            )
-          : await this.anonymousResumes.findActiveByFingerprintHmac(
-              fingerprintHmac,
-            );
+        await this.anonymousResumes.findAnyByFingerprintHmac(fingerprintHmac);
 
       if (existingFingerprintQuota) {
         return this.quotaExhausted(reply);
@@ -110,7 +92,7 @@ export class AnonymousResumeService {
         tokenHash,
         fingerprintHmac,
         localResumeId: input.localResumeId,
-        hasEverUploaded: input.hasEverUploaded,
+        hasEverUploaded: true,
       });
     } catch (error) {
       if (

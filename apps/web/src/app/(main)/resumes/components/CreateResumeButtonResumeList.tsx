@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 const CreateResumeButtonResumeList = () => {
   return (
     <CreateResumeButton
+      withRedirect
       button={(onClick, isDisabled) => (
         <Button
           onClick={onClick}

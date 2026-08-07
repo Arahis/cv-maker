@@ -125,7 +125,7 @@ const SignupForm = ({
             {isLoading ? "Creating ..." : "Create Account"}
           </Button>
           <GoogleSignInButton />
-          <FieldDescription className="px-6 text-center">
+          <FieldDescription className="px-4 text-center">
             Already have an account?{" "}
             {onShowSignin ? (
               <button
