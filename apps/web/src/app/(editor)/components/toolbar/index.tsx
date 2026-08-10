@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Printer } from "lucide-react";
+import { Download } from "lucide-react";
 import { FileStack } from "lucide-react";
 import {
   Popover,
@@ -41,14 +41,14 @@ const Toolbar = ({
   return (
     <div className="absolute z-10 flex h-full items-end">
       <div className="mb-4 ml-2 flex flex-col gap-1">
-        <ToolbarTooltip text="Print resume">
+        <ToolbarTooltip text="Download/Print resume">
           <Button onClick={onPrintClick}>
-            <Printer />
+            <Download />
           </Button>
         </ToolbarTooltip>
 
         <Popover modal={true}>
-          <ToolbarTooltip text="Resume variants">
+          <ToolbarTooltip text="Resume templates">
             <PopoverTrigger asChild>
               <Button>
                 <FileStack />

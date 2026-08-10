@@ -41,9 +41,9 @@ const ResumeWrapperPages = ({
         }}
       >
         {children}
-        <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
+        {/* <p className="absolute bottom-4 left-4 origin-bottom-left -rotate-90 transform text-center text-xs text-gray-300">
           resume created with <strong>cvoop.com</strong>
-        </p>
+        </p> */}
       </div>
     </div>
   );
@@ -94,7 +94,11 @@ const ResumePreview = ({
     // contentRefForPrint.current = node;
   };
 
-  const pages = usePaginateDom({ ref, data: formData, photo: croppedPreviewUrl });
+  const pages = usePaginateDom({
+    ref,
+    data: formData,
+    photo: croppedPreviewUrl,
+  });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const scaleControls = useStageScale(containerRef);
