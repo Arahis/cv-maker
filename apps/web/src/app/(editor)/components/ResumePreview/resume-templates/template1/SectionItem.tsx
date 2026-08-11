@@ -19,13 +19,13 @@ const SectionItem = <T,>({
   }
 
   return (
-    <Paginate.Section className={className} datatype="cv_info-section-item">
+    <div className={className} datatype="cv_info-section-item">
       <p className="mb-4 text-[16px] uppercase">{title}</p>
 
       {items.map((item, idx) => (
         <React.Fragment key={idx}>{renderItem(item, idx)}</React.Fragment>
       ))}
-    </Paginate.Section>
+    </div>
   );
 };
 

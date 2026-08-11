@@ -1,6 +1,5 @@
 import React from "react";
 import SectionItem from "../SectionItem";
-import { Paginate } from "../../../Paginate";
 import { formatDate } from "../../../utils/formatDate";
 import { ResumeForm } from "@/lib/validation";
 import {
@@ -155,10 +154,7 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
   const { educations, skills, languages, customSections, socialLinks } = data;
 
   return (
-    <Paginate.Section
-      className="w-[30%] space-y-6 pr-4"
-      datatype="left-section"
-    >
+    <div className="w-[30%] space-y-6 pr-4" datatype="left-section">
       <Education items={educations} />
 
       <Skills skills={skills} />
@@ -168,7 +164,7 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
       <Languages items={languages} />
 
       <CustomSections items={customSections} />
-    </Paginate.Section>
+    </div>
   );
 };
 
