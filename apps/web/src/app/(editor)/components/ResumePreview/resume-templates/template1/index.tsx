@@ -5,22 +5,28 @@ import LeftSection from "./LeftSection";
 import RightSection from "./RightSection";
 import { Paginate } from "../../Paginate";
 import { ResumeTemplateProps } from "@/lib/types/resume/template.types";
+import PaginationDocument from "../../PaiginatorNew/utils/PaginationDocument";
+import {
+  ColumnsRegion,
+  FullWidthRegion,
+} from "../../PaiginatorNew/utils/Pagination";
 
 export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
   ({ data, photo }, ref) => {
     return (
-      <Paginate ref={ref}>
+      <PaginationDocument revision={data} ref={ref}>
         <HeaderSection data={data} photo={photo} />
-        <Summary data={data.summary} />
+        <FullWidthRegion>
+          <Summary data={data.summary} />
+        </FullWidthRegion>
 
-        <Paginate.Columns
-          className="columns flex w-full"
-          datatype="main-cv-info"
-        >
-          <LeftSection data={data} />
-          <RightSection data={data} />
-        </Paginate.Columns>
-      </Paginate>
+        <ColumnsRegion
+          // className="columns flex w-full"
+          // datatype="main-cv-info"
+          leftColumn={<LeftSection data={data} />}
+          rightColumn={<RightSection data={data} />}
+        />
+      </PaginationDocument>
     );
   },
 );

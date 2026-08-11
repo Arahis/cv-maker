@@ -11,9 +11,9 @@ const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   if (!hasDescription) return;
 
   return (
-    <Paginate.Section className="py-8" datatype="main-summary">
+    <div className="py-8" datatype="main-summary">
       <TextReader value={summary} />
-    </Paginate.Section>
+    </div>
   );
 };
 
