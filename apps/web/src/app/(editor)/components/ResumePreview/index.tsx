@@ -86,16 +86,16 @@ const ResumePreview = ({
   const formData = useWatch({ control }) as ResumeForm;
   const { croppedPreviewUrl } = useAvatar();
 
-  const ref = useRef<HTMLDivElement>(null);
+  // const ref = useRef<HTMLDivElement>(null);
 
   const setRefs = (node: HTMLDivElement | null) => {
-    ref.current = node;
+    // ref.current = node;
     // TODO: Uncomment this line when migrating to the new PDF generation API
     // contentRefForPrint.current = node;
   };
 
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const scaleControls = useStageScale(containerRef);
+  // const containerRef = React.useRef<HTMLDivElement | null>(null);
+  // const scaleControls = useStageScale(containerRef);
   //   scale={scaleControls.scale}
   // width={scaleControls.width}
   // height={scaleControls.height}
@@ -104,10 +104,14 @@ const ResumePreview = ({
 
   return (
     <div
-      ref={containerRef}
-      // className="relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
+    // ref={containerRef}
+    // className="relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
     >
-      <Variant data={formData} photo={croppedPreviewUrl} />
+      <Variant
+        data={formData}
+        photo={croppedPreviewUrl}
+        ref={contentRefForPrint}
+      />
     </div>
   );
 };

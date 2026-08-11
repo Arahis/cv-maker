@@ -1,6 +1,7 @@
 import "./pagination.css";
 
 import {
+  forwardRef,
   ReactNode,
   useCallback,
   useLayoutEffect,
@@ -9,7 +10,6 @@ import {
   type CSSProperties,
 } from "react";
 import {
-  ColumnsRegion,
   EPSILON,
   FOOTER_HEIGHT,
   FlowBreak,
@@ -28,19 +28,31 @@ import {
 /* =========================================================
    MAIN
    ========================================================= */
-
-export default function PaginationDocument({
-  children,
-  revision,
-}: {
-  children: ReactNode;
-  revision?: unknown;
-}) {
+const PaginationDocument = forwardRef<
+  HTMLDivElement,
+  {
+    children: ReactNode;
+    revision?: unknown;
+  }
+>(({ children, revision }, contentRefForPrint) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const documentFlowRef = useRef<HTMLDivElement>(null);
   const previousRevisionRef = useRef(revision);
-
   const [breaks, setBreaks] = useState<FlowBreak[]>([]);
+
+  const setEditorRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      editorRef.current = node;
+
+      if (typeof contentRefForPrint === "function") {
+        contentRefForPrint(node);
+      } else if (contentRefForPrint) {
+        contentRefForPrint.current = node;
+      }
+    },
+    [contentRefForPrint],
+  );
+
   const pageCount =
     breaks.length === 0
       ? 1
@@ -113,8 +125,7 @@ export default function PaginationDocument({
     const documentRect = documentFlow.getBoundingClientRect();
 
     /*
-     * По-прежнему измеряем только
-     * ВЕСЬ document layout.
+     * Measure the whole doc layout
      */
     const layoutBottom = documentRect.bottom - editorRect.top;
 
@@ -166,18 +177,7 @@ export default function PaginationDocument({
   }, [pageCount, findFlowsForBoundary]);
 
   /*
-   * Каждый новый breaker меняет browser layout.
-   *
-   * Поэтому:
-   *
-   * render
-   * → layout
-   * → measure
-   * → add break
-   * → render
-   * → layout
-   * → measure
-   * ...
+   * Every new breaker changes browser layout.
    */
   useLayoutEffect(() => {
     if (previousRevisionRef.current !== revision) {
@@ -192,14 +192,7 @@ export default function PaginationDocument({
     reconcilePagination();
   }, [revision, breaks.length, reconcilePagination]);
 
-  /*
-   * Пока для prototype при любом
-   * изменении content строим pagination
-   * заново.
-   *
-   * input всплывает сюда из любого
-   * contentEditable внутри шаблона.
-   */
+  // handleInput when block is editable in preview
   const handleInput = useCallback(() => {
     setBreaks([]);
   }, []);
@@ -208,7 +201,7 @@ export default function PaginationDocument({
     <PaginationContext.Provider value={{ breaks }}>
       <div className="__editor-wrapper">
         <div
-          ref={editorRef}
+          ref={setEditorRef}
           className="editor"
           style={
             {
@@ -243,4 +236,6 @@ export default function PaginationDocument({
       </div>
     </PaginationContext.Provider>
   );
-}
+});
+
+export default PaginationDocument;
