@@ -100,14 +100,14 @@ const ResumePreview = ({
   // width={scaleControls.width}
   // height={scaleControls.height}
 
-  const Variant = getResumeTemplateComponent(template);
+  const Template = getResumeTemplateComponent(template);
 
   return (
     <div
     // ref={containerRef}
     // className="relative flex w-full flex-col items-center justify-start gap-6 overflow-y-auto bg-gray-50 p-4"
     >
-      <Variant
+      <Template
         data={formData}
         photo={croppedPreviewUrl}
         ref={contentRefForPrint}

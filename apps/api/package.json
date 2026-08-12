@@ -6,7 +6,9 @@
     "@hono/node-server": "^1.19.13"
   },
   "scripts": {
+    "predev": "npm --prefix ../.. run build:renderer",
     "dev": "tsx watch --clear-screen=false src/server.ts",
+    "prebuild": "npm --prefix ../.. run build:renderer",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
@@ -16,6 +18,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.984.0",
     "@aws-sdk/client-sesv2": "^3.1062.0",
+    "@cv-maker/resume-renderer": "*",
     "@cv-maker/shared": "*",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
@@ -31,6 +34,8 @@
     "jsonwebtoken": "^9.0.3",
     "openai": "^6.49.0",
     "playwright": "1.58.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

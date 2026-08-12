@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import {
   DEFAULT_RESUME_TEMPLATE_COMPONENT,
+  getResumeTemplateComponent,
   resumeTemplates,
 } from "@/components/templates/components";
 
@@ -68,8 +69,7 @@ const ResumeCard = ({
     isDeleting,
     updatedAt,
   } = resume;
-  const Template =
-    resumeTemplates[template] ?? DEFAULT_RESUME_TEMPLATE_COMPONENT;
+  const Template = getResumeTemplateComponent(template);
 
   const { scaledWidth, scaledHeight, scale, width, height } =
     getScaleForA4(0.25);

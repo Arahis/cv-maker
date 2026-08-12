@@ -45,4 +45,8 @@ cloudflare-env.d.ts
 next-env.d.ts
 
 packages/shared/dist
+<<<<<<< HEAD
 packages/resume-renderer/dist
+=======
+packages/resume-renderer/dist
+>>>>>>> df52ef30ca63d280fa0b50a2bff524e8c554af6b

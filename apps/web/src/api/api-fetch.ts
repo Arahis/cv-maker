@@ -59,10 +59,19 @@ export async function apiFetch<T>(
   return apiFetchInternal<T>(path, options, true);
 }
 
+export async function apiFetchBlob(
+  path: string,
+  options: RequestInit = {},
+): Promise<Blob> {
+  return apiFetchInternal(path, options, true, (response) => response.blob());
+}
+
 async function apiFetchInternal<T>(
   path: string,
   options: RequestInit,
   shouldTryRefresh: boolean,
+  parseResponse: (response: Response) => Promise<T> = (response) =>
+    response.json() as Promise<T>,
 ): Promise<T> {
   const token = getAccessToken();
   const headers = new Headers(options.headers);
@@ -91,7 +100,7 @@ async function apiFetchInternal<T>(
     const newToken = await refreshAccessToken();
 
     if (newToken) {
-      return apiFetchInternal<T>(path, options, false);
+      return apiFetchInternal<T>(path, options, false, parseResponse);
     }
   }
 
@@ -99,5 +108,5 @@ async function apiFetchInternal<T>(
     throw new ApiError(res.status, await res.text());
   }
 
-  return res.json();
+  return parseResponse(res);
 }

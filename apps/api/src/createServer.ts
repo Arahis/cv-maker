@@ -10,6 +10,7 @@ import resumeRoutes from "./modules/resumes/resume.route.js";
 import uploadRoutes from "./modules/uploads/upload.route.js";
 import parsResumeRoutes from "./modules/pars-resume/pars.route.js";
 import anonymousResumeRoutes from "./modules/anonymous-resumes/anonymous-resume.route.js";
+import pdfRoutes from "./modules/pdf/pdf.route.js";
 
 export function createServer() {
   const app = Fastify({
@@ -41,6 +42,7 @@ export function createServer() {
   app.register(uploadRoutes, { prefix: "/uploads" });
   app.register(anonymousResumeRoutes, { prefix: "/anonymous-resumes" });
   app.register(parsResumeRoutes, { prefix: "/" });
+  app.register(pdfRoutes, { prefix: "/pdf" });
 
   return app;
 }

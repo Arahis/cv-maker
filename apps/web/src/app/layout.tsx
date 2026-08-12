@@ -1,35 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Source_Code_Pro, Cantata_One } from "next/font/google";
 import "./globals.css";
 import "./main.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import CookieBanner from "@/components/analytics/CookieBanner";
 import Providers from "./providers";
-
-const inter = Inter({
-  subsets: ["latin"],
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-brand",
-  display: "swap",
-});
-
-const tech = Source_Code_Pro({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-tech",
-  display: "swap",
-});
-
-const cantata = Cantata_One({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-cantata",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://cvoop.com"),
@@ -53,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} ${outfit.variable} ${tech.variable} ${cantata.variable} antialiased`}
-      >
+      <body className="font-inter antialiased">
         <Providers>{children}</Providers>
         <GoogleAnalytics />
         <CookieBanner />
