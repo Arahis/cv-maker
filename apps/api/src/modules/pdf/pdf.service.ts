@@ -2,12 +2,26 @@ import { chromium } from "playwright";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  EPSILON,
+  FOOTER_HEIGHT,
+  HEADER_HEIGHT,
+  PAGE_HEIGHT,
+  getPageBreakHeight,
+  getPageContentHeight,
+  getPageStride,
+  DEFAULT_PAGINATION_GEOMETRY,
+} from "@cv-maker/resume-renderer";
 
 const apiRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
 const fontsRoot = path.join(apiRoot, "fonts");
+const rendererCssPath = path.resolve(
+  apiRoot,
+  "../../packages/resume-renderer/dist/renderer.css",
+);
 
 const localFontCss = `
 @font-face { font-family: Inter; src: url("http://pdf.local/fonts/inter/Inter-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; }
@@ -21,26 +35,10 @@ const localFontCss = `
 
 type CreatePdfInput = {
   html: string;
-  css: string;
-  baseUrl?: string;
-  stylesheets: string[];
 };
 
-function escapeHtmlAttr(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-}
-
-function injectHead(
-  html: string,
-  css: string,
-  baseUrl: string | undefined,
-  stylesheets: string[],
-) {
-  const cssWithoutExternalFonts = css.replace(/@font-face\s*\{[^}]*\}/gi, "");
-  const links = stylesheets
-    .map((href) => `<link rel="stylesheet" href="${escapeHtmlAttr(href)}" />`)
-    .join("");
-  const injection = `${baseUrl ? `<base href="${escapeHtmlAttr(baseUrl)}" />` : ""}${links}<style>${cssWithoutExternalFonts}${localFontCss}</style>`;
+function injectHead(html: string, css: string) {
+  const injection = `<style>${css}${localFontCss}</style>`;
 
   if (/<\/head>/i.test(html)) {
     return html.replace(/<\/head>/i, `${injection}</head>`);
@@ -49,9 +47,132 @@ function injectHead(
   return `<!doctype html><html><head><meta charset="utf-8" />${injection}</head><body>${html}</body></html>`;
 }
 
+async function applyServerPagination(page: import("playwright").Page) {
+  // tsx/esbuild may emit a __name helper inside the browser evaluate bundle.
+  // It is not available in Playwright's page context by default.
+  await page.evaluate(() => {
+    const scope = globalThis as typeof globalThis & {
+      __name?: (value: unknown, name: string) => unknown;
+    };
+
+    scope.__name ??= (value) => value;
+  });
+
+  const pageGap = 0;
+  const geometry = {
+    ...DEFAULT_PAGINATION_GEOMETRY,
+    pageHeight: PAGE_HEIGHT,
+    footerHeight: FOOTER_HEIGHT,
+    headerHeight: HEADER_HEIGHT,
+    pageGap,
+    pageContentHeight: getPageContentHeight({
+      ...DEFAULT_PAGINATION_GEOMETRY,
+      pageGap,
+    }),
+    pageBreakHeight: getPageBreakHeight({
+      ...DEFAULT_PAGINATION_GEOMETRY,
+      pageGap,
+    }),
+    pageStride: getPageStride({
+      ...DEFAULT_PAGINATION_GEOMETRY,
+      pageGap,
+    }),
+    epsilon: EPSILON,
+  };
+
+  await page.evaluate((geometry) => {
+    const editor = document.querySelector<HTMLElement>(".editor");
+    const documentFlow = document.querySelector<HTMLElement>(".document-flow");
+
+    if (!editor || !documentFlow) return;
+
+    const getFlows = () =>
+      Array.from(
+        documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
+      ).map((element) => {
+        const editorRect = editor.getBoundingClientRect();
+        const rect = element.getBoundingClientRect();
+
+        return {
+          element,
+          top: rect.top - editorRect.top,
+          bottom: rect.bottom - editorRect.top,
+        };
+      });
+
+    const deepestFlows = (flows: ReturnType<typeof getFlows>) =>
+      flows.filter(
+        (flow) =>
+          !flows.some(
+            (other) => other !== flow && flow.element.contains(other.element),
+          ),
+      );
+
+    const createBreak = (marginTop: number) => {
+      const widget = document.createElement("div");
+      widget.className = "pagination-widget";
+      widget.setAttribute("data-server-pagination", "true");
+      widget.innerHTML = `<div class="page-break"><div class="page-anchor" style="margin-top:${marginTop}px"></div><div class="flow-breaker" style="height:${geometry.pageBreakHeight}px"></div></div>`;
+      return widget;
+    };
+
+    let pageNumber = 1;
+    let previousFlowBreaks = new WeakMap<HTMLElement, number>();
+
+    for (let guard = 0; guard < 100; guard += 1) {
+      const editorRect = editor.getBoundingClientRect();
+      const documentRect = documentFlow.getBoundingClientRect();
+      const layoutBottom = documentRect.bottom - editorRect.top;
+      const boundaryY =
+        (pageNumber - 1) * geometry.pageStride +
+        geometry.pageHeight -
+        geometry.footerHeight;
+
+      if (layoutBottom <= boundaryY + geometry.epsilon) break;
+
+      const activeFlows = deepestFlows(
+        getFlows().filter(
+          (flow) =>
+            boundaryY >= flow.top - geometry.epsilon &&
+            boundaryY <= flow.bottom + geometry.epsilon,
+        ),
+      );
+
+      if (activeFlows.length === 0) break;
+
+      for (const flow of activeFlows) {
+        const flowBreakCount = previousFlowBreaks.get(flow.element) ?? 0;
+        const marginTop =
+          flowBreakCount === 0
+            ? Math.max(0, boundaryY - flow.top)
+            : geometry.pageContentHeight;
+
+        flow.element.insertBefore(
+          createBreak(marginTop),
+          flow.element.firstChild,
+        );
+        previousFlowBreaks.set(flow.element, flowBreakCount + 1);
+      }
+
+      pageNumber += 1;
+    }
+
+    editor.style.setProperty(
+      "--editor-height",
+      `${geometry.pageHeight * pageNumber + geometry.pageGap * (pageNumber - 1)}px`,
+    );
+
+  }, geometry);
+}
+
 export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
+  const css = await readFile(rendererCssPath, "utf8");
   const browser = await chromium.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+    ],
   });
 
   try {
@@ -104,13 +225,10 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       }
     });
 
-    await page.setContent(
-      injectHead(input.html, input.css, input.baseUrl, input.stylesheets),
-      {
+    await page.setContent(injectHead(input.html, css), {
       waitUntil: "domcontentloaded",
       timeout: 60_000,
-      },
-    );
+    });
 
     // Use print media so @media print rules are applied consistently.
     await page.emulateMedia({ media: "print" });
@@ -123,6 +241,8 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
         ),
       );
     });
+
+    await applyServerPagination(page);
 
     console.info(
       "PDF fonts",

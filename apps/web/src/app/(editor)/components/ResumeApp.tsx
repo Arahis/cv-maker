@@ -27,8 +27,8 @@ const useResumeForm = () =>
     defaultValues: defaultFormValues(),
   });
 
-const downloadPdf = async (resumeId: string, html: string) => {
-  const blob = await generateAccountResumePdf({ resumeId, html });
+const downloadPdf = async (resumeId: string) => {
+  const blob = await generateAccountResumePdf(resumeId);
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
 
@@ -92,18 +92,8 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     trackEvent("print_click", { device, var: resumeTemplate });
 
     if (source === "account") {
-      const contentHtml = contentRef.current?.outerHTML;
-
-      if (!contentHtml) {
-        console.error("print root not found");
-        return;
-      }
-
-      // Keep the same next/font classes and CSS variables as the browser.
-      const html = `<div class="${document.body.className}" style="text-rendering: geometricPrecision;">${contentHtml}</div>`;
-
       try {
-        await downloadPdf(resumeId, html);
+        await downloadPdf(resumeId);
       } catch (error) {
         console.error("Failed to generate PDF", error);
       }

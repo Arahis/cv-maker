@@ -12,6 +12,7 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/resume-renderer/package.json ./packages/resume-renderer/package.json
 
 RUN npm ci
 
@@ -23,6 +24,7 @@ COPY . .
 
 RUN npx prisma generate --schema apps/api/prisma/schema.prisma
 RUN npm run -w packages/shared build
+RUN npm run -w packages/resume-renderer build
 RUN npm run -w apps/api build
 
 
@@ -41,6 +43,8 @@ COPY --from=builder /app/apps/api/fonts ./apps/api/fonts
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/resume-renderer/dist ./packages/resume-renderer/dist
+COPY --from=builder /app/packages/resume-renderer/package.json ./packages/resume-renderer/package.json
 
 EXPOSE 4000
 

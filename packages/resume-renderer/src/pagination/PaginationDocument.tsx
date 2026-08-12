@@ -3,6 +3,7 @@ import {
   ReactNode,
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -20,8 +21,15 @@ import {
   PAGE_WIDTH,
   PaginationContext,
   VisualPagination,
-  getPageContentBottom,
 } from "./Pagination.js";
+import {
+  DEFAULT_PAGINATION_GEOMETRY,
+  type PaginationGeometry,
+  getPageBreakHeight,
+  getPageContentBottom as getGeometryPageContentBottom,
+  getPageContentHeight,
+  getPageStride,
+} from "./geometry.js";
 
 /* =========================================================
    MAIN
@@ -31,8 +39,22 @@ const PaginationDocument = forwardRef<
   {
     children: ReactNode;
     revision?: unknown;
+    pagePaddingX?: number;
+    headerFooterHeight?: number;
+    pageGap?: number;
   }
->(({ children, revision }, contentRefForPrint) => {
+>(({ children, revision, pagePaddingX, headerFooterHeight, pageGap }, contentRefForPrint) => {
+  const geometry = useMemo<PaginationGeometry>(
+    () => ({
+      ...DEFAULT_PAGINATION_GEOMETRY,
+      ...(pagePaddingX === undefined ? {} : { pagePaddingX }),
+      ...(headerFooterHeight === undefined
+        ? {}
+        : { headerHeight: headerFooterHeight, footerHeight: headerFooterHeight }),
+      ...(pageGap === undefined ? {} : { pageGap }),
+    }),
+    [pagePaddingX, headerFooterHeight, pageGap],
+  );
   const editorRef = useRef<HTMLDivElement>(null);
   const documentFlowRef = useRef<HTMLDivElement>(null);
   const previousRevisionRef = useRef(revision);
@@ -55,7 +77,8 @@ const PaginationDocument = forwardRef<
     breaks.length === 0
       ? 1
       : Math.max(...breaks.map((pageBreak) => pageBreak.pageNumber)) + 1;
-  const editorHeight = PAGE_HEIGHT * pageCount + PAGE_GAP * (pageCount - 1);
+  const editorHeight =
+    PAGE_HEIGHT * pageCount + geometry.pageGap * (pageCount - 1);
 
   type FlowGeometry = {
     element: HTMLElement;
@@ -127,7 +150,10 @@ const PaginationDocument = forwardRef<
      */
     const layoutBottom = documentRect.bottom - editorRect.top;
 
-    const currentPageBottom = getPageContentBottom(pageCount);
+    const currentPageBottom = getGeometryPageContentBottom(
+      pageCount,
+      geometry,
+    );
 
     if (layoutBottom <= currentPageBottom + EPSILON) {
       return;
@@ -161,7 +187,7 @@ const PaginationDocument = forwardRef<
         const marginTop =
           flowBreaks.length === 0
             ? Math.max(0, boundaryY - flow.top)
-            : PAGE_CONTENT_HEIGHT;
+            : getPageContentHeight(geometry);
 
         next.push({
           pageNumber: pageCount,
@@ -172,7 +198,7 @@ const PaginationDocument = forwardRef<
 
       return next;
     });
-  }, [pageCount, findFlowsForBoundary]);
+  }, [pageCount, findFlowsForBoundary, geometry]);
 
   /*
    * Every new breaker changes browser layout.
@@ -196,7 +222,7 @@ const PaginationDocument = forwardRef<
   }, []);
 
   return (
-    <PaginationContext.Provider value={{ breaks }}>
+    <PaginationContext.Provider value={{ breaks, geometry }}>
       <div className="__editor-wrapper">
         <div
           ref={setEditorRef}
@@ -207,21 +233,21 @@ const PaginationDocument = forwardRef<
 
               "--page-height": `${PAGE_HEIGHT}px`,
 
-              "--page-padding-x": `${PAGE_PADDING_X}px`,
+              "--page-padding-x": `${geometry.pagePaddingX}px`,
 
-              "--header-height": `${HEADER_HEIGHT}px`,
+              "--header-height": `${geometry.headerHeight}px`,
 
-              "--footer-height": `${FOOTER_HEIGHT}px`,
+              "--footer-height": `${geometry.footerHeight}px`,
 
-              "--page-gap": `${PAGE_GAP}px`,
+              "--page-gap": `${geometry.pageGap}px`,
 
-              "--page-break-height": `${PAGE_BREAK_HEIGHT}px`,
+              "--page-break-height": `${getPageBreakHeight(geometry)}px`,
 
               "--editor-height": `${editorHeight}px`,
             } as CSSProperties
           }
         >
-          <VisualPagination pageCount={pageCount} />
+          <VisualPagination pageCount={pageCount} geometry={geometry} />
 
           <div
             ref={documentFlowRef}

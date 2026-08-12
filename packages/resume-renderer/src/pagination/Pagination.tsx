@@ -1,21 +1,36 @@
 import { createContext, useContext, useId, type ReactNode } from "react";
+import {
+  EPSILON,
+  FOOTER_HEIGHT,
+  HEADER_HEIGHT,
+  PAGE_HEIGHT,
+  PAGE_PADDING_X,
+  PAGE_WIDTH,
+  DEFAULT_PAGINATION_GEOMETRY,
+  PaginationGeometry,
+  getPageBreakHeight,
+  getPageContentBottom as getGeometryPageContentBottom,
+  getPageContentHeight,
+  getPageStride,
+} from "./geometry.js";
 
-export const PAGE_WIDTH = 793.7;
-export const PAGE_HEIGHT = 1122.52;
+export {
+  EPSILON,
+  FOOTER_HEIGHT,
+  HEADER_HEIGHT,
+  PAGE_HEIGHT,
+  PAGE_PADDING_X,
+  PAGE_WIDTH,
+} from "./geometry.js";
 
-export const PAGE_PADDING_X = 72;
-
-export const HEADER_HEIGHT = 72;
-export const FOOTER_HEIGHT = 72;
 export const PAGE_GAP = 16;
-
-export const PAGE_CONTENT_HEIGHT = PAGE_HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT;
-
-export const PAGE_BREAK_HEIGHT = FOOTER_HEIGHT + PAGE_GAP + HEADER_HEIGHT;
-
-export const PAGE_STRIDE = PAGE_HEIGHT + PAGE_GAP;
-
-export const EPSILON = 0.5;
+export const PAGE_CONTENT_HEIGHT = getPageContentHeight();
+const DEFAULT_PREVIEW_GEOMETRY = {
+  ...DEFAULT_PAGINATION_GEOMETRY,
+  pageGap: PAGE_GAP,
+};
+export const PAGE_BREAK_HEIGHT = getPageBreakHeight(DEFAULT_PREVIEW_GEOMETRY);
+export const PAGE_STRIDE = getPageStride(DEFAULT_PREVIEW_GEOMETRY);
 
 export type FlowBreak = {
   pageNumber: number;
@@ -29,6 +44,7 @@ export type FlowBreak = {
 
 type PaginationContextValue = {
   breaks: FlowBreak[];
+  geometry: PaginationGeometry;
 };
 
 export const PaginationContext = createContext<PaginationContextValue | null>(
@@ -50,9 +66,7 @@ function useFlowBreaks(flowId: string) {
    ========================================================= */
 
 export function getPageContentBottom(pageNumber: number) {
-  const pageTop = (pageNumber - 1) * PAGE_STRIDE;
-
-  return pageTop + PAGE_HEIGHT - FOOTER_HEIGHT;
+  return getGeometryPageContentBottom(pageNumber, DEFAULT_PREVIEW_GEOMETRY);
 }
 
 /* =========================================================
@@ -60,13 +74,6 @@ export function getPageContentBottom(pageNumber: number) {
    ========================================================= */
 
 function FlowBreaks({ breaks }: { breaks: FlowBreak[] }) {
-  console.table(
-    breaks.map((b) => ({
-      pageNumber: b.pageNumber,
-      flowId: b.flowId,
-      marginTop: b.marginTop,
-    })),
-  );
   return (
     <>
       {breaks.map((pageBreak, idx) => (
@@ -158,13 +165,19 @@ export function ColumnsRegion({
    VISUAL PAGINATION
    ========================================================= */
 
-export function VisualPagination({ pageCount }: { pageCount: number }) {
+export function VisualPagination({
+  pageCount,
+  geometry = DEFAULT_PAGINATION_GEOMETRY,
+}: {
+  pageCount: number;
+  geometry?: PaginationGeometry;
+}) {
   return (
     <div className="visual-pagination" aria-hidden="true">
       {Array.from({ length: pageCount }, (_, pageIndex) => {
         const pageNumber = pageIndex + 1;
 
-        const pageTop = pageIndex * PAGE_STRIDE;
+        const pageTop = pageIndex * getPageStride(geometry);
 
         return (
           <div key={pageNumber}>
@@ -174,16 +187,18 @@ export function VisualPagination({ pageCount }: { pageCount: number }) {
                 top: pageTop,
               }}
             >
-              Header page {pageNumber}
+              {/* Uncomment for Testing: */}
+              {/* Header page {pageNumber} */}
             </div>
 
             <div
               className="visual-footer"
               style={{
-                top: pageTop + PAGE_HEIGHT - FOOTER_HEIGHT,
+                top: pageTop + PAGE_HEIGHT - geometry.footerHeight,
               }}
             >
-              Footer page {pageNumber}
+              {/* Uncomment for Testing: */}
+              {/* Footer page {pageNumber} */}
             </div>
 
             {pageNumber < pageCount && (
@@ -200,4 +215,3 @@ export function VisualPagination({ pageCount }: { pageCount: number }) {
     </div>
   );
 }
-

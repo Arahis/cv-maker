@@ -19,7 +19,69 @@ const theme = {
   },
 };
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;");
+}
+
+function renderServerNode(node: any): string {
+  const children = Array.isArray(node.children)
+    ? node.children.map(renderServerNode).join("")
+    : "";
+
+  switch (node.type) {
+    case "text": {
+      let content = escapeHtml(node.text ?? "");
+      const format = Number(node.format ?? 0);
+
+      if (format & 1) content = `<strong>${content}</strong>`;
+      if (format & 2) content = `<em>${content}</em>`;
+      if (format & 4) content = `<s>${content}</s>`;
+      if (format & 8) content = `<u>${content}</u>`;
+
+      return content;
+    }
+    case "linebreak":
+      return "<br />";
+    case "paragraph":
+      return `<p>${children}</p>`;
+    case "list": {
+      const isNumbered = node.listType === "number";
+      const tag = isNumbered ? "ol" : "ul";
+      const className = isNumbered ? "editor-list-ol" : "editor-list-ul";
+
+      return `<${tag} class="${className}">${children}</${tag}>`;
+    }
+    case "listitem":
+      return `<li class="editor-listItem">${children}</li>`;
+    case "link":
+      return `<a href="${escapeHtml(node.url ?? "")}">${children}</a>`;
+    default:
+      return children;
+  }
+}
+
+function createServerTextReader(value: string) {
+  const state = JSON.parse(value) as { root?: { children?: unknown[] } };
+  const children = state.root?.children ?? [];
+  const html = children.map(renderServerNode).join("");
+
+  return {
+    html,
+    text: children
+      .map((node) => renderServerNode(node).replace(/<[^>]+>/g, ""))
+      .join(""),
+  };
+}
+
 export function createTextReader(value: string) {
+  if (typeof document === "undefined") {
+    return createServerTextReader(value);
+  }
+
   const editor = createEditor({
     namespace: "ResumeRenderer",
     nodes,
