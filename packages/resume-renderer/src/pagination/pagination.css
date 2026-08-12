@@ -1,0 +1,288 @@
+/* .editor-wrapper {
+  min-height: 100vh;
+
+  padding: 40px;
+
+  background: #f6e8d5;
+} */
+
+/* ========================================================
+   PAGE / EDITOR
+   ======================================================== */
+
+.editor {
+  position: relative;
+
+  box-sizing: border-box;
+
+  width: var(--page-width);
+  min-height: var(--editor-height);
+
+  margin: 0 auto;
+
+  padding-inline: var(--page-padding-x);
+
+  background: white;
+
+  overflow: visible;
+
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+
+/* ========================================================
+   GLOBAL DOCUMENT FLOW
+   ======================================================== */
+
+.document-flow {
+  position: relative;
+
+  z-index: 1;
+
+  /*
+   * Header первой страницы
+   * резервируем один раз.
+   */
+  padding-top: var(--header-height);
+
+  display: grid;
+
+  grid-template-columns: minmax(0, 1fr);
+
+  row-gap: 24px;
+}
+
+/* ========================================================
+   FULL WIDTH REGION
+   ======================================================== */
+
+.full-width-region {
+  display: flow-root;
+
+  min-width: 0;
+}
+
+.region-content {
+  font-size: 14px;
+  line-height: 20px;
+
+  color: #24384d;
+}
+
+.region-content h1 {
+  margin: 0 0 8px;
+
+  font-size: 28px;
+  line-height: 34px;
+}
+
+.region-content h2 {
+  margin: 0 0 10px;
+
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.region-content p {
+  margin: 0;
+}
+
+/* ========================================================
+   COLUMNS
+   ======================================================== */
+
+.columns-region {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 35fr)
+    minmax(0, 65fr);
+
+  align-items: start;
+  column-gap: 12px;
+
+  min-width: 0;
+}
+
+.column {
+  /*
+   * Каждый column —
+   * отдельный float flow.
+   */
+  display: block;
+  text-align: left;
+
+  min-width: 0;
+}
+
+.column-content {
+  font-size: 14px;
+  line-height: 20px;
+
+  color: #24384d;
+}
+
+.column-content h2 {
+  margin: 0 0 12px;
+
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.column-content p {
+  margin: 0 0 16px;
+}
+
+/* ========================================================
+   PAGINATION WIDGET
+   ======================================================== */
+
+.pagination-widget {
+  position: relative;
+
+  display: block;
+
+  height: 0;
+
+  overflow: visible;
+}
+
+.page-break {
+  display: block;
+
+  height: 0;
+
+  overflow: visible;
+}
+
+/* ========================================================
+   ZERO-SIZE POSITION ANCHOR
+   ======================================================== */
+
+.page-anchor {
+  position: relative;
+
+  float: left;
+  clear: both;
+
+  width: 0;
+  height: 0;
+}
+
+/* ========================================================
+   ACTUAL LAYOUT BREAKER
+   ======================================================== */
+
+.flow-breaker {
+  position: relative;
+
+  float: left;
+  clear: both;
+
+  width: 100%;
+
+  height: var(--page-break-height);
+
+  pointer-events: none;
+}
+
+/* ========================================================
+   VISUAL PAGINATION
+   ======================================================== */
+
+.visual-pagination {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+.visual-header,
+.visual-footer {
+  position: absolute;
+
+  box-sizing: border-box;
+
+  left: 0;
+
+  width: 100%;
+
+  padding-inline: var(--page-padding-x);
+
+  font-size: 12px;
+
+  color: #999;
+
+  background: transparent;
+}
+
+.visual-header {
+  height: var(--header-height);
+
+  padding-top: 24px;
+}
+
+.visual-footer {
+  height: var(--footer-height);
+
+  display: flex;
+
+  align-items: flex-end;
+
+  padding-bottom: 24px;
+}
+
+.visual-gap {
+  position: absolute;
+
+  left: 0;
+
+  width: 100%;
+
+  height: var(--page-gap);
+
+  background: #f6e8d5;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .editor {
+    margin: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    --page-gap: 0px !important;
+    --page-break-height: calc(
+      var(--footer-height) + var(--header-height)
+    ) !important;
+
+    p,
+    span,
+    li,
+    blockquote {
+      orphans: 1;
+      widows: 1;
+    }
+  }
+
+  .visual-gap {
+    display: none !important;
+  }
+  .visual-pagination {
+    display: none !important;
+  }
+}
+
