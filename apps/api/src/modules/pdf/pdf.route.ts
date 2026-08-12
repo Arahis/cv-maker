@@ -5,7 +5,7 @@ import { UserRepository } from "../users/user.repository.js";
 import { ResumeRepository } from "../resumes/resume.repository.js";
 import { createPdf } from "./pdf.service.js";
 import { resumeMediaSchema, resumeSchema } from "@cv-maker/shared";
-import { renderResumeTemplate } from "@cv-maker/resume-renderer";
+import { renderResumeTemplate } from "@cv-maker/resume-renderer/server";
 
 const createPdfBodySchema = z.object({
   resumeId: z.string().min(1),
