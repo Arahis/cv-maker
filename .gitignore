@@ -45,3 +45,4 @@ cloudflare-env.d.ts
 next-env.d.ts
 
 packages/shared/dist
+packages/resume-renderer/dist
