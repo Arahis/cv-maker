@@ -17,6 +17,7 @@ import { useResumeEditorController } from "../useResumeEditorController";
 import { defaultFormValues } from "@/lib/formDefaults";
 import { useResumePersistenceController } from "../useResumePersistenceController";
 import useAvatar from "../store/hooks/useAvatar";
+import { generateAccountResumePdf } from "@/api/pdf";
 
 const useResumeForm = () =>
   useForm({
@@ -26,36 +27,16 @@ const useResumeForm = () =>
     defaultValues: defaultFormValues(),
   });
 
-// TODO: Migrate to the new PDF generation API and uncomment this function
-// const downloadPdf = async (html: string) => {
-//   try {
-//     const res = await fetch("/api/pdf", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ html }),
-//     });
+const downloadPdf = async (resumeId: string, html: string) => {
+  const blob = await generateAccountResumePdf({ resumeId, html });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-//     if (!res.ok) {
-//       const text = await res.text();
-//       console.error("PDF request failed:", res.status, text);
-//       return;
-//     }
-
-//     const blob = await res.blob();
-//     const url = URL.createObjectURL(blob);
-
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "resume.pdf";
-//     a.click();
-
-//     URL.revokeObjectURL(url);
-//   } catch (e) {
-//     console.error("Failed to download PDF", e);
-//   }
-// };
+  link.href = url;
+  link.download = "resume.pdf";
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 const ResumeApp = ({ resumeId }: { resumeId: string | null }) => {
   if (!resumeId) return notFound();
@@ -110,14 +91,25 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
     const device = isDesktopLike() ? "web" : "touch";
     trackEvent("print_click", { device, var: resumeTemplate });
 
-    // TODO: Uncomment this line when migrating to the new PDF generation API
-    // const html = contentRef.current?.outerHTML;
+    if (source === "account") {
+      const contentHtml = contentRef.current?.outerHTML;
 
-    // if (!html) {
-    //   console.error("print root not found");
-    //   return;
-    // }
-    // await downloadPdf(html);
+      if (!contentHtml) {
+        console.error("print root not found");
+        return;
+      }
+
+      // Keep the same next/font classes and CSS variables as the browser.
+      const html = `<div class="${document.body.className}" style="text-rendering: geometricPrecision;">${contentHtml}</div>`;
+
+      try {
+        await downloadPdf(resumeId, html);
+      } catch (error) {
+        console.error("Failed to generate PDF", error);
+      }
+
+      return;
+    }
 
     if (isDesktopLike()) {
       reactToPrintFn();

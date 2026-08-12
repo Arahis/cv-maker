@@ -1,169 +1,18 @@
 @import "tailwindcss";
-
-@layer base {
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-Thin.woff2") format("woff2");
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-ThinItalic.woff2") format("woff2");
-    font-weight: 100;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-Light.woff2") format("woff2");
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-LightItalic.woff2") format("woff2");
-    font-weight: 300;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/ttf/Inter_Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-style: normal;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-Italic.woff2") format("woff2");
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-Medium.woff2") format("woff2");
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-MediumItalic.woff2") format("woff2");
-    font-weight: 500;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-SemiBold.woff2") format("woff2");
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-SemiBoldItalic.woff2") format("woff2");
-    font-weight: 600;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-Bold.woff2") format("woff2");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-BoldItalic.woff2") format("woff2");
-    font-weight: 700;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-ExtraBold.woff2") format("woff2");
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-ExtraBoldItalic.woff2") format("woff2");
-    font-weight: 800;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/Inter-Black.woff2") format("woff2");
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/inter/italic/Inter-BlackItalic.woff2") format("woff2");
-    font-weight: 900;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Outfit";
-    src: url("/fonts/outfit/Outfit-Regular.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Outfit";
-    src: url("/fonts/outfit/Outfit-Bold.woff2") format("woff2");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Cantata";
-    src: url("/fonts/cantata/Cantata_One_Regular.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-}
+@import "../app/(editor)/components/ResumePreview/PaiginatorNew/utils/pagination.css";
+@import "../app/(print)/print.css";
 
 @layer utilities {
   .font-inter {
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   }
 
   .font-brand {
-    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
   }
 
   .font-cantata {
-    font-family: "Cantata", serif;
+    font-family: Cantata, serif;
   }
 }
 

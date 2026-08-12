@@ -5,6 +5,17 @@ import path from "path";
 initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
+  webpack(config) {
+    config.resolve.alias["@cv-maker/resume-renderer$"] = path.resolve(
+      __dirname,
+      "../../packages/resume-renderer/dist/index.js",
+    );
+    config.resolve.alias["@cv-maker/resume-renderer/pagination.css"] = path.resolve(
+      __dirname,
+      "../../packages/resume-renderer/src/pagination/pagination.css",
+    );
+    return config;
+  },
   allowedDevOrigins: ["boastful-shudder-diligent.ngrok-free.dev"],
   turbopack: {
     // Monorepo root so Turbopack can resolve hoisted deps
@@ -32,6 +43,10 @@ const nextConfig: NextConfig = {
       {
         source: "/api/anonymous-resumes/:path*",
         destination: "http://localhost:4000/anonymous-resumes/:path*",
+      },
+      {
+        source: "/api/pdf",
+        destination: "http://localhost:4000/pdf",
       },
       {
         source: "/api/pars-resume",
