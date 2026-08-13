@@ -234,7 +234,18 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
     await page.emulateMedia({ media: "print" });
 
     await page.evaluate(async () => {
-      await document.fonts?.ready;
+      const fontRequests = [
+        "400 14px Inter",
+        "500 14px Inter",
+        "600 14px Inter",
+        "700 14px Inter",
+        "900 14px Inter",
+        "400 14px Outfit",
+        "400 14px Cantata",
+      ];
+
+      await Promise.all(fontRequests.map((font) => document.fonts.load(font)));
+      await document.fonts.ready;
       await Promise.all(
         Array.from(document.images).map((image) =>
           image.decode().catch(() => undefined),
