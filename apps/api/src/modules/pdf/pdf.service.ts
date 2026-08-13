@@ -171,6 +171,9 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
+      "--disable-font-subpixel-positioning",
+      "--font-render-hinting=none",
+      "--disable-lcd-text",
       "--disable-dev-shm-usage",
     ],
   });

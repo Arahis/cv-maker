@@ -272,9 +272,10 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    font-kerning: normal;
+    font-variant-ligatures: none !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+    font-kerning: normal !important;
   }
 
   .editor {
