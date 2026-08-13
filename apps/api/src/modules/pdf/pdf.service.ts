@@ -175,12 +175,14 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       "--font-render-hinting=none",
       "--disable-lcd-text",
       "--disable-dev-shm-usage",
+      "--force-color-profile=srgb",
     ],
   });
 
   try {
     const page = await browser.newPage({
       viewport: { width: 1280, height: 720 },
+      deviceScaleFactor: 2,
       locale: "en-US",
     });
 
