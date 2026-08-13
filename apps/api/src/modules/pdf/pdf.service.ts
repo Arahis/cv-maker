@@ -162,7 +162,6 @@ async function applyServerPagination(page: import("playwright").Page) {
       "--editor-height",
       `${geometry.pageHeight * pageNumber + geometry.pageGap * (pageNumber - 1)}px`,
     );
-
   }, geometry);
 }
 
@@ -227,7 +226,7 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
     });
 
     await page.setContent(injectHead(input.html, css), {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle",
       timeout: 60_000,
     });
 

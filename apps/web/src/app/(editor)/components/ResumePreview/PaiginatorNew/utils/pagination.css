@@ -256,6 +256,13 @@
   body {
     margin: 0 !important;
     padding: 0 !important;
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-kerning: normal;
   }
 
   .editor {
