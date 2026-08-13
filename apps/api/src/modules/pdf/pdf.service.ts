@@ -31,6 +31,7 @@ const localFontCss = `
 @font-face { font-family: Inter; src: url("http://pdf.local/fonts/inter/Inter-Black.woff2") format("woff2"); font-weight: 900; font-style: normal; }
 @font-face { font-family: Outfit; src: url("http://pdf.local/fonts/outfit/Outfit_var.woff2") format("woff2"); font-weight: 300 700; font-style: normal; }
 @font-face { font-family: Cantata; src: url("http://pdf.local/fonts/cantata/Cantata_One_Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+html, body, .editor { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 `;
 
 type CreatePdfInput = {
