@@ -47,7 +47,11 @@ function renderServerNode(node: any): string {
     case "linebreak":
       return "<br />";
     case "paragraph":
-      return `<p>${children}</p>`;
+      // Lexical keeps an empty paragraph as a line-sized block in the
+      // browser. Preserve that height in the server-rendered HTML as well;
+      // otherwise an empty paragraph becomes <p></p> and collapses during
+      // PDF layout/pagination.
+      return `<p>${children || "<br />"}</p>`;
     case "list": {
       const isNumbered = node.listType === "number";
       const tag = isNumbered ? "ol" : "ul";
