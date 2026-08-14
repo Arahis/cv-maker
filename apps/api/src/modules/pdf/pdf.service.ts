@@ -148,9 +148,16 @@ async function applyServerPagination(page: import("playwright").Page) {
             ? Math.max(0, boundaryY - flow.top)
             : geometry.pageContentHeight;
 
+        const firstContentChild = Array.from(flow.element.children).find(
+          (child) => !child.hasAttribute("data-server-pagination"),
+        );
+
+        // Keep breaks in page order. Inserting every new break before the
+        // first child reverses the float order and only becomes visible from
+        // the second page onward.
         flow.element.insertBefore(
           createBreak(marginTop),
-          flow.element.firstChild,
+          firstContentChild ?? null,
         );
         previousFlowBreaks.set(flow.element, flowBreakCount + 1);
       }
