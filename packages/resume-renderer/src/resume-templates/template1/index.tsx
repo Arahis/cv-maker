@@ -14,7 +14,7 @@ export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
         pagePaddingX={40}
         revision={data}
         ref={ref}
-        className="template1"
+        id="template1"
       >
         <HeaderSection data={data} photo={photo} />
         <FullWidthRegion>

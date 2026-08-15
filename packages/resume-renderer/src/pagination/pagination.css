@@ -81,8 +81,8 @@
 
 .column {
   /*
-   * Каждый column —
-   * отдельный float flow.
+   * Every column —
+   * is a separate float flow.
    */
   display: block;
   text-align: left;

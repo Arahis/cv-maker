@@ -1,5 +1,4 @@
 import React from "react";
-import { Paginate } from "../../Paginate";
 
 type SectionProps<T> = {
   title: string;
@@ -19,13 +18,13 @@ const SectionItem = <T,>({
   }
 
   return (
-    <Paginate.Section className={className}>
+    <div className={className}>
       <p className="mb-6 text-[16px] font-bold text-gray-500">{title}</p>
 
       {items.map((item, idx) => (
         <React.Fragment key={idx}>{renderItem(item, idx)}</React.Fragment>
       ))}
-    </Paginate.Section>
+    </div>
   );
 };
 

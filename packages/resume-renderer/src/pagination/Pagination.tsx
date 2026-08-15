@@ -146,12 +146,16 @@ export function ColumnsRegion({
   leftColumn,
   rightColumn,
   className,
+  rightColumnClassName,
+  leftColumnClassName,
   gap = 24,
   columnRatio = { left: 35, right: 100 },
 }: {
   leftColumn: ReactNode;
   rightColumn: ReactNode;
   className?: string;
+  rightColumnClassName?: string;
+  leftColumnClassName?: string;
   gap?: number;
   columnRatio?: { left: number; right: number };
 }) {
@@ -165,11 +169,15 @@ export function ColumnsRegion({
       }}
     >
       <PaginationFlow className="column">
-        <div className="column-content">{leftColumn}</div>
+        <div className={cn("column-content", leftColumnClassName)}>
+          {leftColumn}
+        </div>
       </PaginationFlow>
 
-      <PaginationFlow className="column">
-        <div className="column-content">{rightColumn}</div>
+      <PaginationFlow className="column h-full">
+        <div className={cn("column-content", rightColumnClassName)}>
+          {rightColumn}
+        </div>
       </PaginationFlow>
     </div>
   );

@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  JSX,
   ReactNode,
   useCallback,
   useLayoutEffect,
@@ -36,7 +37,7 @@ const PaginationDocument = forwardRef<
     headerFooterHeight?: number;
     pageGap?: number;
     className?: string;
-  }
+  } & Omit<JSX.IntrinsicElements["div"], "children">
 >(
   (
     {
@@ -46,6 +47,7 @@ const PaginationDocument = forwardRef<
       headerFooterHeight,
       pageGap,
       className,
+      id,
     },
     contentRefForPrint,
   ) => {
@@ -232,10 +234,10 @@ const PaginationDocument = forwardRef<
 
     return (
       <PaginationContext.Provider value={{ breaks, geometry }}>
-        <div className={className}>
+        <div className={className} id={id}>
           <div
             ref={setEditorRef}
-            className={`editor ${className ?? ""}`}
+            className="editor"
             style={
               {
                 "--page-width": `${PAGE_WIDTH}px`,
