@@ -10,7 +10,7 @@ const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   if (!hasDescription) return;
 
   return (
-    <div className="py-8" datatype="main-summary">
+    <div className="pt-4 pb-10 text-sm" datatype="main-summary">
       <TextReader value={summary} />
     </div>
   );

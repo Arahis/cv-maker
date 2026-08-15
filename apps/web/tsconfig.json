@@ -28,13 +28,16 @@
         "./src/*"
       ],
       "@cv-maker/resume-renderer": [
-        "../../packages/resume-renderer/dist/index.js"
+        "../../packages/resume-renderer/src/index.ts"
       ],
       "@cv-maker/resume-renderer/pagination.css": [
         "../../packages/resume-renderer/src/pagination/pagination.css"
       ],
+      "@cv-maker/resume-renderer/renderer.css": [
+        "../../packages/resume-renderer/src/renderer.css"
+      ],
       "@cv-maker/resume-renderer/*": [
-        "../../packages/resume-renderer/dist/*"
+        "../../packages/resume-renderer/src/*"
       ]
     }
   },

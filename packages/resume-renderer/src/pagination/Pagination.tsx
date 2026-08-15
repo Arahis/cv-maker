@@ -13,6 +13,7 @@ import {
   getPageContentHeight,
   getPageStride,
 } from "./geometry.js";
+import { cn } from "../lib/cn.js";
 
 export {
   EPSILON,
@@ -144,12 +145,25 @@ export function FullWidthRegion({ children }: { children: ReactNode }) {
 export function ColumnsRegion({
   leftColumn,
   rightColumn,
+  className,
+  gap = 24,
+  columnRatio = { left: 35, right: 100 },
 }: {
   leftColumn: ReactNode;
   rightColumn: ReactNode;
+  className?: string;
+  gap?: number;
+  columnRatio?: { left: number; right: number };
 }) {
   return (
-    <div className="columns-region">
+    <div
+      className={cn("columns-region", className)}
+      style={{
+        columnGap: `${gap}px`,
+        gridTemplateColumns: `minmax(0, ${columnRatio.left}fr)
+    minmax(0, ${columnRatio.right}fr)`,
+      }}
+    >
       <PaginationFlow className="column">
         <div className="column-content">{leftColumn}</div>
       </PaginationFlow>

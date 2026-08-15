@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./src/pagination/pagination.css";
+@import "./src/renderer.css";
 
 @source "./src/**/*.{ts,tsx}";
 

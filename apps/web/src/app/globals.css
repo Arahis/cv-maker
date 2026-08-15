@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* to generate tailwind CSS only in one place from both workspaces */
+@source "../../../../packages/resume-renderer/src/**/*.{ts,tsx}";
 
 @font-face {
   font-family: Inter;

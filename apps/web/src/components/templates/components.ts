@@ -1,4 +1,4 @@
-import "@cv-maker/resume-renderer/pagination.css";
+import "@cv-maker/resume-renderer/renderer.css";
 import { ResumeTemplate2 } from "@/app/(editor)/components/ResumePreview/resume-templates/template2";
 import { ResumeTemplate3 } from "@/app/(editor)/components/ResumePreview/resume-templates/template3";
 import { ResumeTemplate4 } from "@/app/(editor)/components/ResumePreview/resume-templates/template4";

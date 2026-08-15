@@ -11,11 +11,11 @@ const HeaderSection = ({
 }) => {
   return (
     <ColumnsRegion
-      // className="mb-4 gap-8"
+      gap={24}
       leftColumn={
         photo && (
           <div
-            className="-mt-8 h-60 w-[30%] shrink-0 bg-gray-50 bg-cover bg-center"
+            className=" w-40 h-40 shrink-0 bg-gray-50 bg-cover bg-center"
             style={{
               backgroundImage: photo ? `url(${photo})` : undefined,
             }}
@@ -24,16 +24,16 @@ const HeaderSection = ({
       }
       rightColumn={
         <div className="w-full">
-          <div className="border-b border-gray-300 py-6 text-left">
+          <div className="border-b border-gray-300  text-left">
             {/* <Paginate.Text className="text-3xl">Hello I&apos;m</Paginate.Text> */}
-            <p className="mb-2 text-4xl font-bold">
+            <p className="text-4xl font-bold mb-1">
               {`${data.firstName || "First"} ${data.lastName || "Last"}`}
             </p>
-            <p className="text-xl font-semibold">
+            <p className="text-xl font-semibold mb-4">
               {data.jobTitle || "Profession"}
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-2 text-sm">
             {(data.city || data.country) && (
               <div className="mb-1 flex items-center gap-2">
                 <Icon name="location" size={16} />
