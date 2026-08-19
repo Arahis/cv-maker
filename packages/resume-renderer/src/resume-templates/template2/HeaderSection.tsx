@@ -2,6 +2,7 @@ import { ResumeForm } from "@cv-maker/shared";
 import { EMPTY_LEXICAL_STATE } from "../../empty-lexical-state.js";
 import { ColumnsRegion } from "../../pagination/Pagination.js";
 import { createTextReader, TextReader } from "../../text-reader.js";
+import { useFitContentWidth } from "../hooks/useFitContentWidth.js";
 
 const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   const summary = data || EMPTY_LEXICAL_STATE;
@@ -11,23 +12,53 @@ const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   return <TextReader value={summary} />;
 };
 
+const NameAndPosition = ({
+  firstName,
+  lastName,
+}: {
+  firstName?: string;
+  lastName?: string;
+}) => {
+  return (
+    <p className="text-2xl font-bold text-balance">
+      {`${firstName || "First"} ${lastName || "Last"}`}
+    </p>
+  );
+};
+
 const HeaderSection = ({ data }: { data: ResumeForm }) => {
+  const { ref: leftContentRef, width: leftWidth } =
+    useFitContentWidth<HTMLDivElement>();
+
   return (
     <ColumnsRegion
-      columnRatio={{ left: 70, right: 30 }}
-      className="mb-8 border-b border-gray-500 pb-8"
+      gridTemplateColumns="minmax(0, 70fr) minmax(0, 30fr)"
+      className="border-b border-gray-500 pb-8"
       leftColumn={
-        <div className="flex-1 text-sm">
-          <div className="mb-4 flex">
-            <p className="pr-6 text-2xl font-bold">
-              {`${data.firstName || "First"} ${data.lastName || "Last"}`}
-            </p>
-            <div className="border-l-4 border-gray-500 pl-6">
-              <p className="text-2xl font-bold text-gray-500">
-                {data.jobTitle || "Profession"}
-              </p>
-            </div>
-          </div>
+        <div className="text-sm">
+          <ColumnsRegion
+            gridTemplateColumns={
+              leftWidth === null
+                ? "fit-content(40%) minmax(0, 1fr)"
+                : `min(${leftWidth}px, 40%) minmax(0, 1fr)`
+            }
+            className="nested-columns-region mb-4"
+            leftColumn={
+              <div ref={leftContentRef}>
+                <NameAndPosition
+                  firstName={data.firstName}
+                  lastName={data.lastName}
+                />
+              </div>
+            }
+            rightColumn={
+              <div className="border-l-4 border-gray-500 pl-6 h-full">
+                <p className="text-2xl font-bold text-gray-500">
+                  {data.jobTitle || "Profession"}
+                </p>
+              </div>
+            }
+          />
           <div>
             <Summary data={data.summary} />
           </div>

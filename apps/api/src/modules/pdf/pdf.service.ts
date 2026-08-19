@@ -105,7 +105,16 @@ async function applyServerPagination(page: import("playwright").Page) {
       flows.filter(
         (flow) =>
           !flows.some(
-            (other) => other !== flow && flow.element.contains(other.element),
+            (other) =>
+              other !== flow &&
+              flow.element.contains(other.element) &&
+              !flow.element.hasAttribute("data-pagination-keep-together"),
+          ) &&
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              other.element.hasAttribute("data-pagination-keep-together") &&
+              other.element.contains(flow.element),
           ),
       );
 
@@ -118,7 +127,7 @@ async function applyServerPagination(page: import("playwright").Page) {
     };
 
     let pageNumber = 1;
-    let previousFlowBreaks = new WeakMap<HTMLElement, number>();
+    const previousFlowBreaks = new WeakMap<HTMLElement, number>();
 
     for (let guard = 0; guard < 100; guard += 1) {
       const editorRect = editor.getBoundingClientRect();
@@ -139,9 +148,56 @@ async function applyServerPagination(page: import("playwright").Page) {
         ),
       );
 
-      if (activeFlows.length === 0) break;
+      const nestedBreakFlows: ReturnType<typeof getFlows> = [];
+      const nestedRegions = Array.from(
+        documentFlow.querySelectorAll<HTMLElement>(".nested-columns-region"),
+      );
 
-      for (const flow of activeFlows) {
+      // Keep nested column flows in sync with the browser paginator. This is
+      // needed by template2, where each work item has its own two-column
+      // header inside the main columns region.
+      for (const nestedRegion of nestedRegions) {
+        const nestedTop = nestedRegion.getBoundingClientRect().top - editorRect.top;
+        const nestedBottom = nestedRegion.getBoundingClientRect().bottom - editorRect.top;
+        const crossesBoundary =
+          nestedTop < boundaryY + geometry.pageBreakHeight - geometry.epsilon &&
+          nestedBottom > boundaryY + geometry.epsilon;
+
+        if (!crossesBoundary) continue;
+
+        const parentFlow = nestedRegion.parentElement?.closest<HTMLElement>(
+          "[data-pagination-flow]",
+        );
+        if (!parentFlow) continue;
+        const isInsideKeepTogether =
+          nestedRegion.closest("[data-pagination-keep-together]") !== null;
+        if (isInsideKeepTogether) continue;
+
+        const childFlows = Array.from(
+          nestedRegion.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
+        );
+        for (const element of childFlows) {
+          const rect = element.getBoundingClientRect();
+          nestedBreakFlows.push({
+            element,
+            top: rect.top - editorRect.top,
+            bottom: rect.bottom - editorRect.top,
+          });
+        }
+      }
+
+      const targetFlows = [
+        ...activeFlows,
+        ...nestedBreakFlows,
+      ].filter(
+        (flow, index, flows) =>
+          flows.findIndex((candidate) => candidate.element === flow.element) ===
+          index,
+      );
+
+      if (targetFlows.length === 0) break;
+
+      for (const flow of targetFlows) {
         const flowBreakCount = previousFlowBreaks.get(flow.element) ?? 0;
         const marginTop =
           flowBreakCount === 0

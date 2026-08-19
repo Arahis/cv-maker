@@ -90,6 +90,10 @@
   min-width: 0;
 }
 
+.column-content {
+  height: 100%;
+}
+
 /* ========================================================
    PAGINATION WIDGET
    ======================================================== */
@@ -133,12 +137,16 @@
 .flow-breaker {
   position: relative;
 
+  z-index: 3;
+
   float: left;
   clear: both;
 
   width: 100%;
 
   height: var(--page-break-height);
+
+  background: transparent;
 
   pointer-events: none;
 }
@@ -152,7 +160,7 @@
 
   inset: 0;
 
-  z-index: 2;
+  z-index: 4;
 
   pointer-events: none;
 }

@@ -2,10 +2,11 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { resumeSchema, type ResumeForm } from "@cv-maker/shared";
 import { ResumeTemplate1 } from "./resume-templates/template1/index.js";
+import { ResumeTemplate2 } from "./resume-templates/template2/index.js";
 
 const resumeTemplates = {
   template1: ResumeTemplate1,
-  // template2: ResumeTemplate2,
+  template2: ResumeTemplate2,
 } as const;
 
 export function renderResumeTemplate({
