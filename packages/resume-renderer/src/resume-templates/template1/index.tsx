@@ -12,7 +12,7 @@ export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
     return (
       <PaginationDocument
         pagePaddingX={40}
-        revision={data}
+        revision={JSON.stringify(data)}
         ref={ref}
         id="template1"
       >

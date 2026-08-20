@@ -43,6 +43,7 @@ export type FlowBreak = {
   pageNumber: number;
   flowId: string;
   marginTop: number;
+  flowTop: number;
 };
 
 /* =========================================================

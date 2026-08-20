@@ -164,12 +164,54 @@ const PaginationDocument = forwardRef<
 
       const editorRect = editor.getBoundingClientRect();
 
-      const documentRect = documentFlow.getBoundingClientRect();
+      const flowTops = new Map(
+        Array.from(
+          documentFlow.querySelectorAll<HTMLElement>(
+            "[data-pagination-flow]",
+          ),
+        ).map((flow) => [
+          flow.dataset.paginationFlow!,
+          flow.getBoundingClientRect().top - editorRect.top,
+        ]),
+      );
 
-      /*
-       * Measure the whole doc layout
-       */
-      const layoutBottom = documentRect.bottom - editorRect.top;
+      const hasStaleBreak = breaks.some((pageBreak) => {
+        const currentTop = flowTops.get(pageBreak.flowId);
+        return (
+          currentTop === undefined ||
+          Math.abs(currentTop - pageBreak.flowTop) > EPSILON
+        );
+      });
+
+      if (hasStaleBreak) {
+        setBreaks([]);
+        return;
+      }
+
+      const textWalker = document.createTreeWalker(
+        documentFlow,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) =>
+            node.parentElement?.closest(".pagination-widget")
+              ? NodeFilter.FILTER_REJECT
+              : NodeFilter.FILTER_ACCEPT,
+        },
+      );
+      let layoutBottom = 0;
+      let textNode = textWalker.nextNode();
+
+      while (textNode) {
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        for (const rect of range.getClientRects()) {
+          layoutBottom = Math.max(
+            layoutBottom,
+            rect.bottom - editorRect.top,
+          );
+        }
+        textNode = textWalker.nextNode();
+      }
 
       const currentPageBottom = getGeometryPageContentBottom(
         pageCount,
@@ -278,6 +320,7 @@ const PaginationDocument = forwardRef<
             pageNumber: pageCount,
             flowId: flow.id,
             marginTop,
+            flowTop: flow.top,
           });
           changed = true;
         }
@@ -319,17 +362,30 @@ const PaginationDocument = forwardRef<
      * Every new breaker changes browser layout.
      */
     useLayoutEffect(() => {
+      let frameId: number | undefined;
+
       if (previousRevisionRef.current !== revision) {
         previousRevisionRef.current = revision;
 
         if (breaks.length > 0) {
           setBreaks([]);
-          return;
+        } else {
+          reconcilePagination();
         }
+      } else {
+        reconcilePagination();
       }
 
-      reconcilePagination();
-    }, [revision, breaks.length, reconcilePagination]);
+      frameId = window.requestAnimationFrame(() => {
+        reconcilePagination();
+      });
+
+      return () => {
+        if (frameId !== undefined) {
+          window.cancelAnimationFrame(frameId);
+        }
+      };
+    }, [revision, breaks, reconcilePagination]);
 
     // handleInput when block is editable in preview
     const handleInput = useCallback(() => {

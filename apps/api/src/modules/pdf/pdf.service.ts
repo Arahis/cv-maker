@@ -11,6 +11,7 @@ import {
   getPageContentHeight,
   getPageStride,
   DEFAULT_PAGINATION_GEOMETRY,
+  PAGE_GAP,
 } from "@cv-maker/resume-renderer";
 
 const apiRoot = path.resolve(
@@ -59,7 +60,7 @@ async function applyServerPagination(page: import("playwright").Page) {
     scope.__name ??= (value) => value;
   });
 
-  const pageGap = 0;
+  const pageGap = PAGE_GAP;
   const geometry = {
     ...DEFAULT_PAGINATION_GEOMETRY,
     pageHeight: PAGE_HEIGHT,
@@ -131,8 +132,30 @@ async function applyServerPagination(page: import("playwright").Page) {
 
     for (let guard = 0; guard < 100; guard += 1) {
       const editorRect = editor.getBoundingClientRect();
-      const documentRect = documentFlow.getBoundingClientRect();
-      const layoutBottom = documentRect.bottom - editorRect.top;
+      const textWalker = document.createTreeWalker(
+        documentFlow,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) =>
+            node.parentElement?.closest(".pagination-widget")
+              ? NodeFilter.FILTER_REJECT
+              : NodeFilter.FILTER_ACCEPT,
+        },
+      );
+      let layoutBottom = 0;
+      let textNode = textWalker.nextNode();
+
+      while (textNode) {
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        for (const rect of range.getClientRects()) {
+          layoutBottom = Math.max(
+            layoutBottom,
+            rect.bottom - editorRect.top,
+          );
+        }
+        textNode = textWalker.nextNode();
+      }
       const boundaryY =
         (pageNumber - 1) * geometry.pageStride +
         geometry.pageHeight -
@@ -228,6 +251,67 @@ async function applyServerPagination(page: import("playwright").Page) {
   }, geometry);
 }
 
+async function applyServerContentWidths(page: import("playwright").Page) {
+  await page.evaluate(() => {
+    const scope = globalThis as typeof globalThis & {
+      __name?: (value: unknown, name: string) => unknown;
+    };
+
+    scope.__name ??= (value) => value;
+  });
+
+  await page.evaluate(() => {
+    const regions = document.querySelectorAll<HTMLElement>(
+      ".nested-columns-region",
+    );
+
+    for (const region of regions) {
+      const leftContent = region.querySelector<HTMLElement>(
+        ":scope > .column:first-child .column-content",
+      );
+
+      if (!leftContent) continue;
+
+      const regionRect = region.getBoundingClientRect();
+      const leftRect = leftContent.getBoundingClientRect();
+      let maxRight = leftRect.left;
+      const walker = document.createTreeWalker(
+        leftContent,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) =>
+            node.textContent?.trim()
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT,
+        },
+      );
+      let node = walker.nextNode();
+
+      while (node) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+
+        for (const rect of range.getClientRects()) {
+          if (rect.width > 0 && rect.height > 0) {
+            maxRight = Math.max(maxRight, rect.right);
+          }
+        }
+
+        node = walker.nextNode();
+      }
+
+      const width = Math.ceil(maxRight - leftRect.left);
+      if (width <= 0) continue;
+
+      const isHeaderRegion = region.style.gridTemplateColumns.includes("40%");
+
+      region.style.gridTemplateColumns = isHeaderRegion
+        ? `min(${width}px, 40%) minmax(0, 1fr)`
+        : `${Math.min(width, regionRect.width * 0.5)}px minmax(0, 1fr)`;
+    }
+  });
+}
+
 export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
   const css = await readFile(rendererCssPath, "utf8");
   const browser = await chromium.launch({
@@ -287,12 +371,6 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       }
     });
 
-    page.on("response", (response) => {
-      if (/\.css(?:\?|$)|\.(?:woff2?|ttf|otf)(?:\?|$)/i.test(response.url())) {
-        console.info("PDF asset response", response.status(), response.url());
-      }
-    });
-
     await page.setContent(injectHead(input.html, css), {
       waitUntil: "networkidle",
       timeout: 60_000,
@@ -321,23 +399,10 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       );
     });
 
+    await applyServerContentWidths(page);
     await applyServerPagination(page);
 
-    console.info(
-      "PDF fonts",
-      await page.evaluate(() => ({
-        status: document.fonts.status,
-        inter: document.fonts.check("500 14px Inter"),
-        loaded: Array.from(document.fonts).map((font) => ({
-          family: font.family,
-          weight: font.weight,
-          status: font.status,
-        })),
-      })),
-    );
-
     await page.waitForTimeout(200);
-
     return Buffer.from(
       await page.pdf({
         format: "A4",

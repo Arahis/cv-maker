@@ -108,6 +108,11 @@
   overflow: visible;
 }
 
+/* KeepTogether must contain its float-based page breaker. */
+.keep-together {
+  display: flow-root;
+}
+
 .page-break {
   display: block;
 
@@ -222,6 +227,12 @@
   margin-bottom: 1em;
   margin-left: 1.5em;
   list-style-type: disc;
+}
+
+/* Keep list spacing inside JobSection consistent with KeepTogether padding. */
+.keep-together .editor-list-ul:last-child,
+.keep-together .editor-list-ol:last-child {
+  margin-bottom: 0;
 }
 
 @page {

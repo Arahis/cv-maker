@@ -7,6 +7,7 @@ export { default as PaginationDocument } from "./pagination/PaginationDocument.j
 export {
   ColumnsRegion,
   FullWidthRegion,
+  PAGE_GAP,
   PaginationContext,
 } from "./pagination/Pagination.js";
 export * from "./pagination/geometry.js";

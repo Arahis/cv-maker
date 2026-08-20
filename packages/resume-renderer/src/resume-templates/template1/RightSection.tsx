@@ -5,7 +5,11 @@ import { TextReader } from "../../text-reader.js";
 import type { ResumeForm } from "@cv-maker/shared";
 import { EMPTY_LEXICAL_STATE } from "../../empty-lexical-state.js";
 import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
-import { ColumnsRegion, FullWidthRegion } from "../../pagination/Pagination.js";
+import {
+  ColumnsRegion,
+  FullWidthRegion,
+  NestedColumnsRegion,
+} from "../../pagination/Pagination.js";
 
 // TODO add proper type for item so it could see item fields
 export function JobSection({
@@ -23,7 +27,7 @@ export function JobSection({
     isFullDate,
   } = item;
   return (
-    <ColumnsRegion
+    <NestedColumnsRegion
       leftColumn={
         <div className="text-sm">
           <p className="font-semibold uppercase mb-2">{position}</p>
@@ -50,14 +54,12 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
 
   return (
     <div className="right-section" datatype="cv_info-right-section">
-      <FullWidthRegion>
-        <SectionItem
-          title={"Job Experience"}
-          items={data.workExperiences || []}
-          renderItem={(item) => <JobSection item={item} />}
-          itemsContainerClassName="space-y-6"
-        />
-      </FullWidthRegion>
+      <SectionItem
+        title={"Job Experience"}
+        items={data.workExperiences || []}
+        renderItem={(item) => <JobSection item={item} />}
+        itemsContainerClassName="space-y-6"
+      />
     </div>
   );
 };
