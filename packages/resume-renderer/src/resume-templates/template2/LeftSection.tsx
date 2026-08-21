@@ -28,7 +28,7 @@ export function JobSection({
   const { ref: leftContentRef, width: leftWidth } =
     useFitContentWidth<HTMLDivElement>();
   return (
-    <KeepTogether className="not-last:pb-4">
+    <KeepTogether className="not-last:pb-6">
       <div>
         <NestedColumnsRegion
           className="mb-1 items-start"
