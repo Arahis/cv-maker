@@ -82,7 +82,7 @@ white
 Example: setting a color for a nested region:
 
 ```tsx
-<NestedColumnsRegion
+<ColumnsRegion
   breakBackground="#f3f4f6"
   leftColumn={<Company />}
   rightColumn={<Position />}
@@ -100,22 +100,6 @@ Different colors for each flow:
 />
 ```
 
-### `NestedColumnsRegion`
-
-A wrapper around `ColumnsRegion` for columns placed inside an existing column. It automatically adds the `nested-columns-region w-full` classes.
-
-```tsx
-<NestedColumnsRegion
-  className="items-start"
-  divider
-  breakBackground="#f3f4f6"
-  leftColumn={<Company />}
-  rightColumn={<Position />}
-/>
-```
-
-A nested region retains two child flows of its own. As a result, breaks may appear inside the nested region's child flows independently of the parent flow.
-
 ### `KeepTogether`
 
 `KeepTogether` wraps a logical block in its own pagination flow and keeps the
@@ -128,7 +112,7 @@ Use it around the complete logical item, including its heading and body:
 ```tsx
 <KeepTogether className="not-last:pb-8">
   <div>
-    <NestedColumnsRegion
+    <ColumnsRegion
       leftColumn={<Company />}
       rightColumn={<Position />}
     />
@@ -191,8 +175,7 @@ Important: `h-full` stretches relative to the grid row height. If a `flow-breake
 - `clear: both` affects float placement but does not remove the `flow-breaker` height from grid geometry.
 - `h-full` inside a region may stretch to the height of a row that includes a break.
 - Avoid adding `margin-top`, `padding-top`, or spacer hacks without checking layout geometry; they may change the next page boundary.
-- Use `NestedColumnsRegion` for nested regions instead of copying its classes manually.
-- To change the break color for a specific region, use `breakBackground` on `ColumnsRegion` or `NestedColumnsRegion` instead of globally overriding `.flow-breaker` in CSS.
+- To change the break color for a specific region, use `breakBackground` on `ColumnsRegion` instead of globally overriding `.flow-breaker` in CSS.
 
 ## Verifying changes
 

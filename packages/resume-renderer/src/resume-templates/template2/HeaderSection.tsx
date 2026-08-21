@@ -42,7 +42,7 @@ const HeaderSection = ({ data }: { data: ResumeForm }) => {
                 ? "fit-content(40%) minmax(0, 1fr)"
                 : `min(${leftWidth}px, 40%) minmax(0, 1fr)`
             }
-            className="nested-columns-region mb-4"
+            className="mb-4"
             leftColumn={
               <div ref={leftContentRef}>
                 <NameAndPosition

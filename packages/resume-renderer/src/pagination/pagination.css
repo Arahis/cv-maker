@@ -74,6 +74,8 @@
 .columns-region {
   display: grid;
 
+  width: 100%;
+
   align-items: start;
 
   min-width: 0;
@@ -111,6 +113,7 @@
 /* KeepTogether must contain its float-based page breaker. */
 .keep-together {
   display: flow-root;
+  width: 100%;
 }
 
 .page-break {

@@ -243,18 +243,6 @@ export function ColumnsRegion({
   );
 }
 
-export function NestedColumnsRegion({
-  className,
-  ...props
-}: ColumnsRegionProps) {
-  return (
-    <ColumnsRegion
-      {...props}
-      className={cn("nested-columns-region w-full", className)}
-    />
-  );
-}
-
 /* =========================================================
    VISUAL PAGINATION
    ========================================================= */

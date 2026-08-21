@@ -223,74 +223,8 @@ const PaginationDocument = forwardRef<
       }
 
       const boundaryY = currentPageBottom;
-      const breakZoneBottom =
-        boundaryY + getPageBreakHeight(geometry);
-
       const activeFlows = findFlowsForBoundary(boundaryY);
-
-      const nestedBreakFlows: FlowGeometry[] = [];
-      const nestedChildParentIds = new Map<string, string>();
-      const nestedChildInBreakZone = new Map<string, boolean>();
-
-      for (const nestedRegion of documentFlow.querySelectorAll<HTMLElement>(
-        ".nested-columns-region",
-      )) {
-        const nestedRect = nestedRegion.getBoundingClientRect();
-        const nestedTop = nestedRect.top - editorRect.top;
-        const nestedBottom = nestedRect.bottom - editorRect.top;
-        const childFlows = Array.from(
-          nestedRegion.querySelectorAll<HTMLElement>(
-            "[data-pagination-flow]",
-          ),
-        );
-        const parentFlow = nestedRegion.parentElement?.closest<HTMLElement>(
-          "[data-pagination-flow]",
-        );
-        const crossesBoundary =
-          nestedTop < breakZoneBottom - EPSILON &&
-          nestedBottom > boundaryY + EPSILON;
-        if (parentFlow) {
-          const parentFlowId = parentFlow.dataset.paginationFlow!;
-
-          for (const element of childFlows) {
-            const childFlowId = element.dataset.paginationFlow!;
-
-            nestedChildParentIds.set(childFlowId, parentFlowId);
-            nestedChildInBreakZone.set(childFlowId, crossesBoundary);
-          }
-        }
-
-        if (!crossesBoundary) {
-          continue;
-        }
-
-        const isInsideKeepTogether =
-          nestedRegion.closest("[data-pagination-keep-together]") !== null;
-
-        if (parentFlow && !isInsideKeepTogether) {
-          for (const element of childFlows) {
-            const rect = element.getBoundingClientRect();
-            const childFlowId = element.dataset.paginationFlow!;
-
-            nestedBreakFlows.push({
-              element,
-              id: childFlowId,
-              top: rect.top - editorRect.top,
-              bottom: rect.bottom - editorRect.top,
-            });
-          }
-        }
-      }
-
-      const targetFlows = [
-        ...activeFlows,
-        ...nestedBreakFlows,
-      ].filter(
-        (flow, index, flows) =>
-          flows.findIndex((candidate) => candidate.id === flow.id) === index,
-      );
-
-      if (!targetFlows.length) {
+      if (!activeFlows.length) {
         return;
       }
 
@@ -298,7 +232,7 @@ const PaginationDocument = forwardRef<
         const next = [...current];
         let changed = false;
 
-        for (const flow of targetFlows) {
+        for (const flow of activeFlows) {
           const alreadyExists = next.some(
             (pageBreak) =>
               pageBreak.flowId === flow.id &&
@@ -323,35 +257,6 @@ const PaginationDocument = forwardRef<
             flowTop: flow.top,
           });
           changed = true;
-        }
-
-        const cleaned = next.filter((pageBreak) => {
-          const parentFlowId = nestedChildParentIds.get(pageBreak.flowId);
-
-          if (!parentFlowId) {
-            return true;
-          }
-
-          const parentBreakExists = next.some(
-            (parentBreak) =>
-              parentBreak.flowId === parentFlowId &&
-              parentBreak.pageNumber === pageBreak.pageNumber,
-          );
-
-          // A nested region can temporarily straddle the parent's break
-          // zone. In that state the child break is still required: removing
-          // it makes the grid reflow above the parent breaker. Clean it only
-          // after the nested region has moved completely below the zone.
-          const nestedRegionIsInBreakZone = nestedChildInBreakZone.get(
-            pageBreak.flowId,
-          );
-
-          return !parentBreakExists || nestedRegionIsInBreakZone === true;
-        });
-
-        if (cleaned.length !== next.length) {
-          changed = true;
-          next.splice(0, next.length, ...cleaned);
         }
 
         return changed ? next : current;

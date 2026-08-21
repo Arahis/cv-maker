@@ -8,7 +8,6 @@ import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
 import {
   ColumnsRegion,
   FullWidthRegion,
-  NestedColumnsRegion,
 } from "../../pagination/Pagination.js";
 
 // TODO add proper type for item so it could see item fields
@@ -27,7 +26,7 @@ export function JobSection({
     isFullDate,
   } = item;
   return (
-    <NestedColumnsRegion
+    <ColumnsRegion
       leftColumn={
         <div className="text-sm">
           <p className="font-semibold uppercase mb-2">{position}</p>

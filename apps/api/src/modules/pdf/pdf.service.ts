@@ -11,7 +11,6 @@ import {
   getPageContentHeight,
   getPageStride,
   DEFAULT_PAGINATION_GEOMETRY,
-  PAGE_GAP,
 } from "@cv-maker/resume-renderer";
 
 const apiRoot = path.resolve(
@@ -60,7 +59,10 @@ async function applyServerPagination(page: import("playwright").Page) {
     scope.__name ??= (value) => value;
   });
 
-  const pageGap = PAGE_GAP;
+  // The PDF page is rendered with `@media print`, where pagination.css
+  // explicitly sets --page-gap to 0. Keep the server geometry in sync with
+  // the actual CSS layout instead of using the screen-preview gap.
+  const pageGap = 0;
   const geometry = {
     ...DEFAULT_PAGINATION_GEOMETRY,
     pageHeight: PAGE_HEIGHT,
@@ -171,56 +173,9 @@ async function applyServerPagination(page: import("playwright").Page) {
         ),
       );
 
-      const nestedBreakFlows: ReturnType<typeof getFlows> = [];
-      const nestedRegions = Array.from(
-        documentFlow.querySelectorAll<HTMLElement>(".nested-columns-region"),
-      );
+      if (activeFlows.length === 0) break;
 
-      // Keep nested column flows in sync with the browser paginator. This is
-      // needed by template2, where each work item has its own two-column
-      // header inside the main columns region.
-      for (const nestedRegion of nestedRegions) {
-        const nestedTop = nestedRegion.getBoundingClientRect().top - editorRect.top;
-        const nestedBottom = nestedRegion.getBoundingClientRect().bottom - editorRect.top;
-        const crossesBoundary =
-          nestedTop < boundaryY + geometry.pageBreakHeight - geometry.epsilon &&
-          nestedBottom > boundaryY + geometry.epsilon;
-
-        if (!crossesBoundary) continue;
-
-        const parentFlow = nestedRegion.parentElement?.closest<HTMLElement>(
-          "[data-pagination-flow]",
-        );
-        if (!parentFlow) continue;
-        const isInsideKeepTogether =
-          nestedRegion.closest("[data-pagination-keep-together]") !== null;
-        if (isInsideKeepTogether) continue;
-
-        const childFlows = Array.from(
-          nestedRegion.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
-        );
-        for (const element of childFlows) {
-          const rect = element.getBoundingClientRect();
-          nestedBreakFlows.push({
-            element,
-            top: rect.top - editorRect.top,
-            bottom: rect.bottom - editorRect.top,
-          });
-        }
-      }
-
-      const targetFlows = [
-        ...activeFlows,
-        ...nestedBreakFlows,
-      ].filter(
-        (flow, index, flows) =>
-          flows.findIndex((candidate) => candidate.element === flow.element) ===
-          index,
-      );
-
-      if (targetFlows.length === 0) break;
-
-      for (const flow of targetFlows) {
+      for (const flow of activeFlows) {
         const flowBreakCount = previousFlowBreaks.get(flow.element) ?? 0;
         const marginTop =
           flowBreakCount === 0
@@ -261,8 +216,12 @@ async function applyServerContentWidths(page: import("playwright").Page) {
   });
 
   await page.evaluate(() => {
-    const regions = document.querySelectorAll<HTMLElement>(
-      ".nested-columns-region",
+    const regions = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        ".columns-region .columns-region",
+      ),
+    ).filter((region) =>
+      region.style.gridTemplateColumns.includes("fit-content"),
     );
 
     for (const region of regions) {
@@ -290,13 +249,11 @@ async function applyServerContentWidths(page: import("playwright").Page) {
       while (node) {
         const range = document.createRange();
         range.selectNodeContents(node);
-
         for (const rect of range.getClientRects()) {
-          if (rect.width > 0 && rect.height > 0) {
+          if (rect.width !== 0 && rect.height !== 0) {
             maxRight = Math.max(maxRight, rect.right);
           }
         }
-
         node = walker.nextNode();
       }
 
@@ -304,7 +261,6 @@ async function applyServerContentWidths(page: import("playwright").Page) {
       if (width <= 0) continue;
 
       const isHeaderRegion = region.style.gridTemplateColumns.includes("40%");
-
       region.style.gridTemplateColumns = isHeaderRegion
         ? `min(${width}px, 40%) minmax(0, 1fr)`
         : `${Math.min(width, regionRect.width * 0.5)}px minmax(0, 1fr)`;

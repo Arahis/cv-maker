@@ -3,10 +3,7 @@ import { formatDate } from "../../utils/formatDate.js";
 import { TextReader } from "../../text-reader.js";
 import SectionItem from "./SectionItem.js";
 import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
-import {
-  KeepTogether,
-  NestedColumnsRegion,
-} from "../../pagination/Pagination.js";
+import { ColumnsRegion, KeepTogether } from "../../pagination/Pagination.js";
 import { useFitContentWidth } from "../hooks/useFitContentWidth.js";
 
 // TODO add proper type for item so it could see item fields
@@ -28,9 +25,9 @@ export function JobSection({
   const { ref: leftContentRef, width: leftWidth } =
     useFitContentWidth<HTMLDivElement>();
   return (
-    <KeepTogether className="not-last:pb-6">
-      <div>
-        <NestedColumnsRegion
+    <div className="not-last:pb-6">
+      <KeepTogether>
+        <ColumnsRegion
           className="mb-1 items-start"
           divider
           gridTemplateColumns={
@@ -53,9 +50,9 @@ export function JobSection({
           )}
           {city && <p className="text-gray-400 italic">{city}</p>}
         </div>
-        <TextReader value={description || ""} />
-      </div>
-    </KeepTogether>
+      </KeepTogether>
+      <TextReader value={description || ""} />
+    </div>
   );
 }
 
