@@ -134,30 +134,8 @@ async function applyServerPagination(page: import("playwright").Page) {
 
     for (let guard = 0; guard < 100; guard += 1) {
       const editorRect = editor.getBoundingClientRect();
-      const textWalker = document.createTreeWalker(
-        documentFlow,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (node) =>
-            node.parentElement?.closest(".pagination-widget")
-              ? NodeFilter.FILTER_REJECT
-              : NodeFilter.FILTER_ACCEPT,
-        },
-      );
-      let layoutBottom = 0;
-      let textNode = textWalker.nextNode();
-
-      while (textNode) {
-        const range = document.createRange();
-        range.selectNodeContents(textNode);
-        for (const rect of range.getClientRects()) {
-          layoutBottom = Math.max(
-            layoutBottom,
-            rect.bottom - editorRect.top,
-          );
-        }
-        textNode = textWalker.nextNode();
-      }
+      const layoutBottom =
+        documentFlow.getBoundingClientRect().bottom - editorRect.top;
       const boundaryY =
         (pageNumber - 1) * geometry.pageStride +
         geometry.pageHeight -
@@ -217,12 +195,16 @@ async function applyServerContentWidths(page: import("playwright").Page) {
 
   await page.evaluate(() => {
     const regions = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        ".columns-region .columns-region",
-      ),
-    ).filter((region) =>
-      region.style.gridTemplateColumns.includes("fit-content"),
-    );
+      document.querySelectorAll<HTMLElement>(".columns-region"),
+    ).filter((region) => {
+      const inlineTemplate = region.style.gridTemplateColumns;
+      const computedTemplate = getComputedStyle(region).gridTemplateColumns;
+
+      return (
+        inlineTemplate.includes("fit-content") ||
+        computedTemplate.includes("fit-content")
+      );
+    });
 
     for (const region of regions) {
       const leftContent = region.querySelector<HTMLElement>(
@@ -231,7 +213,6 @@ async function applyServerContentWidths(page: import("playwright").Page) {
 
       if (!leftContent) continue;
 
-      const regionRect = region.getBoundingClientRect();
       const leftRect = leftContent.getBoundingClientRect();
       let maxRight = leftRect.left;
       const walker = document.createTreeWalker(
@@ -260,10 +241,7 @@ async function applyServerContentWidths(page: import("playwright").Page) {
       const width = Math.ceil(maxRight - leftRect.left);
       if (width <= 0) continue;
 
-      const isHeaderRegion = region.style.gridTemplateColumns.includes("40%");
-      region.style.gridTemplateColumns = isHeaderRegion
-        ? `min(${width}px, 40%) minmax(0, 1fr)`
-        : `${Math.min(width, regionRect.width * 0.5)}px minmax(0, 1fr)`;
+      region.style.gridTemplateColumns = `${width}px minmax(0, 1fr)`;
     }
   });
 }

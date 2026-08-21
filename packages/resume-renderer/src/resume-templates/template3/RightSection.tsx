@@ -1,14 +1,13 @@
-import { formatDate } from "../../utils/formatDate";
-import { Paginate } from "../../Paginate";
-import { ResumeForm } from "@/lib/validation";
-import SectionItem from "./SectionItem";
-import React from "react";
+import { ResumeForm } from "@cv-maker/shared";
 import {
   isEducationFilled,
   isLanguageFilled,
   isSocialFilled,
-} from "../../lib/isSectionFilled";
-import { formatUrl } from "../../utils/formatUrl";
+} from "../../lib/isSectionFilled.js";
+import SectionItem from "./SectionItem.js";
+import { formatDate } from "../../utils/formatDate.js";
+import React from "react";
+import { formatUrl } from "../../utils/formatUrl.js";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -126,7 +125,7 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
   const { educations, languages, customSections, socialLinks } = data;
 
   return (
-    <Paginate.Section className="w-[30%] space-y-8 py-8 pl-6">
+    <div className="space-y-8 py-8 ">
       <Education items={educations || []} />
 
       <SocialLinks items={socialLinks} />
@@ -134,7 +133,7 @@ const RightSection = ({ data }: { data: ResumeForm }) => {
       <Languages items={languages} />
 
       <CustomSections items={customSections} />
-    </Paginate.Section>
+    </div>
   );
 };
 

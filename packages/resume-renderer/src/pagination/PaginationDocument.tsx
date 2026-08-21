@@ -24,6 +24,7 @@ import {
   getPageContentBottom as getGeometryPageContentBottom,
   getPageContentHeight,
 } from "./geometry.js";
+import { cn } from "../lib/cn.js";
 
 /* =========================================================
    MAIN
@@ -102,16 +103,19 @@ const PaginationDocument = forwardRef<
 
     function getDeepestFlows(flows: FlowGeometry[]) {
       return flows.filter((flow) => {
-        return !flows.some(
-          (other) =>
-            other !== flow &&
-            flow.element.contains(other.element) &&
-            !flow.element.hasAttribute("data-pagination-keep-together"),
-        ) && !flows.some(
-          (other) =>
-            other !== flow &&
-            other.element.hasAttribute("data-pagination-keep-together") &&
-            other.element.contains(flow.element),
+        return (
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              flow.element.contains(other.element) &&
+              !flow.element.hasAttribute("data-pagination-keep-together"),
+          ) &&
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              other.element.hasAttribute("data-pagination-keep-together") &&
+              other.element.contains(flow.element),
+          )
         );
       });
     }
@@ -166,9 +170,7 @@ const PaginationDocument = forwardRef<
 
       const flowTops = new Map(
         Array.from(
-          documentFlow.querySelectorAll<HTMLElement>(
-            "[data-pagination-flow]",
-          ),
+          documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
         ).map((flow) => [
           flow.dataset.paginationFlow!,
           flow.getBoundingClientRect().top - editorRect.top,
@@ -205,10 +207,7 @@ const PaginationDocument = forwardRef<
         const range = document.createRange();
         range.selectNodeContents(textNode);
         for (const rect of range.getClientRects()) {
-          layoutBottom = Math.max(
-            layoutBottom,
-            rect.bottom - editorRect.top,
-          );
+          layoutBottom = Math.max(layoutBottom, rect.bottom - editorRect.top);
         }
         textNode = textWalker.nextNode();
       }
@@ -299,7 +298,7 @@ const PaginationDocument = forwardRef<
 
     return (
       <PaginationContext.Provider value={{ breaks, geometry, invalidate }}>
-        <div className={className} id={id}>
+        <div id={id}>
           <div
             ref={setEditorRef}
             className="editor"
@@ -327,7 +326,7 @@ const PaginationDocument = forwardRef<
 
             <div
               ref={documentFlowRef}
-              className="document-flow"
+              className={`document-flow ${className ?? ""}`}
               onInput={handleInput}
             >
               {children}

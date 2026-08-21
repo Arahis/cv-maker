@@ -11,6 +11,7 @@ export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
   ({ data, photo }, ref) => {
     return (
       <PaginationDocument
+        className="gap-y-8"
         pagePaddingX={40}
         revision={JSON.stringify(data)}
         ref={ref}
