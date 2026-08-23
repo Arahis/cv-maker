@@ -1,13 +1,10 @@
 import React from "react";
-import { Paginate } from "../../Paginate";
-import { cn } from "@/lib/utils";
 
 type SectionProps<T> = {
   title: string;
   renderItem: (item: T, idx: number) => React.ReactNode;
   items?: T[];
   className?: string;
-  columns?: boolean;
 };
 
 const SectionItem = <T,>({
@@ -15,24 +12,23 @@ const SectionItem = <T,>({
   renderItem,
   items = [],
   className = "",
-  columns = false,
 }: SectionProps<T>) => {
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <Paginate.Section className={className}>
+    <div className="w-full">
       <p className="font-cantata mb-6 text-lg tracking-wider uppercase">
         {title}
       </p>
 
-      <div className={cn(columns && "grid grid-cols-2 gap-4")}>
+      <div className={className}>
         {items.map((item, idx) => (
           <React.Fragment key={idx}>{renderItem(item, idx)}</React.Fragment>
         ))}
       </div>
-    </Paginate.Section>
+    </div>
   );
 };
 

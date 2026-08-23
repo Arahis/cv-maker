@@ -1,17 +1,17 @@
-import { formatDate } from "../../utils/formatDate";
-import { Paginate } from "../../Paginate";
-import { ResumeForm } from "@/lib/validation";
-import SectionItem from "./SectionItem";
 import React from "react";
 import { Phone } from "lucide-react";
 import { Mail } from "lucide-react";
 import { MapPin } from "lucide-react";
+import { ResumeForm } from "@cv-maker/shared";
+import SectionItem from "./SectionItem.js";
 import {
   isEducationFilled,
   isLanguageFilled,
   isSocialFilled,
-} from "../../lib/isSectionFilled";
-import { formatUrl } from "../../utils/formatUrl";
+} from "../../lib/isSectionFilled.js";
+import { formatDate } from "../../utils/formatDate.js";
+import { formatUrl } from "../../utils/formatUrl.js";
+import { KeepTogether } from "../../pagination/Pagination.js";
 
 const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   const skillsToArray = [
@@ -26,7 +26,7 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   ].filter((item) => item.items.length > 0);
 
   return (
-    <Paginate.Columns>
+    <KeepTogether>
       <SectionItem
         title="Skills"
         items={skillsToArray}
@@ -41,7 +41,7 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
           );
         }}
       />
-    </Paginate.Columns>
+    </KeepTogether>
   );
 };
 
@@ -96,6 +96,8 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   return (
     <SectionItem
       title="Education"
+      items={items}
+      className="space-y-4"
       renderItem={({
         degree,
         institution,
@@ -115,7 +117,6 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           </div>
         </div>
       )}
-      items={items}
     />
   );
 };
@@ -126,25 +127,27 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
   if (!hasLinks) return;
 
   return (
-    <SectionItem
-      title="Social Links"
-      items={items}
-      renderItem={(item) => {
-        if (!item.linkName) return;
-        return (
-          <React.Fragment key={item.id}>
-            <p className="font-bold">{item.linkName}</p>
-            <a
-              href={item.linkAddress}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {formatUrl(item.linkAddress)}
-            </a>
-          </React.Fragment>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Social Links"
+        items={items}
+        renderItem={(item) => {
+          if (!item.linkName) return;
+          return (
+            <React.Fragment key={item.id}>
+              <p className="font-bold">{item.linkName}</p>
+              <a
+                href={item.linkAddress}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatUrl(item.linkAddress)}
+              </a>
+            </React.Fragment>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -153,18 +156,20 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
   if (!hasLanguages) return;
 
   return (
-    <SectionItem
-      title="Languages"
-      items={items}
-      renderItem={(item) => {
-        return (
-          <React.Fragment key={item.id}>
-            <p className="font-bold">{item.languageName}</p>
-            <p>{item.languageLevel}</p>
-          </React.Fragment>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Languages"
+        items={items}
+        renderItem={(item) => {
+          return (
+            <React.Fragment key={item.id}>
+              <p className="font-bold">{item.languageName}</p>
+              <p>{item.languageLevel}</p>
+            </React.Fragment>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -181,19 +186,20 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
         if (sectionItems.length === 0) return null;
 
         return (
-          <SectionItem
-            key={item.id ?? `${title}-${idx}`}
-            title={title}
-            items={sectionItems}
-            renderItem={(i) => {
-              return (
-                <React.Fragment key={i.id}>
-                  <p className="font-bold">{i.title}</p>
-                  <p>{formatUrl(i.value)}</p>
-                </React.Fragment>
-              );
-            }}
-          />
+          <KeepTogether key={item.id ?? `${title}-${idx}`}>
+            <SectionItem
+              title={title}
+              items={sectionItems}
+              renderItem={(i) => {
+                return (
+                  <div key={i.id}>
+                    <p className="font-bold">{i.title}</p>
+                    <p>{formatUrl(i.value)}</p>
+                  </div>
+                );
+              }}
+            />
+          </KeepTogether>
         );
       })}
     </React.Fragment>
@@ -218,19 +224,17 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
   const contacts = hasAnyValue ? [{ phone, country, city, email }] : [];
 
   return (
-    <Paginate.Section className="w-[30%] space-y-8 pr-6 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
+    <div className="space-y-8 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
       <Contacts items={contacts} />
 
       <Education items={educations} />
 
       <Skills skills={data.skills} />
-
       <SocialLinks items={socialLinks} />
-
       <Languages items={languages} />
 
       <CustomSections items={customSections} />
-    </Paginate.Section>
+    </div>
   );
 };
 

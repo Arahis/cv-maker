@@ -66,13 +66,41 @@ const PaginationDocument = forwardRef<
       }),
       [pagePaddingX, headerFooterHeight, pageGap],
     );
-    const editorRef = useRef<HTMLDivElement>(null);
-    const documentFlowRef = useRef<HTMLDivElement>(null);
-    const previousRevisionRef = useRef(revision);
-    const [breaks, setBreaks] = useState<FlowBreak[]>([]);
-    const invalidate = useCallback(() => {
-      setBreaks([]);
-    }, []);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const documentFlowRef = useRef<HTMLDivElement>(null);
+  const previousRevisionRef = useRef(revision);
+  const [breaks, setBreaks] = useState<FlowBreak[]>([]);
+  const pendingMeasurementsRef = useRef(0);
+  const initialMeasurementsCompleteRef = useRef(false);
+  const [measurementsReady, setMeasurementsReady] = useState(true);
+  const invalidate = useCallback(() => {
+    setBreaks([]);
+  }, []);
+
+  const beginMeasurement = useCallback(() => {
+    const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
+    pendingMeasurementsRef.current += 1;
+
+    if (isInitialMeasurement) {
+      setMeasurementsReady(false);
+    }
+
+    let completed = false;
+    return () => {
+      if (completed) return;
+      completed = true;
+      pendingMeasurementsRef.current -= 1;
+      if (pendingMeasurementsRef.current === 0) {
+        if (!initialMeasurementsCompleteRef.current) {
+          initialMeasurementsCompleteRef.current = true;
+          setMeasurementsReady(true);
+        } else {
+          invalidate();
+        }
+      }
+    };
+  }, [invalidate]);
+
 
     const setEditorRef = useCallback(
       (node: HTMLDivElement | null) => {
@@ -158,6 +186,8 @@ const PaginationDocument = forwardRef<
        ------------------------------------------------------- */
 
     const reconcilePagination = useCallback(() => {
+      if (!measurementsReady || pendingMeasurementsRef.current > 0) return;
+
       const editor = editorRef.current;
 
       const documentFlow = documentFlowRef.current;
@@ -260,7 +290,7 @@ const PaginationDocument = forwardRef<
 
         return changed ? next : current;
       });
-    }, [pageCount, findFlowsForBoundary, geometry]);
+    }, [pageCount, findFlowsForBoundary, geometry, measurementsReady]);
 
     /*
      * Every new breaker changes browser layout.
@@ -270,7 +300,6 @@ const PaginationDocument = forwardRef<
 
       if (previousRevisionRef.current !== revision) {
         previousRevisionRef.current = revision;
-
         if (breaks.length > 0) {
           setBreaks([]);
         } else {
@@ -297,7 +326,9 @@ const PaginationDocument = forwardRef<
     }, []);
 
     return (
-      <PaginationContext.Provider value={{ breaks, geometry, invalidate }}>
+      <PaginationContext.Provider
+        value={{ breaks, geometry, invalidate, beginMeasurement }}
+      >
         <div id={id}>
           <div
             ref={setEditorRef}

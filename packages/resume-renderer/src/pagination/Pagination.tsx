@@ -54,6 +54,7 @@ type PaginationContextValue = {
   breaks: FlowBreak[];
   geometry: PaginationGeometry;
   invalidate: () => void;
+  beginMeasurement: () => () => void;
 };
 
 export const PaginationContext = createContext<PaginationContextValue | null>(

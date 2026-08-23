@@ -42,7 +42,7 @@ function measureRenderedContentWidth(element: HTMLElement): number {
 }
 
 export function useFitContentWidth<T extends HTMLElement>() {
-  const invalidate = useContext(PaginationContext)?.invalidate;
+  const pagination = useContext(PaginationContext);
   const ref = useRef<T>(null);
   const [width, setWidth] = useState<number | null>(null);
 
@@ -57,20 +57,18 @@ export function useFitContentWidth<T extends HTMLElement>() {
       return;
     }
 
+    const finishMeasurement = pagination?.beginMeasurement();
+
     const nextWidth = measureRenderedContentWidth(element);
 
     if (nextWidth <= 0) {
+      finishMeasurement?.();
       return;
     }
 
     setWidth(nextWidth);
-  }, [width]);
-
-  useLayoutEffect(() => {
-    if (width !== null) {
-      invalidate?.();
-    }
-  }, [invalidate, width]);
+    finishMeasurement?.();
+  }, [pagination, width]);
 
   useLayoutEffect(() => {
     const element = ref.current;

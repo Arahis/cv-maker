@@ -114,6 +114,16 @@
   width: 100%;
 }
 
+/*
+ * A zero-width page anchor lets the first line of an atomic section flow
+ * beside it before the actual breaker is cleared. Make the anchor occupy the
+ * whole line inside KeepTogether so the complete section starts after the
+ * page break.
+ */
+.keep-together .page-anchor {
+  width: 100%;
+}
+
 .page-break {
   display: block;
 

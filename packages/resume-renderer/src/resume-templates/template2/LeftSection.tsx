@@ -24,6 +24,7 @@ export function JobSection({
 
   const { ref: leftContentRef, width: leftWidth } =
     useFitContentWidth<HTMLDivElement>();
+
   return (
     <div className="not-last:pb-6">
       <KeepTogether>

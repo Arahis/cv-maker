@@ -1,15 +1,13 @@
 import "@cv-maker/resume-renderer/renderer.css";
 
-import { ResumeTemplate4 } from "@/app/(editor)/components/ResumePreview/resume-templates/template4";
-import { ResumeTemplate5 } from "@/app/(editor)/components/ResumePreview/resume-templates/template5";
 import { ResumeTemplateComponent } from "@/lib/types/resume/template.types";
 import { ResumeTemplate } from "@cv-maker/shared";
 import {
   ResumeTemplate1,
   ResumeTemplate2,
   ResumeTemplate3,
-  // ResumeTemplate4,
-  // ResumeTemplate5,
+  ResumeTemplate4,
+  ResumeTemplate5,
 } from "@cv-maker/resume-renderer";
 
 export const DEFAULT_RESUME_TEMPLATE: ResumeTemplateKey = "template1";

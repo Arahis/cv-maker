@@ -1,9 +1,7 @@
-import React from "react";
-import { Paginate } from "../../Paginate";
-import { createTextReader, TextReader } from "@/components/editor";
-import SectionItem from "./SectionItem";
-import { ResumeForm } from "@/lib/validation";
-import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
+import { ResumeForm } from "@cv-maker/shared";
+import { EMPTY_LEXICAL_STATE } from "../../empty-lexical-state.js";
+import { createTextReader, TextReader } from "../../text-reader.js";
+import SectionItem from "./SectionItem.js";
 
 const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   const summary = data || EMPTY_LEXICAL_STATE;
@@ -12,13 +10,13 @@ const Summary = ({ data }: { data: ResumeForm["summary"] }) => {
   if (!hasDescription) return;
 
   return (
-    <Paginate.Section datatype="main-summary">
+    <div datatype="main-summary">
       <SectionItem
         title="Summary"
         items={[summary]}
         renderItem={(item) => <TextReader value={item} />}
       />
-    </Paginate.Section>
+    </div>
   );
 };
 
