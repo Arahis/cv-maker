@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  JSX,
   ReactNode,
   useCallback,
   useLayoutEffect,
@@ -10,14 +11,8 @@ import {
 } from "react";
 import {
   EPSILON,
-  FOOTER_HEIGHT,
   FlowBreak,
-  HEADER_HEIGHT,
-  PAGE_BREAK_HEIGHT,
-  PAGE_CONTENT_HEIGHT,
-  PAGE_GAP,
   PAGE_HEIGHT,
-  PAGE_PADDING_X,
   PAGE_WIDTH,
   PaginationContext,
   VisualPagination,
@@ -28,8 +23,8 @@ import {
   getPageBreakHeight,
   getPageContentBottom as getGeometryPageContentBottom,
   getPageContentHeight,
-  getPageStride,
 } from "./geometry.js";
+import { cn } from "../lib/cn.js";
 
 /* =========================================================
    MAIN
@@ -42,224 +37,336 @@ const PaginationDocument = forwardRef<
     pagePaddingX?: number;
     headerFooterHeight?: number;
     pageGap?: number;
-  }
->(({ children, revision, pagePaddingX, headerFooterHeight, pageGap }, contentRefForPrint) => {
-  const geometry = useMemo<PaginationGeometry>(
-    () => ({
-      ...DEFAULT_PAGINATION_GEOMETRY,
-      ...(pagePaddingX === undefined ? {} : { pagePaddingX }),
-      ...(headerFooterHeight === undefined
-        ? {}
-        : { headerHeight: headerFooterHeight, footerHeight: headerFooterHeight }),
-      ...(pageGap === undefined ? {} : { pageGap }),
-    }),
-    [pagePaddingX, headerFooterHeight, pageGap],
-  );
+    className?: string;
+  } & Omit<JSX.IntrinsicElements["div"], "children">
+>(
+  (
+    {
+      children,
+      revision,
+      pagePaddingX,
+      headerFooterHeight,
+      pageGap,
+      className,
+      id,
+    },
+    contentRefForPrint,
+  ) => {
+    const geometry = useMemo<PaginationGeometry>(
+      () => ({
+        ...DEFAULT_PAGINATION_GEOMETRY,
+        ...(pagePaddingX === undefined ? {} : { pagePaddingX }),
+        ...(headerFooterHeight === undefined
+          ? {}
+          : {
+              headerHeight: headerFooterHeight,
+              footerHeight: headerFooterHeight,
+            }),
+        ...(pageGap === undefined ? {} : { pageGap }),
+      }),
+      [pagePaddingX, headerFooterHeight, pageGap],
+    );
   const editorRef = useRef<HTMLDivElement>(null);
   const documentFlowRef = useRef<HTMLDivElement>(null);
   const previousRevisionRef = useRef(revision);
   const [breaks, setBreaks] = useState<FlowBreak[]>([]);
-
-  const setEditorRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      editorRef.current = node;
-
-      if (typeof contentRefForPrint === "function") {
-        contentRefForPrint(node);
-      } else if (contentRefForPrint) {
-        contentRefForPrint.current = node;
-      }
-    },
-    [contentRefForPrint],
-  );
-
-  const pageCount =
-    breaks.length === 0
-      ? 1
-      : Math.max(...breaks.map((pageBreak) => pageBreak.pageNumber)) + 1;
-  const editorHeight =
-    PAGE_HEIGHT * pageCount + geometry.pageGap * (pageCount - 1);
-
-  type FlowGeometry = {
-    element: HTMLElement;
-    id: string;
-    top: number;
-    bottom: number;
-  };
-
-  function getDeepestFlows(flows: FlowGeometry[]) {
-    return flows.filter((flow) => {
-      return !flows.some(
-        (other) => other !== flow && flow.element.contains(other.element),
-      );
-    });
-  }
-
-  const findFlowsForBoundary = useCallback((boundaryY: number) => {
-    const editor = editorRef.current;
-    const documentFlow = documentFlowRef.current;
-
-    if (!editor || !documentFlow) {
-      return [];
-    }
-
-    const editorRect = editor.getBoundingClientRect();
-
-    const elements = Array.from(
-      documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
-    );
-
-    const flows: FlowGeometry[] = elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-
-      return {
-        element,
-        id: element.dataset.paginationFlow!,
-        top: rect.top - editorRect.top,
-        bottom: rect.bottom - editorRect.top,
-      };
-    });
-
-    const intersecting = flows.filter(
-      (flow) =>
-        boundaryY >= flow.top - EPSILON && boundaryY <= flow.bottom + EPSILON,
-    );
-
-    return getDeepestFlows(intersecting);
-  }, []);
-
-  /* -------------------------------------------------------
-       ONE PAGINATION PASS
-       ------------------------------------------------------- */
-
-  const reconcilePagination = useCallback(() => {
-    const editor = editorRef.current;
-
-    const documentFlow = documentFlowRef.current;
-
-    if (!editor || !documentFlow) {
-      return;
-    }
-
-    const editorRect = editor.getBoundingClientRect();
-
-    const documentRect = documentFlow.getBoundingClientRect();
-
-    /*
-     * Measure the whole doc layout
-     */
-    const layoutBottom = documentRect.bottom - editorRect.top;
-
-    const currentPageBottom = getGeometryPageContentBottom(
-      pageCount,
-      geometry,
-    );
-
-    if (layoutBottom <= currentPageBottom + EPSILON) {
-      return;
-    }
-
-    const boundaryY = currentPageBottom;
-
-    const activeFlows = findFlowsForBoundary(boundaryY);
-
-    if (!activeFlows.length) {
-      return;
-    }
-
-    setBreaks((current) => {
-      const next = [...current];
-
-      for (const flow of activeFlows) {
-        const alreadyExists = next.some(
-          (pageBreak) =>
-            pageBreak.flowId === flow.id && pageBreak.pageNumber === pageCount,
-        );
-
-        if (alreadyExists) {
-          continue;
-        }
-
-        const flowBreaks = next.filter(
-          (pageBreak) => pageBreak.flowId === flow.id,
-        );
-
-        const marginTop =
-          flowBreaks.length === 0
-            ? Math.max(0, boundaryY - flow.top)
-            : getPageContentHeight(geometry);
-
-        next.push({
-          pageNumber: pageCount,
-          flowId: flow.id,
-          marginTop,
-        });
-      }
-
-      return next;
-    });
-  }, [pageCount, findFlowsForBoundary, geometry]);
-
-  /*
-   * Every new breaker changes browser layout.
-   */
-  useLayoutEffect(() => {
-    if (previousRevisionRef.current !== revision) {
-      previousRevisionRef.current = revision;
-
-      if (breaks.length > 0) {
-        setBreaks([]);
-        return;
-      }
-    }
-
-    reconcilePagination();
-  }, [revision, breaks.length, reconcilePagination]);
-
-  // handleInput when block is editable in preview
-  const handleInput = useCallback(() => {
+  const pendingMeasurementsRef = useRef(0);
+  const initialMeasurementsCompleteRef = useRef(false);
+  const [measurementsReady, setMeasurementsReady] = useState(true);
+  const invalidate = useCallback(() => {
     setBreaks([]);
   }, []);
 
-  return (
-    <PaginationContext.Provider value={{ breaks, geometry }}>
-      <div className="__editor-wrapper">
-        <div
-          ref={setEditorRef}
-          className="editor"
-          style={
-            {
-              "--page-width": `${PAGE_WIDTH}px`,
+  const beginMeasurement = useCallback(() => {
+    const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
+    pendingMeasurementsRef.current += 1;
 
-              "--page-height": `${PAGE_HEIGHT}px`,
+    if (isInitialMeasurement) {
+      setMeasurementsReady(false);
+    }
 
-              "--page-padding-x": `${geometry.pagePaddingX}px`,
+    let completed = false;
+    return () => {
+      if (completed) return;
+      completed = true;
+      pendingMeasurementsRef.current -= 1;
+      if (pendingMeasurementsRef.current === 0) {
+        if (!initialMeasurementsCompleteRef.current) {
+          initialMeasurementsCompleteRef.current = true;
+          setMeasurementsReady(true);
+        } else {
+          invalidate();
+        }
+      }
+    };
+  }, [invalidate]);
 
-              "--header-height": `${geometry.headerHeight}px`,
 
-              "--footer-height": `${geometry.footerHeight}px`,
+    const setEditorRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        editorRef.current = node;
 
-              "--page-gap": `${geometry.pageGap}px`,
+        if (typeof contentRefForPrint === "function") {
+          contentRefForPrint(node);
+        } else if (contentRefForPrint) {
+          contentRefForPrint.current = node;
+        }
+      },
+      [contentRefForPrint],
+    );
 
-              "--page-break-height": `${getPageBreakHeight(geometry)}px`,
+    const pageCount =
+      breaks.length === 0
+        ? 1
+        : Math.max(...breaks.map((pageBreak) => pageBreak.pageNumber)) + 1;
+    const editorHeight =
+      PAGE_HEIGHT * pageCount + geometry.pageGap * (pageCount - 1);
 
-              "--editor-height": `${editorHeight}px`,
-            } as CSSProperties
-          }
-        >
-          <VisualPagination pageCount={pageCount} geometry={geometry} />
+    type FlowGeometry = {
+      element: HTMLElement;
+      id: string;
+      top: number;
+      bottom: number;
+    };
 
+    function getDeepestFlows(flows: FlowGeometry[]) {
+      return flows.filter((flow) => {
+        return (
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              flow.element.contains(other.element) &&
+              !flow.element.hasAttribute("data-pagination-keep-together"),
+          ) &&
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              other.element.hasAttribute("data-pagination-keep-together") &&
+              other.element.contains(flow.element),
+          )
+        );
+      });
+    }
+
+    const findFlowsForBoundary = useCallback((boundaryY: number) => {
+      const editor = editorRef.current;
+      const documentFlow = documentFlowRef.current;
+
+      if (!editor || !documentFlow) {
+        return [];
+      }
+
+      const editorRect = editor.getBoundingClientRect();
+
+      const elements = Array.from(
+        documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
+      );
+
+      const flows: FlowGeometry[] = elements.map((element) => {
+        const rect = element.getBoundingClientRect();
+
+        return {
+          element,
+          id: element.dataset.paginationFlow!,
+          top: rect.top - editorRect.top,
+          bottom: rect.bottom - editorRect.top,
+        };
+      });
+
+      const intersecting = flows.filter(
+        (flow) =>
+          boundaryY >= flow.top - EPSILON && boundaryY <= flow.bottom + EPSILON,
+      );
+
+      return getDeepestFlows(intersecting);
+    }, []);
+
+    /* -------------------------------------------------------
+       ONE PAGINATION PASS
+       ------------------------------------------------------- */
+
+    const reconcilePagination = useCallback(() => {
+      if (!measurementsReady || pendingMeasurementsRef.current > 0) return;
+
+      const editor = editorRef.current;
+
+      const documentFlow = documentFlowRef.current;
+
+      if (!editor || !documentFlow) {
+        return;
+      }
+
+      const editorRect = editor.getBoundingClientRect();
+
+      const flowTops = new Map(
+        Array.from(
+          documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
+        ).map((flow) => [
+          flow.dataset.paginationFlow!,
+          flow.getBoundingClientRect().top - editorRect.top,
+        ]),
+      );
+
+      const hasStaleBreak = breaks.some((pageBreak) => {
+        const currentTop = flowTops.get(pageBreak.flowId);
+        return (
+          currentTop === undefined ||
+          Math.abs(currentTop - pageBreak.flowTop) > EPSILON
+        );
+      });
+
+      if (hasStaleBreak) {
+        setBreaks([]);
+        return;
+      }
+
+      const textWalker = document.createTreeWalker(
+        documentFlow,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) =>
+            node.parentElement?.closest(".pagination-widget")
+              ? NodeFilter.FILTER_REJECT
+              : NodeFilter.FILTER_ACCEPT,
+        },
+      );
+      let layoutBottom = 0;
+      let textNode = textWalker.nextNode();
+
+      while (textNode) {
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        for (const rect of range.getClientRects()) {
+          layoutBottom = Math.max(layoutBottom, rect.bottom - editorRect.top);
+        }
+        textNode = textWalker.nextNode();
+      }
+
+      const currentPageBottom = getGeometryPageContentBottom(
+        pageCount,
+        geometry,
+      );
+
+      if (layoutBottom <= currentPageBottom + EPSILON) {
+        return;
+      }
+
+      const boundaryY = currentPageBottom;
+      const activeFlows = findFlowsForBoundary(boundaryY);
+      if (!activeFlows.length) {
+        return;
+      }
+
+      setBreaks((current) => {
+        const next = [...current];
+        let changed = false;
+
+        for (const flow of activeFlows) {
+          const alreadyExists = next.some(
+            (pageBreak) =>
+              pageBreak.flowId === flow.id &&
+              pageBreak.pageNumber === pageCount,
+          );
+
+          if (alreadyExists) continue;
+
+          const flowBreaks = next.filter(
+            (pageBreak) => pageBreak.flowId === flow.id,
+          );
+
+          const marginTop =
+            flowBreaks.length === 0
+              ? Math.max(0, boundaryY - flow.top)
+              : getPageContentHeight(geometry);
+
+          next.push({
+            pageNumber: pageCount,
+            flowId: flow.id,
+            marginTop,
+            flowTop: flow.top,
+          });
+          changed = true;
+        }
+
+        return changed ? next : current;
+      });
+    }, [pageCount, findFlowsForBoundary, geometry, measurementsReady]);
+
+    /*
+     * Every new breaker changes browser layout.
+     */
+    useLayoutEffect(() => {
+      let frameId: number | undefined;
+
+      if (previousRevisionRef.current !== revision) {
+        previousRevisionRef.current = revision;
+        if (breaks.length > 0) {
+          setBreaks([]);
+        } else {
+          reconcilePagination();
+        }
+      } else {
+        reconcilePagination();
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        reconcilePagination();
+      });
+
+      return () => {
+        if (frameId !== undefined) {
+          window.cancelAnimationFrame(frameId);
+        }
+      };
+    }, [revision, breaks, reconcilePagination]);
+
+    // handleInput when block is editable in preview
+    const handleInput = useCallback(() => {
+      setBreaks([]);
+    }, []);
+
+    return (
+      <PaginationContext.Provider
+        value={{ breaks, geometry, invalidate, beginMeasurement }}
+      >
+        <div id={id}>
           <div
-            ref={documentFlowRef}
-            className="document-flow"
-            onInput={handleInput}
+            ref={setEditorRef}
+            className="editor"
+            style={
+              {
+                "--page-width": `${PAGE_WIDTH}px`,
+
+                "--page-height": `${PAGE_HEIGHT}px`,
+
+                "--page-padding-x": `${geometry.pagePaddingX}px`,
+
+                "--header-height": `${geometry.headerHeight}px`,
+
+                "--footer-height": `${geometry.footerHeight}px`,
+
+                "--page-gap": `${geometry.pageGap}px`,
+
+                "--page-break-height": `${getPageBreakHeight(geometry)}px`,
+
+                "--editor-height": `${editorHeight}px`,
+              } as CSSProperties
+            }
           >
-            {children}
+            <VisualPagination pageCount={pageCount} geometry={geometry} />
+
+            <div
+              ref={documentFlowRef}
+              className={`document-flow ${className ?? ""}`}
+              onInput={handleInput}
+            >
+              {children}
+            </div>
           </div>
         </div>
-      </div>
-    </PaginationContext.Provider>
-  );
-});
+      </PaginationContext.Provider>
+    );
+  },
+);
 
 export default PaginationDocument;

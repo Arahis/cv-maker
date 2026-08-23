@@ -6,13 +6,22 @@ initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   webpack(config) {
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      ".js": [".ts", ".tsx", ".js"],
+      ".jsx": [".tsx", ".jsx"],
+    };
     config.resolve.alias["@cv-maker/resume-renderer$"] = path.resolve(
       __dirname,
-      "../../packages/resume-renderer/dist/index.js",
+      "../../packages/resume-renderer/src/index.ts",
     );
     config.resolve.alias["@cv-maker/resume-renderer/pagination.css"] = path.resolve(
       __dirname,
       "../../packages/resume-renderer/src/pagination/pagination.css",
+    );
+    config.resolve.alias["@cv-maker/resume-renderer/renderer.css"] = path.resolve(
+      __dirname,
+      "../../packages/resume-renderer/src/renderer.css",
     );
     return config;
   },
@@ -20,6 +29,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     // Monorepo root so Turbopack can resolve hoisted deps
     root: path.resolve(__dirname, "../.."),
+    resolveAlias: {
+      "@cv-maker/resume-renderer": "./packages/resume-renderer/src/index.ts",
+      "@cv-maker/resume-renderer/renderer.css": "./packages/resume-renderer/src/renderer.css",
+    },
   },
   // Keep tracing root aligned with turbopack.root
   outputFileTracingRoot: path.resolve(__dirname, "../.."),

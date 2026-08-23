@@ -25,10 +25,12 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
         endDate,
         isFullDate,
       }) => (
-        <div>
-          <p className="text-[16px] font-bold">{degree}</p>
-          <p className="mb-1 text-[16px]">{institution}</p>
-          <p>{city}</p>
+        <div className="text-[14px]">
+          <p className="font-bold">{degree}</p>
+          <p className="mb-2">{institution}</p>
+          <p>
+            <i>{city}</i>
+          </p>
           {startDate && endDate && (
             <p>{`${formatDate(isFullDate, startDate)} - ${formatDate(isFullDate, endDate)}`}</p>
           )}
@@ -59,10 +61,10 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
         if (!item?.head) return null;
 
         return (
-          <React.Fragment key={item.head}>
+          <div key={item.head} className="text-[14px] ">
             <p className="font-bold">#{item.head}</p>
             <p>{item?.items?.map((i) => i.name).join(", ")}</p>
-          </React.Fragment>
+          </div>
         );
       }}
     />
@@ -80,10 +82,10 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
       renderItem={(item) => {
         if (!item.languageName) return;
         return (
-          <React.Fragment key={item.id}>
+          <div key={item.id} className="text-[14px]">
             <p className="font-bold">{item.languageName}</p>
             <p>{item.languageLevel}</p>
-          </React.Fragment>
+          </div>
         );
       }}
     />
@@ -102,7 +104,7 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
       renderItem={(item) => {
         if (!item.linkName) return;
         return (
-          <React.Fragment key={item.id}>
+          <div key={item.id} className="text-[14px]">
             <p className="font-bold">{item.linkName}</p>
             <a
               href={item.linkAddress}
@@ -111,7 +113,7 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
             >
               {formatUrl(item.linkAddress)}
             </a>
-          </React.Fragment>
+          </div>
         );
       }}
     />
@@ -137,10 +139,10 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
             items={sectionItems}
             renderItem={(i) => {
               return (
-                <React.Fragment key={i.id}>
+                <div key={i.id} className="text-[14px]">
                   <p className="font-bold">{i.title}</p>
                   <p>{formatUrl(i.value)}</p>
-                </React.Fragment>
+                </div>
               );
             }}
           />
@@ -154,7 +156,7 @@ const LeftSection = ({ data }: { data: ResumeForm }) => {
   const { educations, skills, languages, customSections, socialLinks } = data;
 
   return (
-    <div className="w-[30%] space-y-6 pr-4" datatype="left-section">
+    <div className="space-y-6 pr-4" datatype="left-section">
       <Education items={educations} />
 
       <Skills skills={skills} />

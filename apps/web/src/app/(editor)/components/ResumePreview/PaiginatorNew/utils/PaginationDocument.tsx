@@ -1,4 +1,4 @@
-import "./pagination.css";
+import "@cv-maker/resume-renderer/pagination.css";
 
 import {
   forwardRef,

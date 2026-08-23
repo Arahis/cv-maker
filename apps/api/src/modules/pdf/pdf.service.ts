@@ -59,6 +59,9 @@ async function applyServerPagination(page: import("playwright").Page) {
     scope.__name ??= (value) => value;
   });
 
+  // The PDF page is rendered with `@media print`, where pagination.css
+  // explicitly sets --page-gap to 0. Keep the server geometry in sync with
+  // the actual CSS layout instead of using the screen-preview gap.
   const pageGap = 0;
   const geometry = {
     ...DEFAULT_PAGINATION_GEOMETRY,
@@ -105,7 +108,16 @@ async function applyServerPagination(page: import("playwright").Page) {
       flows.filter(
         (flow) =>
           !flows.some(
-            (other) => other !== flow && flow.element.contains(other.element),
+            (other) =>
+              other !== flow &&
+              flow.element.contains(other.element) &&
+              !flow.element.hasAttribute("data-pagination-keep-together"),
+          ) &&
+          !flows.some(
+            (other) =>
+              other !== flow &&
+              other.element.hasAttribute("data-pagination-keep-together") &&
+              other.element.contains(flow.element),
           ),
       );
 
@@ -118,12 +130,12 @@ async function applyServerPagination(page: import("playwright").Page) {
     };
 
     let pageNumber = 1;
-    let previousFlowBreaks = new WeakMap<HTMLElement, number>();
+    const previousFlowBreaks = new WeakMap<HTMLElement, number>();
 
     for (let guard = 0; guard < 100; guard += 1) {
       const editorRect = editor.getBoundingClientRect();
-      const documentRect = documentFlow.getBoundingClientRect();
-      const layoutBottom = documentRect.bottom - editorRect.top;
+      const layoutBottom =
+        documentFlow.getBoundingClientRect().bottom - editorRect.top;
       const boundaryY =
         (pageNumber - 1) * geometry.pageStride +
         geometry.pageHeight -
@@ -170,6 +182,68 @@ async function applyServerPagination(page: import("playwright").Page) {
       `${geometry.pageHeight * pageNumber + geometry.pageGap * (pageNumber - 1)}px`,
     );
   }, geometry);
+}
+
+async function applyServerContentWidths(page: import("playwright").Page) {
+  await page.evaluate(() => {
+    const scope = globalThis as typeof globalThis & {
+      __name?: (value: unknown, name: string) => unknown;
+    };
+
+    scope.__name ??= (value) => value;
+  });
+
+  await page.evaluate(() => {
+    const regions = Array.from(
+      document.querySelectorAll<HTMLElement>(".columns-region"),
+    ).filter((region) => {
+      const inlineTemplate = region.style.gridTemplateColumns;
+      const computedTemplate = getComputedStyle(region).gridTemplateColumns;
+
+      return (
+        inlineTemplate.includes("fit-content") ||
+        computedTemplate.includes("fit-content")
+      );
+    });
+
+    for (const region of regions) {
+      const leftContent = region.querySelector<HTMLElement>(
+        ":scope > .column:first-child .column-content",
+      );
+
+      if (!leftContent) continue;
+
+      const leftRect = leftContent.getBoundingClientRect();
+      let maxRight = leftRect.left;
+      const walker = document.createTreeWalker(
+        leftContent,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) =>
+            node.textContent?.trim()
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT,
+        },
+      );
+      let node = walker.nextNode();
+
+      while (node) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) {
+          if (rect.width !== 0 && rect.height !== 0) {
+            maxRight = Math.max(maxRight, rect.right);
+          }
+        }
+        node = walker.nextNode();
+      }
+
+      const width = Math.ceil(maxRight - leftRect.left);
+      if (width <= 0) continue;
+
+      region.style.gridTemplateColumns = `${width}px minmax(0, 1fr)`;
+    }
+  });
 }
 
 export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
@@ -231,12 +305,6 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       }
     });
 
-    page.on("response", (response) => {
-      if (/\.css(?:\?|$)|\.(?:woff2?|ttf|otf)(?:\?|$)/i.test(response.url())) {
-        console.info("PDF asset response", response.status(), response.url());
-      }
-    });
-
     await page.setContent(injectHead(input.html, css), {
       waitUntil: "networkidle",
       timeout: 60_000,
@@ -265,23 +333,10 @@ export async function createPdf(input: CreatePdfInput): Promise<Buffer> {
       );
     });
 
+    await applyServerContentWidths(page);
     await applyServerPagination(page);
 
-    console.info(
-      "PDF fonts",
-      await page.evaluate(() => ({
-        status: document.fonts.status,
-        inter: document.fonts.check("500 14px Inter"),
-        loaded: Array.from(document.fonts).map((font) => ({
-          family: font.family,
-          weight: font.weight,
-          status: font.status,
-        })),
-      })),
-    );
-
     await page.waitForTimeout(200);
-
     return Buffer.from(
       await page.pdf({
         format: "A4",

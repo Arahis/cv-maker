@@ -39,16 +39,13 @@
   z-index: 1;
 
   /*
-   * Header первой страницы
-   * резервируем один раз.
+   * First  page reserve onceHeader
    */
   padding-top: var(--header-height);
 
   display: grid;
 
   grid-template-columns: minmax(0, 1fr);
-
-  row-gap: 24px;
 }
 
 /* ========================================================
@@ -59,31 +56,6 @@
   display: flow-root;
 
   min-width: 0;
-}
-
-.region-content {
-  font-size: 14px;
-  line-height: 20px;
-
-  color: #24384d;
-}
-
-.region-content h1 {
-  margin: 0 0 8px;
-
-  font-size: 28px;
-  line-height: 34px;
-}
-
-.region-content h2 {
-  margin: 0 0 10px;
-
-  font-size: 18px;
-  line-height: 22px;
-}
-
-.region-content p {
-  margin: 0;
 }
 
 /* Keep an empty paragraph as a full line that can cross the page-break float. */
@@ -100,20 +72,17 @@
 .columns-region {
   display: grid;
 
-  grid-template-columns:
-    minmax(0, 35fr)
-    minmax(0, 65fr);
+  width: 100%;
 
   align-items: start;
-  column-gap: 12px;
 
   min-width: 0;
 }
 
 .column {
   /*
-   * Каждый column —
-   * отдельный float flow.
+   * Every column —
+   * is a separate float flow.
    */
   display: block;
   text-align: left;
@@ -122,21 +91,7 @@
 }
 
 .column-content {
-  font-size: 14px;
-  line-height: 20px;
-
-  color: #24384d;
-}
-
-.column-content h2 {
-  margin: 0 0 12px;
-
-  font-size: 18px;
-  line-height: 22px;
-}
-
-.column-content p {
-  margin: 0 0 16px;
+  height: 100%;
 }
 
 /* ========================================================
@@ -151,6 +106,22 @@
   height: 0;
 
   overflow: visible;
+}
+
+/* KeepTogether must contain its float-based page breaker. */
+.keep-together {
+  display: flow-root;
+  width: 100%;
+}
+
+/*
+ * A zero-width page anchor lets the first line of an atomic section flow
+ * beside it before the actual breaker is cleared. Make the anchor occupy the
+ * whole line inside KeepTogether so the complete section starts after the
+ * page break.
+ */
+.keep-together .page-anchor {
+  width: 100%;
 }
 
 .page-break {
@@ -182,12 +153,16 @@
 .flow-breaker {
   position: relative;
 
+  z-index: 3;
+
   float: left;
   clear: both;
 
   width: 100%;
 
   height: var(--page-break-height);
+
+  background: transparent;
 
   pointer-events: none;
 }
@@ -201,7 +176,7 @@
 
   inset: 0;
 
-  z-index: 2;
+  z-index: 4;
 
   pointer-events: none;
 }
@@ -263,6 +238,12 @@
   margin-bottom: 1em;
   margin-left: 1.5em;
   list-style-type: disc;
+}
+
+/* Keep list spacing inside JobSection consistent with KeepTogether padding. */
+.keep-together .editor-list-ul:last-child,
+.keep-together .editor-list-ol:last-child {
+  margin-bottom: 0;
 }
 
 @page {

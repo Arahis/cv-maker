@@ -1,4 +1,10 @@
-import { createContext, useContext, useId, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useId,
+  type ReactNode,
+  type CSSProperties,
+} from "react";
 import {
   EPSILON,
   FOOTER_HEIGHT,
@@ -13,6 +19,7 @@ import {
   getPageContentHeight,
   getPageStride,
 } from "./geometry.js";
+import { cn } from "../lib/cn.js";
 
 export {
   EPSILON,
@@ -36,6 +43,7 @@ export type FlowBreak = {
   pageNumber: number;
   flowId: string;
   marginTop: number;
+  flowTop: number;
 };
 
 /* =========================================================
@@ -45,6 +53,8 @@ export type FlowBreak = {
 type PaginationContextValue = {
   breaks: FlowBreak[];
   geometry: PaginationGeometry;
+  invalidate: () => void;
+  beginMeasurement: () => () => void;
 };
 
 export const PaginationContext = createContext<PaginationContextValue | null>(
@@ -73,10 +83,16 @@ export function getPageContentBottom(pageNumber: number) {
    FLOAT BREAKS
    ========================================================= */
 
-function FlowBreaks({ breaks }: { breaks: FlowBreak[] }) {
+function FlowBreaks({
+  breaks,
+  background,
+}: {
+  breaks: FlowBreak[];
+  background?: CSSProperties["backgroundColor"];
+}) {
   return (
     <>
-      {breaks.map((pageBreak, idx) => (
+      {breaks.map((pageBreak) => (
         <div
           key={`${pageBreak.flowId}-${pageBreak.pageNumber}`}
           className="pagination-widget"
@@ -90,7 +106,10 @@ function FlowBreaks({ breaks }: { breaks: FlowBreak[] }) {
               }}
             />
 
-            <div className="flow-breaker" />
+            <div
+              className="flow-breaker"
+              style={background === undefined ? undefined : { background }}
+            />
           </div>
         </div>
       ))}
@@ -105,9 +124,13 @@ function FlowBreaks({ breaks }: { breaks: FlowBreak[] }) {
 function PaginationFlow({
   className,
   children,
+  breakBackground,
+  keepTogether = false,
 }: {
   className?: string;
   children: ReactNode;
+  breakBackground?: CSSProperties["backgroundColor"];
+  keepTogether?: boolean;
 }) {
   const flowId = useId();
 
@@ -117,11 +140,29 @@ function PaginationFlow({
     <div
       className={`pagination-flow ${className ?? ""}`}
       data-pagination-flow={flowId}
+      {...(keepTogether ? { "data-pagination-keep-together": "true" } : {})}
     >
-      <FlowBreaks breaks={breaks} />
+      <FlowBreaks breaks={breaks} background={breakBackground} />
 
       {children}
     </div>
+  );
+}
+
+export function KeepTogether({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <PaginationFlow
+      className={`keep-together ${className ?? ""}`}
+      keepTogether
+    >
+      {children}
+    </PaginationFlow>
   );
 }
 
@@ -141,21 +182,63 @@ export function FullWidthRegion({ children }: { children: ReactNode }) {
    COLUMNS REGION
    ========================================================= */
 
+export type ColumnsRegionProps = {
+  leftColumn: ReactNode;
+  rightColumn: ReactNode;
+  className?: string;
+  rightColumnClassName?: string;
+  leftColumnClassName?: string;
+  gap?: number;
+  gridTemplateColumns?: string;
+  divider?: boolean;
+  breakBackground?: CSSProperties["backgroundColor"];
+  leftBreakBackground?: CSSProperties["backgroundColor"];
+  rightBreakBackground?: CSSProperties["backgroundColor"];
+};
+
 export function ColumnsRegion({
   leftColumn,
   rightColumn,
-}: {
-  leftColumn: ReactNode;
-  rightColumn: ReactNode;
-}) {
+  className,
+  rightColumnClassName,
+  leftColumnClassName,
+  gap = 24,
+  gridTemplateColumns = "minmax(0, 35fr) minmax(0,100fr)",
+  divider = false,
+  breakBackground,
+  leftBreakBackground,
+  rightBreakBackground,
+}: ColumnsRegionProps) {
   return (
-    <div className="columns-region">
-      <PaginationFlow className="column">
-        <div className="column-content">{leftColumn}</div>
+    <div
+      className={cn("columns-region", className)}
+      style={{
+        columnGap: `${gap}px`,
+        gridTemplateColumns,
+      }}
+    >
+      <PaginationFlow
+        className="column"
+        breakBackground={leftBreakBackground ?? breakBackground}
+      >
+        <div className={cn("column-content", leftColumnClassName)}>
+          {leftColumn}
+        </div>
       </PaginationFlow>
 
-      <PaginationFlow className="column">
-        <div className="column-content">{rightColumn}</div>
+      <PaginationFlow
+        className="column"
+        breakBackground={rightBreakBackground ?? breakBackground}
+      >
+        <div
+          className={cn(
+            "column-content",
+            rightColumnClassName,
+            divider && "border-l-2 border-gray-500 pl-6 h-full",
+          )}
+        >
+          {rightColumn}
+        </div>
       </PaginationFlow>
     </div>
   );
