@@ -1,0 +1,14 @@
+.template3-columns {
+  position: relative;
+}
+
+.template3-columns::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(70% - 16.8px);
+  width: 1px;
+  background: var(--color-yellow-400);
+  pointer-events: none;
+}

@@ -21,6 +21,7 @@ export const ResumeTemplate3 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
         <Summary data={data} />
 
         <ColumnsRegion
+          className="template3-columns"
           gridTemplateColumns="minmax(0, 7fr) minmax(0, 3fr)"
           leftColumn={<LeftSection data={data} />}
           rightColumn={<RightSection data={data} />}

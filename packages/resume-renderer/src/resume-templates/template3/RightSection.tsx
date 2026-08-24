@@ -18,6 +18,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   return (
     <SectionItem
       title="Education"
+      className="space-y-4"
       renderItem={({
         degree,
         institution,

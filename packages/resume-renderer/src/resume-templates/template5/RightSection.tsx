@@ -104,7 +104,7 @@ const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
 
 const RightSection = ({ data }: { data: ResumeForm }) => {
   return (
-    <div className="space-y-8 border-l border-gray-600 pt-12 pl-6">
+    <div className="space-y-8 pt-12 pl-6">
       <Experience items={data.workExperiences} />
       <Education items={data.educations} />
     </div>
