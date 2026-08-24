@@ -26,22 +26,22 @@ const Skills = ({ skills = {} }: { skills: ResumeForm["skills"] }) => {
   ].filter((item) => item.items.length > 0);
 
   return (
-    <KeepTogether>
-      <SectionItem
-        title="Skills"
-        items={skillsToArray}
-        renderItem={(item) => {
-          if (!item?.head) return null;
+    <SectionItem
+      title="Skills"
+      items={skillsToArray}
+      renderItem={(item) => {
+        if (!item?.head) return null;
 
-          return (
-            <div key={item.head} className="mb-2">
+        return (
+          <KeepTogether key={item.head}>
+            <div className="mb-2">
               <p className="font-bold">{item.head}</p>
               <p>{item.items.map((i) => i.name).join(", ")}</p>
             </div>
-          );
-        }}
-      />
-    </KeepTogether>
+          </KeepTogether>
+        );
+      }}
+    />
   );
 };
 
