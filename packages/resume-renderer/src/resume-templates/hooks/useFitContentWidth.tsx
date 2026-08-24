@@ -9,6 +9,8 @@ import { PaginationContext } from "../../pagination/Pagination.js";
 
 function measureRenderedContentWidth(element: HTMLElement): number {
   const elementRect = element.getBoundingClientRect();
+  const scaleX =
+    element.offsetWidth > 0 ? elementRect.width / element.offsetWidth : 1;
 
   let maxRight = elementRect.left;
 
@@ -38,7 +40,7 @@ function measureRenderedContentWidth(element: HTMLElement): number {
     node = walker.nextNode();
   }
 
-  return Math.ceil(maxRight - elementRect.left);
+  return Math.ceil((maxRight - elementRect.left) / scaleX);
 }
 
 export function useFitContentWidth<T extends HTMLElement>() {

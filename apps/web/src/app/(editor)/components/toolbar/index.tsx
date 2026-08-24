@@ -1,11 +1,11 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { FileStack } from "lucide-react";
 import {
   Popover,
@@ -34,16 +34,32 @@ const Toolbar = ({
   onResumeTemplateChange,
   template,
 }: {
-  onPrintClick: () => void;
+  onPrintClick: () => void | Promise<void>;
   onResumeTemplateChange: (template: any) => void;
   template: string;
 }) => {
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrintClick = async () => {
+    setIsPrinting(true);
+
+    try {
+      await onPrintClick();
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
   return (
-    <div className="absolute z-10 flex h-full items-end">
-      <div className="mb-4 ml-2 flex flex-col gap-1">
+    <div className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-end">
+      <div className="pointer-events-auto mb-4 ml-2 flex flex-col gap-1">
         <ToolbarTooltip text="Download/Print resume">
-          <Button onClick={onPrintClick}>
-            <Download />
+          <Button onClick={handlePrintClick} disabled={isPrinting}>
+            {isPrinting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Download />
+            )}
           </Button>
         </ToolbarTooltip>
 

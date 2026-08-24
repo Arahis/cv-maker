@@ -12,13 +12,11 @@ import { Eye } from "lucide-react";
 import { ResumeTemplateKey } from "@/components/templates/components";
 
 const ResumePreviewWrapper = ({
-  resumeId,
   resumeTemplate,
   ref,
   onPrintClick,
   onResumeTemplateChange,
 }: {
-  resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   onPrintClick: () => void;
@@ -34,7 +32,7 @@ const ResumePreviewWrapper = ({
         </DrawerTrigger>
         <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-dvh">
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
-          <div className="relative flex overflow-y-auto">
+          <div className="relative flex h-full min-h-0 overflow-hidden">
             <Toolbar
               onPrintClick={onPrintClick}
               onResumeTemplateChange={onResumeTemplateChange}
@@ -42,7 +40,6 @@ const ResumePreviewWrapper = ({
             />
             <ResumePreview
               key={resumeTemplate}
-              resumeId={resumeId}
               ref={ref}
               template={resumeTemplate}
             />
@@ -53,18 +50,13 @@ const ResumePreviewWrapper = ({
   }
 
   return (
-    <div className="relative flex w-1/2 overflow-y-auto">
+    <div className="relative flex h-full min-h-0 w-1/2 overflow-hidden">
       <Toolbar
         onPrintClick={onPrintClick}
         onResumeTemplateChange={onResumeTemplateChange}
         template={resumeTemplate || "template1"}
       />
-      <ResumePreview
-        key={resumeTemplate}
-        resumeId={resumeId}
-        ref={ref}
-        template={resumeTemplate}
-      />
+      <ResumePreview key={resumeTemplate} ref={ref} template={resumeTemplate} />
     </div>
   );
 };
