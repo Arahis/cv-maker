@@ -11,7 +11,8 @@ const HeaderSection = ({
 }) => {
   return (
     <ColumnsRegion
-      gap={24}
+      gap={photo ? 24 : 0}
+      gridTemplateColumns="fit-content(30%) minmax(0, 1fr)"
       leftColumn={
         photo && (
           <div

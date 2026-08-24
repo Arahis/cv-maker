@@ -8,6 +8,7 @@ import {
   isSocialFilled,
 } from "../../../lib/isSectionFilled.js";
 import { formatUrl } from "../../../utils/formatUrl.js";
+import { KeepTogether } from "../../../pagination/Pagination.js";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -17,6 +18,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   return (
     <SectionItem
       title="Education"
+      itemsContainerClassName="space-y-4"
       renderItem={({
         degree,
         institution,
@@ -25,7 +27,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
         endDate,
         isFullDate,
       }) => (
-        <div className="text-[14px]">
+        <KeepTogether>
           <p className="font-bold">{degree}</p>
           <p className="mb-2">{institution}</p>
           <p>
@@ -34,7 +36,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
           {startDate && endDate && (
             <p>{`${formatDate(isFullDate, startDate)} - ${formatDate(isFullDate, endDate)}`}</p>
           )}
-        </div>
+        </KeepTogether>
       )}
       items={items}
     />
@@ -76,19 +78,21 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
   if (!hasLanguages) return;
 
   return (
-    <SectionItem
-      title="Languages"
-      items={items}
-      renderItem={(item) => {
-        if (!item.languageName) return;
-        return (
-          <div key={item.id} className="text-[14px]">
-            <p className="font-bold">{item.languageName}</p>
-            <p>{item.languageLevel}</p>
-          </div>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Languages"
+        items={items}
+        renderItem={(item) => {
+          if (!item.languageName) return;
+          return (
+            <div key={item.id} className="text-[14px]">
+              <p className="font-bold">{item.languageName}</p>
+              <p>{item.languageLevel}</p>
+            </div>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -98,25 +102,27 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
   if (!hasLinks) return;
 
   return (
-    <SectionItem
-      title="Social Links"
-      items={items}
-      renderItem={(item) => {
-        if (!item.linkName) return;
-        return (
-          <div key={item.id} className="text-[14px]">
-            <p className="font-bold">{item.linkName}</p>
-            <a
-              href={item.linkAddress}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {formatUrl(item.linkAddress)}
-            </a>
-          </div>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Social Links"
+        items={items}
+        renderItem={(item) => {
+          if (!item.linkName) return;
+          return (
+            <div key={item.id} className="text-[14px]">
+              <p className="font-bold">{item.linkName}</p>
+              <a
+                href={item.linkAddress}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatUrl(item.linkAddress)}
+              </a>
+            </div>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -133,19 +139,20 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
         if (sectionItems.length === 0) return null;
 
         return (
-          <SectionItem
-            key={item.id ?? `${title}-${idx}`}
-            title={title}
-            items={sectionItems}
-            renderItem={(i) => {
-              return (
-                <div key={i.id} className="text-[14px]">
-                  <p className="font-bold">{i.title}</p>
-                  <p>{formatUrl(i.value)}</p>
-                </div>
-              );
-            }}
-          />
+          <KeepTogether key={item.id ?? `${title}-${idx}`}>
+            <SectionItem
+              title={title}
+              items={sectionItems}
+              renderItem={(i) => {
+                return (
+                  <div key={i.id} className="text-[14px]">
+                    <p className="font-bold">{i.title}</p>
+                    <p>{formatUrl(i.value)}</p>
+                  </div>
+                );
+              }}
+            />
+          </KeepTogether>
         );
       })}
     </React.Fragment>
