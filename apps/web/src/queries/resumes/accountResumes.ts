@@ -73,11 +73,16 @@ export function useUpdateResume() {
 
   return useMutation({
     mutationFn: updateResume,
-    onSuccess: (_, input) => {
-      queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
-      queryClient.invalidateQueries({
-        queryKey: accountResumeKeys.detail(input.resumeId),
-      });
+    onSuccess: (updatedResume, input) => {
+      queryClient.setQueryData(
+        accountResumeKeys.detail(input.resumeId),
+        updatedResume,
+      );
+      queryClient.setQueryData<Resume[]>(accountResumeKeys.list, (resumes) =>
+        resumes?.map((resume) =>
+          resume.id === updatedResume.id ? updatedResume : resume,
+        ),
+      );
     },
   });
 }
@@ -87,11 +92,16 @@ export function useUpdateResumeTemplate() {
 
   return useMutation({
     mutationFn: updateResumeTemplate,
-    onSuccess: (_, input) => {
-      queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
-      queryClient.invalidateQueries({
-        queryKey: accountResumeKeys.detail(input.resumeId),
-      });
+    onSuccess: (updatedResume, input) => {
+      queryClient.setQueryData(
+        accountResumeKeys.detail(input.resumeId),
+        updatedResume,
+      );
+      queryClient.setQueryData<Resume[]>(accountResumeKeys.list, (resumes) =>
+        resumes?.map((resume) =>
+          resume.id === updatedResume.id ? updatedResume : resume,
+        ),
+      );
     },
   });
 }
@@ -101,11 +111,16 @@ export function useUpdateResumeMedia() {
 
   return useMutation({
     mutationFn: updateResumeMedia,
-    onSuccess: (_, input) => {
-      queryClient.invalidateQueries({ queryKey: accountResumeKeys.list });
-      queryClient.invalidateQueries({
-        queryKey: accountResumeKeys.detail(input.resumeId),
-      });
+    onSuccess: (updatedResume, input) => {
+      queryClient.setQueryData(
+        accountResumeKeys.detail(input.resumeId),
+        updatedResume,
+      );
+      queryClient.setQueryData<Resume[]>(accountResumeKeys.list, (resumes) =>
+        resumes?.map((resume) =>
+          resume.id === updatedResume.id ? updatedResume : resume,
+        ),
+      );
     },
   });
 }

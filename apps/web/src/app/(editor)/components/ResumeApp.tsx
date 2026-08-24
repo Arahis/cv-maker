@@ -54,6 +54,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   const f = useResumeForm();
   const router = useRouter();
   const { setAvatarState } = useAvatar();
+  const initializedResumeId = useRef<string | null>(null);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -71,12 +72,18 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
   });
 
   useEffect(() => {
-    if (resume) {
+    if (resume && initializedResumeId.current !== resumeId) {
       f.reset(resume.data);
       setResumeTemplate(resume.template);
       setAvatarState(resume.media?.avatar);
+      initializedResumeId.current = resumeId;
     }
-  }, [resumeId, f, resume?.data, resume?.template, resume?.media, setAvatarState]);
+  }, [
+    resumeId,
+    f,
+    resume,
+    setAvatarState,
+  ]);
 
   useEffect(() => {
     if (status === "forbidden") {
