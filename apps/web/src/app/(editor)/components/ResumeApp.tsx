@@ -78,12 +78,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
       setAvatarState(resume.media?.avatar);
       initializedResumeId.current = resumeId;
     }
-  }, [
-    resumeId,
-    f,
-    resume,
-    setAvatarState,
-  ]);
+  }, [resumeId, f, resume, setAvatarState]);
 
   useEffect(() => {
     if (status === "forbidden") {
@@ -129,7 +124,6 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
         </div>
 
         <ResumePreviewWrapper
-          resumeId={resumeId}
           resumeTemplate={resumeTemplate}
           onResumeTemplateChange={onResumeTemplateChange}
           onPrintClick={handlePrintClick}
