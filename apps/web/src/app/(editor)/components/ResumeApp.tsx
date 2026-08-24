@@ -69,6 +69,25 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
+    pageStyle: `
+      @page { margin: 0; }
+      .right-section {
+        position: relative !important;
+        z-index: 0 !important;
+      }
+      .right-section::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        top: -28px !important;
+        left: -28px !important;
+        width: calc(100% + 28px + var(--page-padding-x)) !important;
+        height: calc(100% + 68px) !important;
+        background-color: #f3f4f6 !important;
+        z-index: -1 !important;
+        pointer-events: none !important;
+      }
+    `,
   });
 
   useEffect(() => {
