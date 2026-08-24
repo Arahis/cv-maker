@@ -26,6 +26,10 @@ import {
 } from "./geometry.js";
 import { cn } from "../lib/cn.js";
 
+function getRenderedScale(renderedSize: number, layoutSize: number) {
+  return layoutSize > 0 ? renderedSize / layoutSize : 1;
+}
+
 /* =========================================================
    MAIN
    ========================================================= */
@@ -157,6 +161,7 @@ const PaginationDocument = forwardRef<
       }
 
       const editorRect = editor.getBoundingClientRect();
+      const scaleY = getRenderedScale(editorRect.height, editor.offsetHeight);
 
       const elements = Array.from(
         documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
@@ -168,8 +173,8 @@ const PaginationDocument = forwardRef<
         return {
           element,
           id: element.dataset.paginationFlow!,
-          top: rect.top - editorRect.top,
-          bottom: rect.bottom - editorRect.top,
+          top: (rect.top - editorRect.top) / scaleY,
+          bottom: (rect.bottom - editorRect.top) / scaleY,
         };
       });
 
@@ -197,13 +202,14 @@ const PaginationDocument = forwardRef<
       }
 
       const editorRect = editor.getBoundingClientRect();
+      const scaleY = getRenderedScale(editorRect.height, editor.offsetHeight);
 
       const flowTops = new Map(
         Array.from(
           documentFlow.querySelectorAll<HTMLElement>("[data-pagination-flow]"),
         ).map((flow) => [
           flow.dataset.paginationFlow!,
-          flow.getBoundingClientRect().top - editorRect.top,
+          (flow.getBoundingClientRect().top - editorRect.top) / scaleY,
         ]),
       );
 
@@ -237,7 +243,10 @@ const PaginationDocument = forwardRef<
         const range = document.createRange();
         range.selectNodeContents(textNode);
         for (const rect of range.getClientRects()) {
-          layoutBottom = Math.max(layoutBottom, rect.bottom - editorRect.top);
+          layoutBottom = Math.max(
+            layoutBottom,
+            (rect.bottom - editorRect.top) / scaleY,
+          );
         }
         textNode = textWalker.nextNode();
       }

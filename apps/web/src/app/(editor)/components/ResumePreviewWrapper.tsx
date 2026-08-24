@@ -12,13 +12,11 @@ import { Eye } from "lucide-react";
 import { ResumeTemplateKey } from "@/components/templates/components";
 
 const ResumePreviewWrapper = ({
-  resumeId,
   resumeTemplate,
   ref,
   onPrintClick,
   onResumeTemplateChange,
 }: {
-  resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   onPrintClick: () => void;
@@ -42,7 +40,6 @@ const ResumePreviewWrapper = ({
             />
             <ResumePreview
               key={resumeTemplate}
-              resumeId={resumeId}
               ref={ref}
               template={resumeTemplate}
             />
@@ -59,12 +56,7 @@ const ResumePreviewWrapper = ({
         onResumeTemplateChange={onResumeTemplateChange}
         template={resumeTemplate || "template1"}
       />
-      <ResumePreview
-        key={resumeTemplate}
-        resumeId={resumeId}
-        ref={ref}
-        template={resumeTemplate}
-      />
+      <ResumePreview key={resumeTemplate} ref={ref} template={resumeTemplate} />
     </div>
   );
 };
