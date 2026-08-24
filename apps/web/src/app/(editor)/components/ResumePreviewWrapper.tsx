@@ -32,7 +32,7 @@ const ResumePreviewWrapper = ({
         </DrawerTrigger>
         <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-dvh">
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
-          <div className="relative flex overflow-y-auto">
+          <div className="relative flex h-full min-h-0 overflow-hidden">
             <Toolbar
               onPrintClick={onPrintClick}
               onResumeTemplateChange={onResumeTemplateChange}
@@ -50,7 +50,7 @@ const ResumePreviewWrapper = ({
   }
 
   return (
-    <div className="relative flex w-1/2 overflow-y-auto">
+    <div className="relative flex h-full min-h-0 w-1/2 overflow-hidden">
       <Toolbar
         onPrintClick={onPrintClick}
         onResumeTemplateChange={onResumeTemplateChange}

@@ -47,7 +47,7 @@ const ResumePreview = ({
   return (
     <div
       ref={containerRef}
-      className="relative h-fit w-full self-start overflow-y-auto bg-gray-50 p-4"
+      className="relative h-full min-h-0 w-full overflow-y-auto bg-gray-50 p-4"
     >
       <div className="mx-auto" style={{ width, height: contentHeight }}>
         <div
