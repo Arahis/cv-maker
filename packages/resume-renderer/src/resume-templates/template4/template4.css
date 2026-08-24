@@ -1,0 +1,14 @@
+.template4-columns {
+  position: relative;
+}
+
+.template4-columns::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(25% + 24px);
+  width: 1px;
+  background: var(--color-gray-600);
+  pointer-events: none;
+}

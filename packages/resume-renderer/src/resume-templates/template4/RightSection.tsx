@@ -82,7 +82,7 @@ const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
 
 const RightSection = ({ data }: { data: ResumeForm }) => {
   return (
-    <div className="space-y-8 border-l border-gray-600 pl-6 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
+    <div className="space-y-8 pl-6 [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-gray-600 [&>*:not(:last-child)]:pb-8">
       <Summary data={data.summary} />
       <Experience items={data.workExperiences || []} />
     </div>

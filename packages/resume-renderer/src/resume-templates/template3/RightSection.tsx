@@ -8,6 +8,7 @@ import SectionItem from "./SectionItem.js";
 import { formatDate } from "../../utils/formatDate.js";
 import React from "react";
 import { formatUrl } from "../../utils/formatUrl.js";
+import { KeepTogether } from "../../pagination/Pagination.js";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -17,6 +18,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   return (
     <SectionItem
       title="Education"
+      className="space-y-4"
       renderItem={({
         degree,
         institution,
@@ -25,7 +27,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
         endDate,
         isFullDate,
       }) => (
-        <div>
+        <KeepTogether>
           <p className="mb-2 text-[16px] font-bold">{degree}</p>
           <p className="text-[16px]">{institution}</p>
           <div className="mb-0.5">
@@ -34,7 +36,7 @@ const Education = ({ items }: { items: ResumeForm["educations"] }) => {
             )}
             {city && <p className="italic">{city}</p>}
           </div>
-        </div>
+        </KeepTogether>
       )}
       items={items}
     />
@@ -47,25 +49,27 @@ const SocialLinks = ({ items }: { items: ResumeForm["socialLinks"] }) => {
   if (!hasLinks) return;
 
   return (
-    <SectionItem
-      title="Social Links"
-      items={items}
-      renderItem={(item) => {
-        if (!item.linkName) return;
-        return (
-          <React.Fragment key={item.id}>
-            <p className="font-bold">{item.linkName}</p>
-            <a
-              href={item.linkAddress}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {formatUrl(item.linkAddress)}
-            </a>
-          </React.Fragment>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Social Links"
+        items={items}
+        renderItem={(item) => {
+          if (!item.linkName) return;
+          return (
+            <div key={item.id}>
+              <p className="font-bold">{item.linkName}</p>
+              <a
+                href={item.linkAddress}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatUrl(item.linkAddress)}
+              </a>
+            </div>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -74,18 +78,20 @@ const Languages = ({ items }: { items: ResumeForm["languages"] }) => {
   if (!hasLanguages) return;
 
   return (
-    <SectionItem
-      title="Languages"
-      items={items}
-      renderItem={(item) => {
-        return (
-          <React.Fragment key={item.id}>
-            <p className="font-bold">{item.languageName}</p>
-            <p>{item.languageLevel}</p>
-          </React.Fragment>
-        );
-      }}
-    />
+    <KeepTogether>
+      <SectionItem
+        title="Languages"
+        items={items}
+        renderItem={(item) => {
+          return (
+            <div key={item.id}>
+              <p className="font-bold">{item.languageName}</p>
+              <p>{item.languageLevel}</p>
+            </div>
+          );
+        }}
+      />
+    </KeepTogether>
   );
 };
 
@@ -102,19 +108,20 @@ const CustomSections = ({ items }: { items: ResumeForm["customSections"] }) => {
         if (sectionItems.length === 0) return null;
 
         return (
-          <SectionItem
-            key={item.id ?? `${title}-${idx}`}
-            title={title}
-            items={sectionItems}
-            renderItem={(i) => {
-              return (
-                <React.Fragment key={i.id}>
-                  <p className="font-bold">{i.title}</p>
-                  <p>{formatUrl(i.value)}</p>
-                </React.Fragment>
-              );
-            }}
-          />
+          <KeepTogether key={item.id ?? `${title}-${idx}`}>
+            <SectionItem
+              title={title}
+              items={sectionItems}
+              renderItem={(i) => {
+                return (
+                  <React.Fragment key={i.id}>
+                    <p className="font-bold">{i.title}</p>
+                    <p>{formatUrl(i.value)}</p>
+                  </React.Fragment>
+                );
+              }}
+            />
+          </KeepTogether>
         );
       })}
     </React.Fragment>

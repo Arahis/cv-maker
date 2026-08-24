@@ -138,7 +138,7 @@ const Experience = ({ items }: { items: ResumeForm["workExperiences"] }) => {
 
 const LeftSection = ({ data }: { data: ResumeForm }) => {
   return (
-    <div className="border-r border-yellow-400 py-8 pr-6">
+    <div className="py-8 pr-6">
       <Skills skills={data.skills || {}} />
       <Experience items={data.workExperiences} />
     </div>

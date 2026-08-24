@@ -15,7 +15,7 @@ const HeaderSection = ({
         <div>
           {photo && (
             <div
-              className="aspect-square w-40 rounded-full bg-gray-50 bg-cover bg-center outline-1 outline-offset-4"
+              className="aspect-square w-40 rounded-full bg-gray-50 bg-cover bg-center outline-1 outline-offset-4 ml-auto"
               style={{
                 backgroundImage: photo ? `url(${photo})` : undefined,
               }}

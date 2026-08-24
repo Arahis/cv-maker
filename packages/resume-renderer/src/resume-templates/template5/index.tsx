@@ -18,6 +18,7 @@ export const ResumeTemplate5 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
       >
         <HeaderSection data={data} photo={photo} />
         <ColumnsRegion
+          className="template5-columns"
           leftColumn={<LeftSection data={data} />}
           rightColumn={<RightSection data={data} />}
         />

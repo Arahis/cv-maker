@@ -23,6 +23,7 @@ export const ResumeTemplate1 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
         </FullWidthRegion>
 
         <ColumnsRegion
+          className="template1-columns"
           gridTemplateColumns="minmax(0, 35fr) minmax(0, 65fr)"
           leftColumn={<LeftSection data={data} />}
           rightColumn={<RightSection data={data} />}
