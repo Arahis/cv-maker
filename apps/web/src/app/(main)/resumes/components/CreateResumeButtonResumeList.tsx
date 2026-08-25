@@ -15,7 +15,7 @@ const CreateResumeButtonResumeList = () => {
           size="lg"
           className="cursor-pointer"
         >
-          Create New Resume
+          Create Resume
         </Button>
       )}
     />

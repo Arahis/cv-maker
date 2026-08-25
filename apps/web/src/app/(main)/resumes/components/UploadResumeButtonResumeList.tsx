@@ -15,7 +15,7 @@ export default function UploadResumeButtonResumeList() {
           size="lg"
           className="cursor-pointer"
         >
-          Upload Existing Resume
+          Upload Resume
         </Button>
       )}
     />
