@@ -10,11 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import {
-  DEFAULT_RESUME_TEMPLATE_COMPONENT,
-  getResumeTemplateComponent,
-  resumeTemplates,
-} from "@/components/templates/components";
+import { getResumeTemplateComponent } from "@/components/templates/components";
 
 import { format, isValid, parseISO } from "date-fns";
 import {
@@ -31,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 // TODO: create in separate file to import in different places
 const getScaleForA4 = (scale: number) => {
@@ -87,8 +84,13 @@ const ResumeCard = ({
         className="cursor-pointer"
       >
         <div
-          className={cn("flex rounded-md border-2 p-1 hover:border-blue-300")}
+          className={cn(
+            "relative flex rounded-md border-2 p-1 hover:border-blue-300",
+          )}
         >
+          {source === "local" && (
+            <Badge className="absolute top-2 right-2 z-2">Local</Badge>
+          )}
           <div
             className="cursor-pointer overflow-hidden"
             style={{ width: scaledWidth, height: scaledHeight }}
