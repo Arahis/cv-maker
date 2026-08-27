@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { format, isValid, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,10 +11,7 @@ import {
   RefreshCcw,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
 import { getResumeTemplateComponent } from "@/components/templates/components";
-
-import { format, isValid, parseISO } from "date-fns";
 import {
   ResumeController,
   ResumeListItem,
@@ -28,19 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
-// TODO: create in separate file to import in different places
-const getScaleForA4 = (scale: number) => {
-  const WIDTH = 794;
-  const HEIGHT = 1123;
-  return {
-    scaledWidth: WIDTH * scale,
-    scaledHeight: HEIGHT * scale,
-    width: WIDTH,
-    height: HEIGHT,
-    scale,
-  };
-};
 
 const ResumeCard = ({
   resume,
@@ -67,9 +53,21 @@ const ResumeCard = ({
     updatedAt,
   } = resume;
   const Template = getResumeTemplateComponent(template);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [previewWidth, setPreviewWidth] = useState(0);
 
-  const { scaledWidth, scaledHeight, scale, width, height } =
-    getScaleForA4(0.25);
+  useEffect(() => {
+    if (!previewRef.current) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setPreviewWidth(entry.contentRect.width);
+    });
+
+    observer.observe(previewRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const scale = previewWidth > 0 ? previewWidth / 794 : 0.25;
 
   const updatedAtDate =
     typeof updatedAt === "number" ? new Date(updatedAt) : parseISO(updatedAt);
@@ -92,12 +90,17 @@ const ResumeCard = ({
             <Badge className="absolute top-2 right-2 z-2">Local</Badge>
           )}
           <div
-            className="cursor-pointer overflow-hidden"
-            style={{ width: scaledWidth, height: scaledHeight }}
+            ref={previewRef}
+            className="aspect-[794/1123] w-full cursor-pointer overflow-hidden"
           >
             <div
-              className="origin-top-left transform text-left"
-              style={{ width: width, height: height, scale: scale }}
+              className="origin-top-left text-left"
+              style={{
+                width: 794,
+                height: 1123,
+                transform: `scale(${scale})`,
+                transformOrigin: "top left",
+              }}
             >
               <Template data={data} />
             </div>
@@ -192,8 +195,6 @@ const ResumeList = () => {
     clearQuotaResetError,
     ...controls
   } = useResumeController();
-  const { scaledWidth } = getScaleForA4(0.25);
-
   const errorDialog = (
     <ErrorDialog
       open={Boolean(quotaResetError)}
@@ -229,14 +230,11 @@ const ResumeList = () => {
 
   return (
     <>
-      <div
-        className="mx-auto grid w-[60%] justify-center gap-4"
-        style={{
-          gridTemplateColumns: `repeat(auto-fill, ${scaledWidth + 8}px)`,
-        }}
-      >
+      <div className="mx-auto grid grid-cols-2 justify-center gap-4 px-2 sm:grid-cols-3 sm:px-4 md:grid-cols-4 md:px-20 lg:grid-cols-5 lg:px-40">
         {resumes.map((r) => (
-          <ResumeCard key={r.id} resume={r} {...controls} />
+          <div key={r.id} className="w-full">
+            <ResumeCard resume={r} {...controls} />
+          </div>
         ))}
       </div>
       {errorDialog}

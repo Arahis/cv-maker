@@ -6,6 +6,7 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerTitle,
+  DrawerDescription,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
@@ -27,12 +28,15 @@ const ResumePreviewWrapper = ({
       <Drawer direction="bottom">
         <DrawerTrigger asChild className="absolute right-4 bottom-4">
           <Button variant="default">
-            <Eye />
+            <Eye /> Preview
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-dvh">
+        <DrawerContent className="data-[vaul-drawer-direction=bottom]:h-dvh data-[vaul-drawer-direction=bottom]:max-h-dvh">
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
-          <div className="relative flex h-full min-h-0 overflow-hidden">
+          <DrawerDescription className="sr-only">
+            Preview of the current resume
+          </DrawerDescription>
+          <div className="relative flex min-h-0 flex-1 overflow-hidden">
             <Toolbar
               onPrintClick={onPrintClick}
               onResumeTemplateChange={onResumeTemplateChange}
