@@ -230,9 +230,9 @@ const ResumeList = () => {
 
   return (
     <>
-      <div className="mx-auto grid grid-cols-2 justify-center gap-4 px-2 sm:grid-cols-3 sm:px-4 md:grid-cols-4 md:px-20 lg:grid-cols-5 lg:px-40">
+      <div className="mx-auto grid grid-cols-[repeat(2,minmax(0,200px))] justify-center gap-4 px-2 sm:grid-cols-[repeat(3,minmax(0,200px))] sm:px-4 md:grid-cols-[repeat(4,minmax(0,200px))] md:px-20 lg:grid-cols-[repeat(5,minmax(0,200px))] lg:px-40">
         {resumes.map((r) => (
-          <div key={r.id} className="w-full">
+          <div key={r.id} className="w-full max-w-[200px] justify-self-center">
             <ResumeCard resume={r} {...controls} />
           </div>
         ))}
