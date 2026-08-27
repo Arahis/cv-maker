@@ -10,12 +10,14 @@ import Education from "./forms/Education";
 import Skills from "./forms/skills";
 import Summary from "./forms/Summary";
 import ResumeSteps from "./ResumeSteps";
-import { useIndexedDBDebouncedSave } from "@/lib/indexedDB";
 import { ResumeEditorProvider } from "../context/ResumeEditorContext";
 import { ResumeForm as ResumeFormProps } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import OtherInfo from "./forms/OtherInfo";
 import { cn } from "@/lib/utils";
+import { Source } from "@/api/resumes";
+import { ResumeForm as ResumeFormType } from "@/lib/validation";
+import { useResumePersistenceController } from "../useResumePersistenceController";
 
 const resumeSections: {
   title: string;
@@ -111,12 +113,14 @@ const ResumeStepsControl = ({
 const ResumeForm = ({
   resumeId,
   onPrintClick,
+  source,
 }: {
   resumeId: string;
   onPrintClick: () => void;
+  source: Source | null;
 }) => {
   const f = useFormContext<ResumeFormProps>();
-  const formData = useWatch({ control: f.control });
+  const formData = useWatch({ control: f.control }) as ResumeFormType;
   const [currentEditorStep, setCurrentEditorStep] = useState(0);
   const sectionTitles = resumeSections.map((section) => section.title);
 
@@ -134,9 +138,12 @@ const ResumeForm = ({
     setCurrentEditorStep((prev) => Math.max(0, prev - 1));
   };
 
-  // Autosave в IndexedDB with debounce
-  // @ts-expect-error: useWatch doesn't infer the type of formData correctly
-  useIndexedDBDebouncedSave(resumeId, formData, 2000);
+  const { saveMedia } = useResumePersistenceController({
+    resumeId,
+    source,
+    data: formData,
+    debounceMs: 2000,
+  });
 
   return (
     <div className="mx-4 py-4 md:mx-12">
@@ -147,7 +154,7 @@ const ResumeForm = ({
         setNextStep={handleGoToNextItem}
         setPrevStep={handleGoToPrevItem}
       />
-      <ResumeEditorProvider value={{ resumeId }}>
+      <ResumeEditorProvider value={{ resumeId, source, saveMedia }}>
         <div className="rounded-2xl border-2 border-gray-100 p-6">
           <Component {...(slug === "finalize" ? { onPrintClick } : {})} />
         </div>

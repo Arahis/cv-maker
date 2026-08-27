@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "./src/renderer.css";
+
+@source "./src/**/*.{ts,tsx}";
+
+@layer utilities {
+  .font-inter {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .font-brand {
+    font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .font-cantata {
+    font-family: Cantata, serif;
+  }
+}

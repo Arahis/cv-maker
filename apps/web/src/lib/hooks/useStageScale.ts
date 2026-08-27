@@ -27,7 +27,7 @@ type StageSize = {
 
 export const useStageScale = (
   container: RefObject<HTMLDivElement | null>,
-  maxScale = 0.7,
+  maxScale = 0.8,
   minScale = 0.5,
   targetWidth = 794,
   targetHeight = 1123,

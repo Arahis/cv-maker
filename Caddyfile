@@ -1,3 +1,7 @@
+api.staging.cvoop.com {
+  reverse_proxy api-staging:4000
+}
+
 api.cvoop.com {
-  reverse_proxy api:4000
+  reverse_proxy api-production:4000
 }

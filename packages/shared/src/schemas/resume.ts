@@ -9,19 +9,16 @@ export const generalFormSchema = z.object({
 
 export type GeneralResumeForm = z.infer<typeof generalFormSchema>;
 
-export const avatarCropDataSchema = z
-  .object({
-    x: z.number().min(0).max(100),
-    y: z.number().min(0).max(100),
-    zoom: z.number().min(1).max(4),
-    rotation: z.number().min(0).max(360),
+const resumeEmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((value) => value === "" || z.email().safeParse(value).success, {
+    message: "Invalid email format",
   })
   .optional();
 
-export type AvatarCropDataForm = z.infer<typeof avatarCropDataSchema>;
-
 export const personalInfoSchema = z.object({
-  avatarCropData: avatarCropDataSchema,
   firstName: optionalString,
   lastName: optionalString,
   jobTitle: optionalString,
@@ -70,12 +67,7 @@ export const personalInfoSchema = z.object({
       }
     })
     .optional(),
-  email: z.preprocess((v) => {
-    const s = String(v ?? "")
-      .trim()
-      .toLowerCase();
-    return s === "" ? undefined : s;
-  }, z.email("Invalid email format").optional()),
+  email: resumeEmailSchema,
 });
 
 export type PersonalInfoForm = z.infer<typeof personalInfoSchema>;
@@ -147,7 +139,7 @@ export const socialLinksSchema = z.object({
 export type SocialLinksForm = z.infer<typeof socialLinksSchema>;
 
 const skillItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   name: z.string().min(2, "Skill name must be at least 2 characters"),
 });
 
@@ -169,19 +161,18 @@ export const summarySchema = z.object({
 export type SummaryForm = z.infer<typeof summarySchema>;
 
 const customSectionItemFieldsSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   title: optionalString,
   value: optionalString,
 });
 
 const customSectionItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   sectionName: optionalString,
   sectionItems: z.array(customSectionItemFieldsSchema).optional(),
 });
 
 export const customSectionSchema = z.object({
-  id: z.string().optional(),
   customSections: z.array(customSectionItemSchema).optional(),
 });
 
@@ -201,22 +192,26 @@ export const resumeSchema = z.object({
 
 export type ResumeForm = z.infer<typeof resumeSchema>;
 
-export const resumeTemplateSchema = z.enum([
-  "template1",
-  "template2",
-  "template3",
-  "template4",
-  "template5",
-]);
+export const DEFAULT_RESUME_TEMPLATE: ResumeTemplate = "template1";
+export const resumeTemplateSchema = z
+  .custom<ResumeTemplate>(
+    (value) => {
+      return typeof value === "string" && /^template[1-9]\d*$/.test(value);
+    },
+    {
+      message: "Invalid resume template",
+    },
+  )
+  .default(DEFAULT_RESUME_TEMPLATE);
 
-export type ResumeTemplate = z.infer<typeof resumeTemplateSchema>;
+export type ResumeTemplate = `template${number}`;
 
 export const resumeMediaSchema = z
   .object({
     avatar: z
       .object({
-        original: z.string().optional(),
-        cropped: z.string().optional(),
+        croppedUrl: z.string(),
+        croppedKey: z.string(),
       })
       .optional(),
   })

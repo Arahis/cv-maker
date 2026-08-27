@@ -1,9 +1,10 @@
 "use client";
 
 import { resumeTemplates } from "@/components/templates/components";
-import { loadResume, ResumeRecord } from "@/lib/indexedDB";
+import Loading from "@/components/Loading";
+import { useResumeEditorController } from "@/app/(editor)/useResumeEditorController";
 import { notFound, useSearchParams } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 const ResumeWrapperDOM = ({ children }: { children: ReactNode }) => {
   return (
@@ -28,43 +29,88 @@ const ResumeWrapperDOM = ({ children }: { children: ReactNode }) => {
 
 const PrintClient = () => {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const resumeId = searchParams.get("id");
+  const { status, resume } = useResumeEditorController(resumeId);
 
-  const [resumeData, setResumeData] = useState<ResumeRecord | undefined>();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const hasPrinted = useRef(false);
 
-  // Check if the resume exists in IndexedDB
-  // If it exists, load the data into the form
-  // If it doesn't exist, show a not found page
   useEffect(() => {
-    const checkResumeExists = async () => {
-      if (!id) return;
+    if (!resume) {
+      setPhotoUrl(null);
+      return;
+    }
 
-      const resume = await loadResume(id);
+    const avatar = resume.media?.avatar;
 
-      if (!!resume) {
-        setResumeData(resume);
-      }
+    if (!avatar) {
+      setPhotoUrl(null);
+      return;
+    }
+
+    // Local resumes keep the cropped image in IndexedDB as a Blob.
+    if ("croppedBlob" in avatar) {
+      const objectUrl = URL.createObjectURL(avatar.croppedBlob);
+      setPhotoUrl(objectUrl);
+
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    }
+
+    // Account resumes keep the uploaded image on the backend/storage.
+    setPhotoUrl(avatar.croppedUrl);
+  }, [resume]);
+
+  useEffect(() => {
+    if (status !== "ready" || !resume || hasPrinted.current) return;
+
+    const hasAvatar = Boolean(resume.media?.avatar);
+    if (hasAvatar && !photoUrl) return;
+
+    let cancelled = false;
+    let timeoutId: number | undefined;
+
+    const printWhenReady = async () => {
+      await document.fonts?.ready;
+
+      const images = Array.from(document.images);
+      await Promise.all(
+        images.map((image) => image.decode().catch(() => undefined)),
+      );
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (cancelled || hasPrinted.current) return;
+
+          hasPrinted.current = true;
+          timeoutId = window.setTimeout(() => window.print(), 300);
+        });
+      });
     };
 
-    checkResumeExists();
-  }, [id]);
+    void printWhenReady();
 
-  useEffect(() => {
-    setTimeout(() => window.print(), 300);
-  }, []);
+    return () => {
+      cancelled = true;
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [photoUrl, resume, status]);
 
-  if (resumeData === undefined) return <p>Loading...</p>;
-  if (!resumeData || !id) return notFound();
+  if (!resumeId || status === "not_found" || status === "forbidden") {
+    return notFound();
+  }
 
-  const Template = resumeTemplates[resumeData.template || "template1"];
+  if (status === "loading" || !resume) {
+    return <Loading />;
+  }
+
+  const Template = resumeTemplates[resume.template || "template1"];
 
   return (
-    <ResumeWrapperDOM>
-      <Template
-        data={resumeData.data}
-        photo={resumeData.media.avatar?.cropped}
-      />
-    </ResumeWrapperDOM>
+    <Template data={resume.data} photo={photoUrl} />
+    // <ResumeWrapperDOM>
+    // </ResumeWrapperDOM>
   );
 };
 

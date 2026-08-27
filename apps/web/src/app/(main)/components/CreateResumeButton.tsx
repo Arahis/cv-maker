@@ -1,37 +1,72 @@
 "use client";
 
-import { useState, JSX } from "react";
-import { defaultFormValues } from "@/lib/formDefaults";
-import { createResume } from "@/lib/indexedDB";
-import { useRouter } from "next/navigation";
+import { JSX, useState } from "react";
 import { TemplateKey } from "@/components/templates/previews";
+import { useCreateResumeController } from "../hooks/useCreateResumeController";
+import { ApiError } from "@/api/api-fetch";
+import { GuestResumeQuotaDialog } from "./GuestResumeQuotaDialog";
+import { ErrorDialog } from "./ErrorDialog";
+import { FullscreenLoading } from "./FullscreenLoading";
+import { useResumeAction } from "../providers/ResumeActionProvider";
 
 const CreateResumeButton = ({
   button,
   template = "template1",
+  withRedirect = false,
 }: {
   button: (onClick: () => void, isDisabled: boolean) => JSX.Element;
   template?: TemplateKey;
+  withRedirect?: boolean;
 }) => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { createResume, isLoading, isProcessing, hasGuestLocalResumes } =
+    useCreateResumeController();
+  const { isResumeActionPending, setIsResumeActionPending } = useResumeAction();
+  const [isQuotaDialogOpen, setIsQuotaDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCreateResume = async () => {
-    if (isLoading) return;
+    if (isLoading || isResumeActionPending) return;
 
-    setIsLoading(true);
-    const resumeId = crypto.randomUUID();
+    setIsResumeActionPending(true);
 
     try {
-      await createResume(resumeId, defaultFormValues, template);
-      router.push(`/resume-editor?id=${encodeURIComponent(resumeId)}`);
-    } catch {
-      alert("Error while creating resume. Please try again.");
-      setIsLoading(false);
+      if (withRedirect && hasGuestLocalResumes()) {
+        setIsQuotaDialogOpen(true);
+        return;
+      }
+
+      await createResume(template);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setIsQuotaDialogOpen(true);
+        return;
+      }
+
+      setErrorMessage("Error while creating resume. Please try again.");
+    } finally {
+      setIsResumeActionPending(false);
     }
   };
 
-  return button(handleCreateResume, isLoading);
+  return (
+    <>
+      {button(handleCreateResume, isLoading || isResumeActionPending)}
+      <GuestResumeQuotaDialog
+        open={isQuotaDialogOpen}
+        onOpenChange={setIsQuotaDialogOpen}
+        source="create"
+        hasEverUploaded={false}
+      />
+      <ErrorDialog
+        open={Boolean(errorMessage)}
+        onOpenChange={(open) => {
+          if (!open) setErrorMessage(null);
+        }}
+        message={errorMessage ?? ""}
+      />
+      {isProcessing && <FullscreenLoading />}
+    </>
+  );
 };
 
 export default CreateResumeButton;

@@ -2,6 +2,7 @@ type GtagEventParams = Record<string, any>;
 
 type EventType =
   | "create_resume_click"
+  | "upload_resume_click"
   | "print_click"
   | "switch_var"
   | "donate_click";

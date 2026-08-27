@@ -11,7 +11,18 @@ const requiredEnv = [
   "ACCESS_TOKEN_TTL_MINUTES",
   "REFRESH_COOKIE_NAME",
   "REFRESH_TOKEN_TTL_DAYS",
+  "ANONYMOUS_RESUME_FINGERPRINT_SECRET",
+  "OPENAI_API_KEY",
+  "OPENAI_MODEL",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
 ] as const;
+
+const resumeImportMaxPages = Number(process.env.RESUME_IMPORT_MAX_PAGES ?? 5);
+
+const resumeImportMaxFileSizeMb = Number(
+  process.env.RESUME_IMPORT_MAX_FILE_SIZE_MB ?? 10,
+);
 
 for (const key of requiredEnv) {
   if (!process.env[key]) {
@@ -21,14 +32,24 @@ for (const key of requiredEnv) {
 
 export const env = {
   corsOrigins: process.env.CORS_ORIGINS!.split(","),
+  webAppUrl: process.env.WEB_APP_URL,
   databaseUrl: process.env.DATABASE_URL!,
-  port: Number(process.env.PORT ?? 4000),
+  port: Number(process.env.PORT),
   nodeEnv: process.env.NODE_ENV!,
   cookieSecret: process.env.COOKIE_SECRET!,
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET!,
+  googleClientId: process.env.GOOGLE_CLIENT_ID!,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET!,
   accessTokenTtlMinutes:
     `${Number(process.env.ACCESS_TOKEN_TTL_MINUTES ?? 10)}m` as StringValue,
   refreshCookieName: process.env.REFRESH_COOKIE_NAME!,
   refreshTokenTtlDays: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30),
+  anonymousResumeFingerprintSecret:
+    process.env.ANONYMOUS_RESUME_FINGERPRINT_SECRET!,
   isProduction: process.env.NODE_ENV === "production",
+
+  openAiApiKey: process.env.OPENAI_API_KEY!,
+  openAiModel: process.env.OPENAI_MODEL!,
+  resumeImportMaxPages,
+  resumeImportMaxFileSizeBytes: resumeImportMaxFileSizeMb * 1024 * 1024,
 };

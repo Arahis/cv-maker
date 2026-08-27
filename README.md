@@ -14,23 +14,45 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cookie Consent Banner
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Cvoop displays a cookie consent banner for visitors from European Union countries.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The banner obtains consent before loading Google Analytics. Google Analytics scripts are not loaded until the visitor explicitly accepts analytics cookies.
 
-## Learn More
+### How it works
 
-To learn more about Next.js, take a look at the following resources:
+- The visitor's country is detected using the `CF-IPCountry` header provided by Cloudflare.
+- The banner is displayed only for visitors from EU member states.
+- The consent choice is stored in `localStorage` under `cvoop_analytics_consent`.
+- The accepted values are `accepted` and `rejected`.
+- Google Analytics is loaded only when the stored consent is `accepted`.
+- For visitors outside the EU, Google Analytics may load without displaying the banner.
+- If the visitor's country cannot be determined, Google Analytics remains disabled until consent is given.
+- Visitors who decline analytics are not tracked by Google Analytics.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Local testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To display the banner manually during local development, add `cookie_banner=1` to the URL:
 
-## Deploy on Vercel
+```text
+http://localhost:3000/?cookie_banner=1
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This allows the banner to be tested even when the local environment does not provide a country header.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Relevant files
+
+- `apps/web/src/components/analytics/CookieBanner.tsx`
+- `apps/web/src/components/analytics/GoogleAnalytics.tsx`
+- `apps/web/src/app/api/location/route.ts`
+
+### Configuration
+
+Google Analytics is enabled only when this environment variable is configured:
+
+```env
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+
+If `NEXT_PUBLIC_GA_ID` is not set, Google Analytics and the cookie consent functionality remain inactive.

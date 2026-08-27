@@ -1,5 +1,4 @@
 export {
-  avatarCropDataSchema,
   customSectionSchema,
   educationSchema,
   generalFormSchema,
@@ -15,7 +14,6 @@ export {
 } from "@cv-maker/shared";
 
 export type {
-  AvatarCropDataForm,
   CustomSectionForm,
   EducationForm,
   GeneralResumeForm,

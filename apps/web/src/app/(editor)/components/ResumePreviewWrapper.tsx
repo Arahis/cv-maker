@@ -1,4 +1,3 @@
-import { saveResumeTemplate } from "@/lib/indexedDB";
 import { isDesktopLike } from "@/lib/utils";
 import Toolbar from "./toolbar";
 import ResumePreview from "./ResumePreview";
@@ -7,47 +6,37 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerTitle,
+  DrawerDescription,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import {
-  ResumeTemplateKey,
-  resumeTemplates,
-} from "@/components/templates/components";
+import { ResumeTemplateKey } from "@/components/templates/components";
 
 const ResumePreviewWrapper = ({
-  resumeId,
   resumeTemplate,
   ref,
   onPrintClick,
-  setResumeTemplate,
+  onResumeTemplateChange,
 }: {
-  resumeId: string;
   resumeTemplate: ResumeTemplateKey | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   onPrintClick: () => void;
-  setResumeTemplate: (t: ResumeTemplateKey) => void;
+  onResumeTemplateChange: (t: ResumeTemplateKey) => void;
 }) => {
-  const onResumeTemplateChange = async (newVar: ResumeTemplateKey) => {
-    setResumeTemplate(newVar);
-    try {
-      await saveResumeTemplate(resumeId, newVar);
-    } catch (e) {
-      console.error("Failed to save resume variant", e);
-    }
-  };
-
   if (!isDesktopLike()) {
     return (
       <Drawer direction="bottom">
         <DrawerTrigger asChild className="absolute right-4 bottom-4">
           <Button variant="default">
-            <Eye />
+            <Eye /> Preview
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-dvh">
+        <DrawerContent className="data-[vaul-drawer-direction=bottom]:h-dvh data-[vaul-drawer-direction=bottom]:max-h-dvh">
           <DrawerTitle className="sr-only">Move Goal</DrawerTitle>
-          <div className="relative flex overflow-y-auto">
+          <DrawerDescription className="sr-only">
+            Preview of the current resume
+          </DrawerDescription>
+          <div className="relative flex min-h-0 flex-1 overflow-hidden">
             <Toolbar
               onPrintClick={onPrintClick}
               onResumeTemplateChange={onResumeTemplateChange}
@@ -55,9 +44,8 @@ const ResumePreviewWrapper = ({
             />
             <ResumePreview
               key={resumeTemplate}
-              resumeId={resumeId}
               ref={ref}
-              resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
+              template={resumeTemplate}
             />
           </div>
         </DrawerContent>
@@ -66,18 +54,13 @@ const ResumePreviewWrapper = ({
   }
 
   return (
-    <div className="relative flex w-1/2 overflow-y-auto">
+    <div className="relative flex h-full min-h-0 w-1/2 overflow-hidden">
       <Toolbar
         onPrintClick={onPrintClick}
         onResumeTemplateChange={onResumeTemplateChange}
         template={resumeTemplate || "template1"}
       />
-      <ResumePreview
-        key={resumeTemplate}
-        resumeId={resumeId}
-        ref={ref}
-        resumeComponent={resumeTemplates[resumeTemplate || "template1"]}
-      />
+      <ResumePreview key={resumeTemplate} ref={ref} template={resumeTemplate} />
     </div>
   );
 };

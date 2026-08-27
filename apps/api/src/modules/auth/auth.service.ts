@@ -3,27 +3,43 @@ import { hashPassword, verifyPassword } from "../../lib/hash.js";
 import { signAccessToken, verifyAccessToken } from "../../lib/jwt.js";
 import {
   clearRefreshTokenCookie,
-  generateRefreshToken,
-  getRefreshTokenExpiresAt,
   getRefreshTokenFromRequest,
-  hashRefreshToken,
-  setRefreshTokenCookie,
-} from "../../lib/refresh-token.js";
+} from "../../lib/refresh-token-cookie.js";
 import type { LoginBody, SignupBody } from "./auth.schema.js";
 import { UserRepository } from "../users/user.repository.js";
-import { AuthAccountRepository } from "./auth.repository.js";
 import { RefreshSessionRepository } from "../refresh-sessions/refresh-session.repository.js";
-import { getClientIp } from "../../lib/get-client-IP.js";
+import { hashToken } from "../../lib/tokens.js";
+import { EmailVerificationService } from "../email-verification/email-verification.service.js";
+import { PasswordResetSessionRepository } from "../password-reset/password-reset-session.repository.js";
+import { clearPasswordResetSessionCookie } from "../../lib/reset-pass-cookie.js";
+import { AuthSessionService } from "./auth-session.service.js";
+import { getAuthenticatedUserId } from "../../lib/get-authenticated-user-id.js";
+import { AuthAccountRepository } from "./auth.repository.js";
+import {
+  GoogleTokenService,
+  GoogleTokenVerificationError,
+} from "./google-token.service.js";
+import { randomBytes } from "node:crypto";
 
 export class AuthService {
+  private readonly prisma;
   private readonly users;
-  private readonly authAccounts;
   private readonly refreshSessions;
+  private readonly emailVerification;
+  private readonly passwordResetSessions;
+  private readonly authSessionService;
+  private readonly authAccounts;
+  private readonly googleTokenService;
 
   constructor(app: FastifyInstance) {
+    this.prisma = app.prisma;
     this.users = new UserRepository(app.prisma);
-    this.authAccounts = new AuthAccountRepository(app.prisma);
     this.refreshSessions = new RefreshSessionRepository(app.prisma);
+    this.passwordResetSessions = new PasswordResetSessionRepository(app.prisma);
+    this.emailVerification = new EmailVerificationService(app);
+    this.authSessionService = new AuthSessionService(app);
+    this.authAccounts = new AuthAccountRepository(app.prisma);
+    this.googleTokenService = new GoogleTokenService();
   }
 
   async signup(
@@ -33,52 +49,28 @@ export class AuthService {
   ) {
     const existingUser = await this.users.findByEmail(input.email);
 
-    if (existingUser) {
+    if (existingUser?.emailVerifiedAt) {
       reply.code(409);
       return {
-        error: "Email is already in use",
+        error: "An account with this email already exists.",
       };
     }
 
     const passwordHash = await hashPassword(input.password);
 
-    const user = await this.users.create(input.email, passwordHash);
+    const user = existingUser
+      ? await this.users.update(existingUser.id, passwordHash)
+      : await this.users.create(input.email, passwordHash);
 
-    await this.authAccounts.create({
+    await this.emailVerification.sendEmailVerificationCode({
       userId: user.id,
-      provider: "credentials",
-      providerAccountId: user.email,
-    });
-
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
-
-    await this.refreshSessions.create({
-      userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request),
-    });
-
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
-
-    const accessToken = signAccessToken({
-      sub: user.id,
       email: user.email,
     });
 
-    reply.code(201);
-
     return {
-      accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      message:
+        "The code has been sent to your email. Please verify your email to complete the signup process.",
+      status: "verification_required",
     };
   }
 
@@ -104,61 +96,103 @@ export class AuthService {
       };
     }
 
-    //TODO: From this part the code almost repeats in both login and signup, we should extract it to a separate method
-    const rawRefreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
-    const refreshExpiresAt = getRefreshTokenExpiresAt();
+    await this.passwordResetSessions.deleteByUserId(user.id);
 
-    await this.refreshSessions.create({
+    clearPasswordResetSessionCookie(reply);
+
+    // authSessionService.createSession also sets the refresh token cookie in the response, so we don't need to do it here
+    const { accessToken } = await this.authSessionService.createSession({
       userId: user.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: refreshExpiresAt,
-      ...(request.headers["user-agent"]
-        ? { userAgent: request.headers["user-agent"] }
-        : {}),
-      ipAddress: getClientIp(request),
-    });
-
-    setRefreshTokenCookie(reply, rawRefreshToken, refreshExpiresAt);
-
-    const accessToken = signAccessToken({
-      sub: user.id,
       email: user.email,
+      request,
+      reply,
     });
 
     return {
       accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
     };
+  }
+
+  async googleLogin(
+    input: { code: string },
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    let googleUser;
+
+    try {
+      googleUser = await this.googleTokenService.verifyAuthorizationCode(
+        input.code,
+      );
+    } catch (error) {
+      if (error instanceof GoogleTokenVerificationError) {
+        throw error;
+      }
+
+      throw error;
+    }
+
+    const linkedAccount = await this.authAccounts.findByProviderAccountId(
+      "google",
+      googleUser.providerAccountId,
+    );
+
+    let user =
+      linkedAccount?.user ?? (await this.users.findByEmail(googleUser.email));
+
+    if (!user) {
+      const unusablePasswordHash = await hashPassword(
+        randomBytes(32).toString("hex"),
+      );
+
+      user = await this.users.create(
+        googleUser.email,
+        unusablePasswordHash,
+        new Date(),
+      );
+    } else if (!user.emailVerifiedAt) {
+      user = await this.users.markEmailAsVerified(user.id);
+    }
+
+    await this.authAccounts.upsertGoogleAccount({
+      userId: user.id,
+      providerAccountId: googleUser.providerAccountId,
+    });
+
+    const { accessToken } = await this.authSessionService.createSession({
+      userId: user.id,
+      email: user.email,
+      request,
+      reply,
+    });
+
+    return { accessToken };
   }
 
   async refresh(request: FastifyRequest, reply: FastifyReply) {
     const rawRefreshToken = getRefreshTokenFromRequest(request);
 
     if (!rawRefreshToken) {
-      reply.code(401);
-      return { error: "Missing refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
-    const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+    const refreshTokenHash = hashToken(rawRefreshToken);
 
     const session =
       await this.refreshSessions.findByTokenHash(refreshTokenHash);
 
     if (!session) {
       clearRefreshTokenCookie(reply);
-      reply.code(401);
-      return { error: "Invalid or expired refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     if (session.expiresAt < new Date()) {
       clearRefreshTokenCookie(reply);
       await this.refreshSessions.deleteByTokenHash(session.tokenHash);
-      reply.code(401);
-      return { error: "Invalid or expired refresh token" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     const user = await this.users.findById(session.userId);
@@ -166,8 +200,8 @@ export class AuthService {
     if (!user) {
       clearRefreshTokenCookie(reply);
       await this.refreshSessions.deleteByTokenHash(session.tokenHash);
-      reply.code(401);
-      return { error: "User not found" };
+      reply.code(200);
+      return { status: "unauthenticated", accessToken: null };
     }
 
     const accessToken = signAccessToken({
@@ -188,7 +222,7 @@ export class AuthService {
     const rawRefreshToken = getRefreshTokenFromRequest(request);
 
     if (rawRefreshToken) {
-      const refreshTokenHash = hashRefreshToken(rawRefreshToken);
+      const refreshTokenHash = hashToken(rawRefreshToken);
 
       try {
         await this.refreshSessions.deleteByTokenHash(refreshTokenHash);
@@ -202,6 +236,25 @@ export class AuthService {
     return {
       success: true,
     };
+  }
+
+  async deleteAccount(request: FastifyRequest, reply: FastifyReply) {
+    const auth = await getAuthenticatedUserId({
+      request,
+      users: this.users,
+    });
+
+    if (!auth.userId) {
+      reply.code(401);
+      return { error: "Unauthorized" };
+    }
+
+    // Related records are deleted by the database through ON DELETE CASCADE.
+    await this.users.delete(auth.userId);
+
+    clearRefreshTokenCookie(reply);
+
+    return { success: true };
   }
 
   async me(request: FastifyRequest, reply: FastifyReply) {

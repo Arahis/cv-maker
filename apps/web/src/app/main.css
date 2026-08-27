@@ -43,8 +43,75 @@
   content: "";
   position: absolute;
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: var(--brand-gradient);
   left: 0;
   bottom: 0;
+}
+
+@keyframes orbit-pink {
+  0%,
+  100% {
+    transform: translate(0, -130px);
+  }
+  25% {
+    transform: translate(130px, 0);
+  }
+  50% {
+    transform: translate(0, 130px);
+  }
+  75% {
+    transform: translate(-130px, 0);
+  }
+}
+
+@keyframes orbit-red {
+  0%,
+  100% {
+    transform: translate(0, 140px);
+  }
+
+  25% {
+    transform: translate(-140px, 0);
+  }
+
+  50% {
+    transform: translate(0, -140px);
+  }
+
+  75% {
+    transform: translate(140px, 0);
+  }
+}
+
+@keyframes orbit-blue {
+  0%,
+  100% {
+    transform: translate(-160px, 0);
+  }
+
+  25% {
+    transform: translate(0, -120px);
+  }
+
+  50% {
+    transform: translate(160px, 0);
+  }
+
+  75% {
+    transform: translate(0, 120px);
+  }
+}
+.pink {
+  animation: orbit-pink 6.4s linear infinite;
+}
+
+.red {
+  animation: orbit-red 4.7s linear infinite;
+  animation-delay: -2.1s;
+}
+
+.blue {
+  animation: orbit-blue 7.5s linear infinite;
+  animation-delay: -4.6s;
 }

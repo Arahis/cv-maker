@@ -5,11 +5,9 @@ export const EMPTY_LEXICAL_STATE =
 
 export const avatarCropInitialValues = { x: 0, y: 0, zoom: 1, rotation: 0 };
 
-export const defaultFormValues: ResumeForm = {
+export const defaultFormValues = (): ResumeForm => ({
   title: "My resume",
   description: "",
-
-  avatarCropData: avatarCropInitialValues,
   firstName: "",
   lastName: "",
   jobTitle: "",
@@ -58,4 +56,4 @@ export const defaultFormValues: ResumeForm = {
     },
   ],
   socialLinks: [{ id: crypto.randomUUID(), linkName: "", linkAddress: "" }],
-};
+});

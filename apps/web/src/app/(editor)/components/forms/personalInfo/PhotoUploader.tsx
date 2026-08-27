@@ -4,30 +4,39 @@ import { useState } from "react";
 import PhotoUploadModal from "./PhotoUploadModal";
 import useAvatar from "../../../store/hooks/useAvatar";
 import { useResumeEditor } from "../../../context/ResumeEditorContext";
-import { AvatarCropDataForm } from "@/lib/validation";
+import { uploadAvatar } from "@/api/uploads";
 
-const PhotoUploader = ({
-  value,
-  onChange,
-}: {
-  value: AvatarCropDataForm;
-  onChange: (v: AvatarCropDataForm) => void;
-}) => {
+const PhotoUploader = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { resumeId } = useResumeEditor();
+  const { saveMedia, source } = useResumeEditor();
 
-  const { cropped, original, setAvatarMedia } = useAvatar(resumeId);
+  const { cropped, croppedPreviewUrl, setAvatarState } = useAvatar();
 
-  const handleOnChange = async (
-    originalPhoto: string,
-    croppedPhoto: string,
-    cropData: AvatarCropDataForm,
-  ) => {
-    await setAvatarMedia({
-      original: originalPhoto,
-      cropped: croppedPhoto,
-    });
-    onChange(cropData);
+  const handleOnChange = async (croppedPhoto: Blob | null) => {
+    if (!croppedPhoto) {
+      setAvatarState(null);
+      await saveMedia({});
+      return;
+    }
+
+    if (source === "account") {
+      const avatar = (
+        await uploadAvatar({
+          croppedFile: croppedPhoto,
+        })
+      ).avatar;
+
+      setAvatarState(avatar);
+      await saveMedia({ avatar });
+      return;
+    }
+
+    const avatar = {
+      croppedBlob: croppedPhoto,
+    };
+
+    setAvatarState(avatar);
+    await saveMedia({ avatar });
   };
 
   return (
@@ -35,18 +44,19 @@ const PhotoUploader = ({
       <Button
         className="h-24 w-24 bg-gray-200 bg-cover bg-center"
         style={{
-          backgroundImage: cropped ? `url(${cropped})` : undefined,
+          backgroundImage: croppedPreviewUrl
+            ? `url(${croppedPreviewUrl})`
+            : undefined,
         }}
         onClick={() => setModalOpen(true)}
       >
-        {!cropped && <Camera className="size-6" />}
+        {!croppedPreviewUrl && <Camera className="size-6" />}
       </Button>
 
       <PhotoUploadModal
-        originalPhoto={original}
+        currentPhoto={cropped}
         open={modalOpen}
         onModalChange={setModalOpen}
-        value={value}
         onChange={handleOnChange}
       />
     </>

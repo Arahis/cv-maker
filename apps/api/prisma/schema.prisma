@@ -13,15 +13,61 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String @id @default(cuid())
+  email        String @unique
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  pdfParseCount Int @default(0)
+
+  emailVerifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   refreshTokens RefreshSession[]
   authAccounts  AuthAccount[]
   resumes       Resume[]
+
+  emailVerificationCode EmailVerificationCode?
+  passwordResetCode     PasswordResetCode?
+  passwordResetSession  PasswordResetSession?
+}
+
+model EmailVerificationCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model PasswordResetCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model PasswordResetSession {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  sessionHash String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
 
 model AuthAccount {
@@ -56,17 +102,32 @@ model RefreshSession {
 }
 
 model Resume {
-  id          String   @id @default(cuid())
-  userId      String
-  title       String?
-  description String?
-  template    String   @default("template1")
-  data        Json
-  media       Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  localResumeId String?
+  userId        String
+  template      String   @default("template1")
+  data          Json
+  media         Json
+  position      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, localResumeId])
   @@index([userId, updatedAt])
+  @@index([userId, position])
+}
+
+model AnonymousResumeQuota {
+  id              String   @id @default(cuid())
+  tokenHash       String
+  fingerprintHmac String?
+  localResumeId   String   @unique
+  hasEverUploaded Boolean  @default(false)
+  active          Boolean  @default(true)
+  claimedAt       DateTime @default(now())
+
+  @@unique([tokenHash, hasEverUploaded])
+  @@unique([fingerprintHmac, hasEverUploaded])
 }

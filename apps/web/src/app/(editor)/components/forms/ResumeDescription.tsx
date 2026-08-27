@@ -60,7 +60,7 @@ const ResumeDescription = ({ onPrintClick }: { onPrintClick: () => void }) => {
           You can always come back and make changes later.
         </p>
         <Button onClick={onPrintClick} className="cursor-pointer">
-          Print / Save as PDF
+          Download/Print resume
         </Button>
       </div>
     </div>

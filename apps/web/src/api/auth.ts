@@ -1,4 +1,3 @@
-// src/api/auth.ts
 import { apiFetch } from "./api-fetch";
 import { setAccessToken } from "./token";
 
@@ -7,16 +6,32 @@ type LoginSignupInput = {
   password: string;
 };
 
+type VerifyCodeInput = {
+  email: string;
+  code: string;
+};
+
+type SignupRes = {
+  status: string;
+  message: string;
+};
+
+type ForgotPasswordRes = {
+  status: string;
+  message: string;
+};
+
 type AuthUser = {
   id: string;
   email: string;
 };
 
 type AuthRes = {
-  accessToken: string;
-  user: AuthUser;
+  status: string;
+  accessToken: string | null;
 };
 
+// TODO: Check if this status type is correct, it should be "ok" or "error" instead of "success"
 type SuccessRes = {
   success: true;
 };
@@ -26,7 +41,46 @@ type MeRes = {
 };
 
 export async function signup(input: LoginSignupInput) {
-  const res = await apiFetch<AuthRes>("/auth/signup", {
+  const res = await apiFetch<SignupRes>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  return res;
+}
+
+export async function verifyEmailCode(input: VerifyCodeInput) {
+  const res = await apiFetch<AuthRes>("/auth/verify-email-code", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  return res;
+}
+
+export async function forgotPassword(input: { email: string }) {
+  const res = await apiFetch<ForgotPasswordRes>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  return res;
+}
+
+export async function verifyResetPasswordCode(input: VerifyCodeInput) {
+  const res = await apiFetch<{ status: string }>(
+    "/auth/forgot-password/verify",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
+
+  return res;
+}
+
+export async function resetPassword(input: { password: string }) {
+  const res = await apiFetch<AuthRes>("/auth/forgot-password/reset-password", {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -55,6 +109,14 @@ export async function refresh() {
 
 export async function logout() {
   const res = await apiFetch<SuccessRes>("/auth/logout", {
+    method: "POST",
+  });
+
+  return res;
+}
+
+export async function deleteAccount() {
+  const res = await apiFetch<SuccessRes>("/auth/delete-account", {
     method: "POST",
   });
 

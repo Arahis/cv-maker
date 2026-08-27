@@ -8,15 +8,15 @@ import {
 const faqItems = [
   {
     q: "Is Cvoop really free?",
-    a: "Yes. Cvoop is a completely free resume and CV builder. You can create, edit, and download your resume without paying or creating an account.",
+    a: "Yes. Cvoop is a free resume and CV builder. You can create, edit, and download your resume without paying or creating an account.",
   },
   {
     q: "Do I need to sign up to use Cvoop?",
-    a: "No. You can build and download your resume without registration or login. This makes the process faster and easier, especially if you need a resume quickly.",
+    a: "No. You can build and download a resume in guest mode without registration. Creating an account is optional and lets you save resumes and access them on supported devices. You can register with email or use Google Sign-In when available.",
   },
   {
     q: "Can I download my resume without an account?",
-    a: "Yes. You can download your resume instantly in PDF format. No signup, no email required.",
+    a: "Yes. You can download your resume instantly in PDF format without signing up or providing an email address.",
   },
   {
     q: "How do I download my resume as a PDF?",
@@ -24,15 +24,15 @@ const faqItems = [
   },
   {
     q: "Where is my data stored?",
-    a: "Your resume data is stored locally in your browser and never uploaded to our servers. This means your resume stays private and secure. It is available only on the device and browser where you created it, so we recommend downloading a copy after finishing.",
+    a: "In guest mode, your resume data is stored locally in your browser and is not uploaded to our servers just because you edit it. If you create an account or use an account feature, resumes and images you choose to save are stored in our servers or cloud storage so they can be synchronized across supported devices.",
   },
   {
     q: "Why can’t I see my resumes on other devices?",
-    a: "Your resumes are stored locally and are not synced or saved online. This makes Cvoop a privacy-focused resume builder. Because of this, your resumes are available only on the device and browser where they were created. To use your resume on another device, download it as a PDF.",
+    a: "Guest resumes are stored only in the browser where they were created and are not synchronized. To access resumes on supported devices, create an account and save the resumes to your account.",
   },
   {
     q: "Is Cvoop safe to use?",
-    a: "Yes. Since your data stays on your device, your resume remains private. We do not track, sell, or store your personal information.",
+    a: "We use reasonable security measures to protect the Service and account data. Guest resumes remain in your browser, while account resumes are stored securely so they can be synchronized. We do not sell personal information.",
   },
   {
     q: "Can I use Cvoop on mobile?",
@@ -43,8 +43,8 @@ const faqItems = [
     a: "Yes. Our resume templates are designed to be clean and structured, helping applicant tracking systems (ATS) read your resume correctly.",
   },
   {
-    q: "Will Cvoop support cloud storage and sync across devices in the future?",
-    a: "We are exploring optional cloud storage and resume sync in the future. This will allow users to access their resumes from any device while still keeping local privacy-focused storage as an option.",
+    q: "Can I save my resume online and use it on another device?",
+    a: "Yes. Create an account and save your resume to access it on supported devices. If you prefer not to create an account, you can continue using local browser storage and download your resume as a PDF.",
   },
 ];
 

@@ -7,13 +7,26 @@ async function corsPlugin(app: FastifyInstance) {
 
   await app.register(cors, {
     origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const normalizedOrigin = origin?.trim().replace(/\/$/, "");
+
+      if (
+        !normalizedOrigin ||
+        normalizedOrigin === "null" ||
+        allowedOrigins.includes(normalizedOrigin)
+      ) {
         cb(null, true);
       } else {
+        app.log.warn({ origin }, "Rejected CORS origin");
         cb(new Error("Not allowed by CORS"), false);
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "ngrok-skip-browser-warning",
+    ],
   });
 }
 

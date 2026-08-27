@@ -1,0 +1,307 @@
+/* .editor-wrapper {
+  min-height: 100vh;
+
+  padding: 40px;
+
+  background: #f6e8d5;
+} */
+
+/* ========================================================
+   PAGE / EDITOR
+   ======================================================== */
+
+.editor {
+  position: relative;
+
+  box-sizing: border-box;
+
+  width: var(--page-width);
+  min-height: var(--editor-height);
+
+  margin: 0 auto;
+
+  padding-inline: var(--page-padding-x);
+
+  background: white;
+
+  overflow: visible;
+
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+
+/* ========================================================
+   GLOBAL DOCUMENT FLOW
+   ======================================================== */
+
+.document-flow {
+  position: relative;
+
+  z-index: 1;
+
+  /*
+   * First  page reserve onceHeader
+   */
+  padding-top: var(--header-height);
+
+  display: grid;
+
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ========================================================
+   FULL WIDTH REGION
+   ======================================================== */
+
+.full-width-region {
+  display: flow-root;
+
+  min-width: 0;
+}
+
+/* Keep an empty paragraph as a full line that can cross the page-break float. */
+.region-content p:has(> br:only-child),
+.column-content p:has(> br:only-child) {
+  display: inline-block;
+  width: 100%;
+}
+
+/* ========================================================
+   COLUMNS
+   ======================================================== */
+
+.columns-region {
+  display: grid;
+
+  width: 100%;
+
+  align-items: start;
+
+  min-width: 0;
+}
+
+.column {
+  /*
+   * Every column —
+   * is a separate float flow.
+   */
+  display: block;
+  text-align: left;
+
+  min-width: 0;
+}
+
+.column-content {
+  height: 100%;
+}
+
+/* ========================================================
+   PAGINATION WIDGET
+   ======================================================== */
+
+.pagination-widget {
+  position: relative;
+
+  display: block;
+
+  height: 0;
+
+  overflow: visible;
+}
+
+/* KeepTogether must contain its float-based page breaker. */
+.keep-together {
+  display: flow-root;
+  width: 100%;
+}
+
+/*
+ * A zero-width page anchor lets the first line of an atomic section flow
+ * beside it before the actual breaker is cleared. Make the anchor occupy the
+ * whole line inside KeepTogether so the complete section starts after the
+ * page break.
+ */
+.keep-together .page-anchor {
+  width: 100%;
+}
+
+.page-break {
+  display: block;
+
+  height: 0;
+
+  overflow: visible;
+}
+
+/* ========================================================
+   ZERO-SIZE POSITION ANCHOR
+   ======================================================== */
+
+.page-anchor {
+  position: relative;
+
+  float: left;
+  clear: both;
+
+  width: 0;
+  height: 0;
+}
+
+/* ========================================================
+   ACTUAL LAYOUT BREAKER
+   ======================================================== */
+
+.flow-breaker {
+  position: relative;
+
+  z-index: 3;
+
+  float: left;
+  clear: both;
+
+  width: 100%;
+
+  height: var(--page-break-height);
+
+  background: transparent;
+
+  pointer-events: none;
+}
+
+/* ========================================================
+   VISUAL PAGINATION
+   ======================================================== */
+
+.visual-pagination {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 4;
+
+  pointer-events: none;
+}
+
+.visual-header,
+.visual-footer {
+  position: absolute;
+
+  box-sizing: border-box;
+
+  left: 0;
+
+  width: 100%;
+
+  padding-inline: var(--page-padding-x);
+
+  font-size: 12px;
+
+  color: #999;
+
+  background: transparent;
+}
+
+.visual-header {
+  height: var(--header-height);
+
+  padding-top: 24px;
+}
+
+.visual-footer {
+  height: var(--footer-height);
+
+  display: flex;
+
+  align-items: flex-end;
+
+  padding-bottom: 24px;
+}
+
+.visual-gap {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: var(--page-gap);
+  background: var(--color-gray-50);
+  /* margin-left: -10px; */
+  box-shadow:
+    inset 0 4px 6px -5px rgb(0 0 0 / 0.2),
+    inset 0 -4px 6px -5px rgb(0 0 0 / 0.2);
+}
+
+.visual-gap::after {
+  content: "";
+  position: absolute;
+  width: calc(100% + 20px);
+  height: var(--page-gap);
+  background: var(--color-gray-50);
+  z-index: -1;
+  left: -10px;
+}
+
+.editor-list-ol {
+  margin-bottom: 1em;
+  margin-left: 1.5em;
+  list-style-type: decimal;
+}
+
+.editor-list-ul {
+  margin-bottom: 1em;
+  margin-left: 1.5em;
+  list-style-type: disc;
+}
+
+/* Keep list spacing inside JobSection consistent with KeepTogether padding. */
+.keep-together .editor-list-ul:last-child,
+.keep-together .editor-list-ol:last-child {
+  margin-bottom: 0;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    font-variant-ligatures: none !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    font-kerning: normal !important;
+    letter-spacing: 0px !important;
+  }
+
+  .editor {
+    margin: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    --page-gap: 0px !important;
+    --page-break-height: calc(
+      var(--footer-height) + var(--header-height)
+    ) !important;
+
+    p,
+    span,
+    li,
+    blockquote {
+      orphans: 1;
+      widows: 1;
+    }
+  }
+
+  .visual-gap {
+    display: none !important;
+  }
+  .visual-pagination {
+    display: none !important;
+  }
+}

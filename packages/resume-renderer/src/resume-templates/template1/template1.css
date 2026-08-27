@@ -1,0 +1,15 @@
+.template1-columns {
+  position: relative;
+}
+
+.template1-columns::before {
+  content: "";
+  position: absolute;
+  top: -28px;
+  right: calc(var(--page-padding-x) * -1);
+  bottom: -40px;
+  left: calc(35% - 12.4px);
+  background-color: var(--color-gray-100);
+  z-index: -1;
+  pointer-events: none;
+}

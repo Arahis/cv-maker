@@ -1,7 +1,1 @@
-export type AvatarObj = {
-  base64: string;
-  width: number;
-  height: number;
-};
-
-export type Avatar = string;
+export type Avatar = string | Blob;

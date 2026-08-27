@@ -1,9 +1,13 @@
 @media print {
   @page {
     size: A4;
-    margin: 4mm 0mm 4mm 0mm;
-    height: auto !important; /* Allow div to expand to full content height */
-    overflow: visible !important; /* Ensure all content is visible */
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   * {
@@ -11,10 +15,30 @@
     print-color-adjust: exact;
   }
 
-  p,
-  li,
-  blockquote {
-    orphans: 1;
-    widows: 1;
+  .editor {
+    margin: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    --page-gap: 0px !important;
+    --page-break-height: calc(
+      var(--footer-height) + var(--header-height)
+    ) !important;
+
+    p,
+    span,
+    li,
+    blockquote {
+      orphans: 1;
+      widows: 1;
+    }
+  }
+
+  .visual-gap {
+    display: none !important;
+  }
+  .visual-pagination {
+    display: none !important;
   }
 }

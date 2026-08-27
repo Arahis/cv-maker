@@ -3,9 +3,14 @@ import TagBadge from "./TagBadge";
 import Dropdown from "./Dropdown";
 import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ControllerRenderProps, FieldPath, FieldValues } from "react-hook-form";
 import { SkillsOptions } from "..";
 import { distance } from "fastest-levenshtein";
+
+type TagSelectInputProps = {
+  value?: SkillsOptions[];
+  onChange: (value: SkillsOptions[]) => void;
+  skills: SkillsOptions[];
+};
 
 const filteredSkills = (
   input: string,
@@ -27,24 +32,16 @@ const filteredSkills = (
   });
 };
 
-function TagSelectInput<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
-  skills,
-  value,
-  onChange,
-}: ControllerRenderProps<TFieldValues, TName> & {
-  skills: SkillsOptions[];
-}) {
+function TagSelectInput({ skills, value = [], onChange }: TagSelectInputProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const selectedSkills = value as SkillsOptions[];
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isAlreadySelected = (skill: SkillsOptions) =>
-    (value as SkillsOptions[]).some((s) => s.id === skill.id);
+    selectedSkills.some((s) => s.id === skill.id);
 
   // returns filtered options based on input in format {id, name}
   const filteredOptions = useMemo(() => {
@@ -60,21 +57,19 @@ function TagSelectInput<
 
   const addTag = (skill: SkillsOptions) => {
     if (!isAlreadySelected(skill)) {
-      onChange([...value, skill]);
+      onChange([...selectedSkills, skill]);
     }
     setInput("");
   };
 
   const handleTagRemove = (skill: SkillsOptions) => {
-    onChange(value.filter((t: SkillsOptions) => t.id !== skill.id));
+    onChange(selectedSkills.filter((t: SkillsOptions) => t.id !== skill.id));
   };
 
   const handleAddTagFromInput = () => {
     const skillsToAdd: SkillsOptions[] = [];
-    const userIds = new Set((value as SkillsOptions[]).map((s) => s.id));
-    const userNames = new Set(
-      (value as SkillsOptions[]).map((s) => s.name.toLowerCase()),
-    );
+    const userIds = new Set(selectedSkills.map((s) => s.id));
+    const userNames = new Set(selectedSkills.map((s) => s.name.toLowerCase()));
 
     const inputValues = input.trim().split(",");
     // First normalize every item in array
@@ -104,7 +99,7 @@ function TagSelectInput<
       if (!exists) skillsToAdd.push(skillToAdd);
     }
     // TODO: Also check if the tag(s) is already selected
-    onChange([...value, ...skillsToAdd]);
+    onChange([...selectedSkills, ...skillsToAdd]);
     resetInput();
   };
 
@@ -168,7 +163,7 @@ function TagSelectInput<
 
       {/* Tags under input */}
       <div className="mt-3 flex flex-wrap gap-2">
-        {value.map((skill: SkillsOptions) => (
+        {selectedSkills.map((skill: SkillsOptions) => (
           <TagBadge
             key={skill.id}
             tag={skill.name}

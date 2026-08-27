@@ -6,68 +6,118 @@ import { ResumeTemplateKey } from "@/components/templates/components";
 
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
+const PENDING_CREATION_STORE_NAME = "pending-resume-creations";
+
+export type LocalResumeAvatar = {
+  croppedBlob: Blob;
+};
+
+export type LocalResumeMedia = {
+  avatar?: LocalResumeAvatar;
+};
 
 export interface ResumeRecord {
   id: string;
   updatedAt: number;
+  position: number;
 
   data: ResumeForm;
   template: ResumeTemplateKey;
 
-  media: {
-    avatar?: {
-      original?: string;
-      cropped?: string;
-    };
-  };
+  media: LocalResumeMedia;
 }
 
 // Initialize IndexedDB
 async function getDB() {
-  return openDB(DB_NAME, 1, {
-    upgrade(db) {
+  return openDB(DB_NAME, 4, {
+    upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, {
           keyPath: "id",
         });
       }
+
+      if (oldVersion < 2) {
+        // `position` is a regular record field, so no object-store migration
+        // is required. Existing records are backfilled in loadAllResumes.
+      }
+
+      if (
+        oldVersion < 4 &&
+        db.objectStoreNames.contains(PENDING_CREATION_STORE_NAME)
+      ) {
+        db.deleteObjectStore(PENDING_CREATION_STORE_NAME);
+      }
+
     },
   });
 }
 
 export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
   const db = await getDB();
-  return await db.getAll(STORE_NAME);
+  const resumes = await db.getAll(STORE_NAME);
+  const needsMigration = resumes.some((resume) => resume.position == null);
+
+  if (!needsMigration) {
+    return resumes;
+  }
+
+  const migrated = resumes.map((resume, index) => ({
+    ...resume,
+    position: resume.position ?? (index + 1) * 1000,
+  }));
+
+  const transaction = db.transaction(STORE_NAME, "readwrite");
+  await Promise.all(migrated.map((resume) => transaction.store.put(resume)));
+  await transaction.done;
+
+  return migrated;
 }
 
-export async function loadResume(
+export async function getLocalResume(
   resumeId: string,
 ): Promise<ResumeRecord | null> {
+  await loadAllResumes();
   const db = await getDB();
-  return await db.get(STORE_NAME, resumeId);
+  return (await db.get(STORE_NAME, resumeId)) || null;
 }
 
-export async function createResume(
-  resumeId: string,
-  data: ResumeRecord["data"],
-  template: ResumeRecord["template"],
-) {
+export async function createLocalResume({
+  resumeId,
+  data,
+  template,
+}: {
+  resumeId: string;
+  data: ResumeRecord["data"];
+  template: ResumeRecord["template"];
+}) {
   const db = await getDB();
+  const resumes = await db.getAll(STORE_NAME);
+  const position =
+    resumes.reduce((max, resume) => Math.max(max, resume.position ?? 0), 0) +
+    1000;
 
   const record: ResumeRecord = {
     id: resumeId,
     updatedAt: Date.now(),
+    position,
     data,
     media: {},
     template,
   };
+
   await db.put(STORE_NAME, record);
+
+  return record;
 }
 
-export async function saveFormData(
-  resumeId: string,
-  data: Partial<ResumeRecord["data"]>,
-) {
+export async function updateLocalFormData({
+  resumeId,
+  data,
+}: {
+  resumeId: string;
+  data: Partial<ResumeRecord["data"]>;
+}) {
   const db = await getDB();
   const current = await db.get(STORE_NAME, resumeId);
 
@@ -85,10 +135,13 @@ export async function saveFormData(
   await db.put(STORE_NAME, updated);
 }
 
-export async function saveMediaData(
-  resumeId: string,
-  data: ResumeRecord["media"]["avatar"],
-) {
+export async function updateLocalMediaData({
+  resumeId,
+  data,
+}: {
+  resumeId: string;
+  data?: LocalResumeAvatar;
+}): Promise<ResumeRecord | undefined> {
   const db = await getDB();
   const current = await db.get(STORE_NAME, resumeId);
 
@@ -105,12 +158,17 @@ export async function saveMediaData(
   };
 
   await db.put(STORE_NAME, updated);
+
+  return updated;
 }
 
-export async function saveResumeTemplate(
-  resumeId: string,
-  template: ResumeRecord["template"],
-) {
+export async function updateLocalResumeTemplate({
+  resumeId,
+  template,
+}: {
+  resumeId: string;
+  template: ResumeRecord["template"];
+}) {
   const db = await getDB();
   const current = await db.get(STORE_NAME, resumeId);
 
@@ -123,15 +181,43 @@ export async function saveResumeTemplate(
   };
 
   await db.put(STORE_NAME, updated);
+
+  return updated;
 }
 
-export async function deleteResume(resumeId: string) {
+export async function updateLocalResumeTitle({
+  resumeId,
+  title,
+}: {
+  resumeId: string;
+  title: string;
+}) {
+  const db = await getDB();
+  const current = await db.get(STORE_NAME, resumeId);
+
+  if (!current) return;
+
+  const updated: ResumeRecord = {
+    ...current,
+    updatedAt: Date.now(),
+    data: {
+      ...current.data,
+      title,
+    },
+  };
+
+  await db.put(STORE_NAME, updated);
+
+  return updated;
+}
+
+export async function deleteLocalResume(resumeId: string) {
   const db = await getDB();
   await db.delete(STORE_NAME, resumeId);
 }
 
-export function useIndexedDBDebouncedSave(
-  resumeID: string,
+export function useIndexedDBDebouncedUpdate(
+  resumeId: string,
   data: ResumeRecord["data"],
   debounceMs: number = 3000,
 ) {
@@ -141,7 +227,8 @@ export function useIndexedDBDebouncedSave(
   // TODO: add correct types
   const debouncedSave = useRef(
     debounce(
-      (latestData: ResumeRecord["data"]) => saveFormData(resumeID, latestData),
+      (latestData: ResumeRecord["data"]) =>
+        updateLocalFormData({ resumeId, data: latestData }),
       debounceMs,
     ),
   ).current;
@@ -152,5 +239,5 @@ export function useIndexedDBDebouncedSave(
       return;
     }
     debouncedSave(data);
-  }, [data, resumeID, debouncedSave]);
+  }, [data, resumeId, debouncedSave]);
 }

@@ -1,9 +1,98 @@
+"use client";
+
 import Logo from "@/assets/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import DonateLink from "./DonateLink";
+import { Button } from "@/components/ui/button";
+import { useLogout, useMeQuery } from "@/queries/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, LogOutIcon, LoaderCircle } from "lucide-react";
+import { useAuthBootstrap } from "@/providers/auth-bootstrap";
+
+function SignInButton() {
+  return (
+    <Button
+      variant="ghost"
+      asChild
+      className="link-hover px-4 py-2 text-base font-bold"
+    >
+      <Link href="/sign-in">Sign in</Link>
+    </Button>
+  );
+}
+
+export function HeaderAuth() {
+  const isAuthReady = useAuthBootstrap();
+  const { data: me, isLoading } = useMeQuery();
+  const logoutMutation = useLogout();
+
+  if (isAuthReady && isLoading) {
+    return (
+      <Button
+        variant="ghost"
+        disabled
+        className="px-4 py-2 text-base font-bold opacity-70"
+      >
+        <LoaderCircle className="size-5 animate-spin" />
+      </Button>
+    );
+  }
+
+  if (me) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size={logoutMutation.isPending ? "default" : "icon"}
+            className="link-hover px-4 py-2 text-base font-bold"
+            disabled={logoutMutation.isPending}
+          >
+            {logoutMutation.isPending ? (
+              <LoaderCircle className="size-5 animate-spin" />
+            ) : (
+              <User className="size-5" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{me.user.email}</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <Link href="/resumes">Your resumes</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/account-settings">Settings</Link>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => logoutMutation.mutate()}
+          >
+            <LogOutIcon />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return <SignInButton />;
+}
 
 const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
+  const isAuthReady = useAuthBootstrap();
+  const { data: me, isLoading: isMeLoading } = useMeQuery();
+
   return (
     <header
       className={cn(
@@ -25,11 +114,25 @@ const Navbar = ({ isSticky }: { isSticky?: boolean }) => {
 
         {/* Links */}
         <div className="flex items-center gap-4">
-          <DonateLink />
+          <Button
+            variant="ghost"
+            asChild
+            className="link-hover px-4 py-2 text-base font-bold"
+          >
+            <Link href="/plans">Plans</Link>
+          </Button>
 
-          <Link href="/resumes" className="link-hover px-4 py-2 font-bold">
-            Your resumes here
-          </Link>
+          {isAuthReady && !isMeLoading && me && (
+            <Button
+              variant="ghost"
+              asChild
+              className="link-hover hidden px-4 py-2 text-base font-bold lg:inline-flex"
+            >
+              <Link href="/resumes">Your resumes</Link>
+            </Button>
+          )}
+
+          <HeaderAuth />
         </div>
       </nav>
     </header>

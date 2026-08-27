@@ -6,7 +6,9 @@
     "@hono/node-server": "^1.19.13"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "predev": "npm --prefix ../.. run build:renderer",
+    "dev": "tsx watch --clear-screen=false src/server.ts",
+    "prebuild": "npm --prefix ../.. run build:renderer",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
@@ -14,22 +16,32 @@
     "prisma:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.984.0",
+    "@aws-sdk/client-sesv2": "^3.1062.0",
+    "@cv-maker/resume-renderer": "*",
     "@cv-maker/shared": "*",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
+    "@fastify/multipart": "^9.2.1",
+    "@google/genai": "^2.13.0",
     "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
+    "@prisma/client": "^7.9.1",
     "argon2": "^0.44.0",
+    "date-fns": "^4.4.0",
     "dotenv": "^16.6.1",
     "fastify": "^5.8.4",
+    "google-auth-library": "^10.9.1",
     "jsonwebtoken": "^9.0.3",
+    "openai": "^6.49.0",
     "playwright": "1.58.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
-    "prisma": "^7.6.0",
+    "prisma": "^7.9.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
