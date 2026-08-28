@@ -31,6 +31,10 @@ const localFontCss = `
 @font-face { font-family: Inter; src: url("http://pdf.local/fonts/inter/Inter-Black.woff2") format("woff2"); font-weight: 900; font-style: normal; }
 @font-face { font-family: Outfit; src: url("http://pdf.local/fonts/outfit/Outfit_var.woff2") format("woff2"); font-weight: 300 700; font-style: normal; }
 @font-face { font-family: Cantata; src: url("http://pdf.local/fonts/cantata/Cantata_One_Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "DM Sans"; src: url("http://pdf.local/fonts/DM_sans/dm-sans-v17-latin-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "DM Sans"; src: url("http://pdf.local/fonts/DM_sans/dm-sans-v17-latin-600.woff2") format("woff2"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "DM Sans"; src: url("http://pdf.local/fonts/DM_sans/dm-sans-v17-latin-700.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+@font-face { font-family: "DM Sans"; src: url("http://pdf.local/fonts/DM_sans/dm-sans-v17-latin-800.woff2") format("woff2"); font-weight: 800; font-style: normal; }
 html, body, .editor { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 `;
 

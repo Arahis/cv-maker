@@ -4,28 +4,7 @@ import { resumeTemplates } from "@/components/templates/components";
 import Loading from "@/components/Loading";
 import { useResumeEditorController } from "@/app/(editor)/useResumeEditorController";
 import { notFound, useSearchParams } from "next/navigation";
-import { ReactNode, useEffect, useRef, useState } from "react";
-
-const ResumeWrapperDOM = ({ children }: { children: ReactNode }) => {
-  return (
-    <div
-      className="text-[14px]"
-      style={{
-        width: 794,
-      }}
-    >
-      <div
-        data-page-mobile-print
-        className="p-6"
-        style={{
-          width: 794,
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
+import { useEffect, useRef, useState } from "react";
 
 const PrintClient = () => {
   const searchParams = useSearchParams();
@@ -107,11 +86,7 @@ const PrintClient = () => {
 
   const Template = resumeTemplates[resume.template || "template1"];
 
-  return (
-    <Template data={resume.data} photo={photoUrl} />
-    // <ResumeWrapperDOM>
-    // </ResumeWrapperDOM>
-  );
+  return <Template data={resume.data} photo={photoUrl} />;
 };
 
 export default PrintClient;

@@ -14,8 +14,7 @@
     "deploy:staging": "opennextjs-cloudflare deploy --env staging",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "start": "next start",
-    "lint": "next lint",
-    "build:pdf-assets": "node ./src/pdf/generate-pdf-css.mjs"
+    "lint": "next lint"
   },
   "dependencies": {
     "@cv-maker/shared": "*",

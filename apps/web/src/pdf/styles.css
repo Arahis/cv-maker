@@ -14,6 +14,10 @@
   .font-cantata {
     font-family: Cantata, serif;
   }
+
+  .font-dm-sans {
+    font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  }
 }
 
 @source "../components/templates/**/*.{ts,tsx,js,jsx}";
