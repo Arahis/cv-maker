@@ -15,14 +15,16 @@ const nextConfig: NextConfig = {
       __dirname,
       "../../packages/resume-renderer/src/index.ts",
     );
-    config.resolve.alias["@cv-maker/resume-renderer/pagination.css"] = path.resolve(
-      __dirname,
-      "../../packages/resume-renderer/src/pagination/pagination.css",
-    );
-    config.resolve.alias["@cv-maker/resume-renderer/renderer.css"] = path.resolve(
-      __dirname,
-      "../../packages/resume-renderer/src/renderer.css",
-    );
+    config.resolve.alias["@cv-maker/resume-renderer/pagination.css"] =
+      path.resolve(
+        __dirname,
+        "../../packages/resume-renderer/src/pagination/pagination.css",
+      );
+    config.resolve.alias["@cv-maker/resume-renderer/renderer.css"] =
+      path.resolve(
+        __dirname,
+        "../../packages/resume-renderer/src/renderer.css",
+      );
     return config;
   },
   allowedDevOrigins: ["boastful-shudder-diligent.ngrok-free.dev"],
@@ -31,13 +33,27 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "../.."),
     resolveAlias: {
       "@cv-maker/resume-renderer": "./packages/resume-renderer/src/index.ts",
-      "@cv-maker/resume-renderer/renderer.css": "./packages/resume-renderer/src/renderer.css",
+      "@cv-maker/resume-renderer/renderer.css":
+        "./packages/resume-renderer/src/renderer.css",
     },
   },
   // Keep tracing root aligned with turbopack.root
   outputFileTracingRoot: path.resolve(__dirname, "../.."),
   images: {
     unoptimized: true, // Turn off img optimization
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
+        ],
+      },
+    ];
   },
   async rewrites() {
     const apiRoutes = [
