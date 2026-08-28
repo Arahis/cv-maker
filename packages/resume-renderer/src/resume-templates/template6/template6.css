@@ -1,0 +1,15 @@
+.template6-bg {
+  position: relative;
+}
+
+.template6-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #f3f3fc;
+  width: 335px;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+}

@@ -42,6 +42,7 @@ const PaginationDocument = forwardRef<
     headerFooterHeight?: number;
     pageGap?: number;
     className?: string;
+    editorClassName?: string;
   } & Omit<JSX.IntrinsicElements["div"], "children">
 >(
   (
@@ -52,6 +53,7 @@ const PaginationDocument = forwardRef<
       headerFooterHeight,
       pageGap,
       className,
+      editorClassName,
       id,
     },
     contentRefForPrint,
@@ -70,41 +72,40 @@ const PaginationDocument = forwardRef<
       }),
       [pagePaddingX, headerFooterHeight, pageGap],
     );
-  const editorRef = useRef<HTMLDivElement>(null);
-  const documentFlowRef = useRef<HTMLDivElement>(null);
-  const previousRevisionRef = useRef(revision);
-  const [breaks, setBreaks] = useState<FlowBreak[]>([]);
-  const pendingMeasurementsRef = useRef(0);
-  const initialMeasurementsCompleteRef = useRef(false);
-  const [measurementsReady, setMeasurementsReady] = useState(true);
-  const invalidate = useCallback(() => {
-    setBreaks([]);
-  }, []);
+    const editorRef = useRef<HTMLDivElement>(null);
+    const documentFlowRef = useRef<HTMLDivElement>(null);
+    const previousRevisionRef = useRef(revision);
+    const [breaks, setBreaks] = useState<FlowBreak[]>([]);
+    const pendingMeasurementsRef = useRef(0);
+    const initialMeasurementsCompleteRef = useRef(false);
+    const [measurementsReady, setMeasurementsReady] = useState(true);
+    const invalidate = useCallback(() => {
+      setBreaks([]);
+    }, []);
 
-  const beginMeasurement = useCallback(() => {
-    const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
-    pendingMeasurementsRef.current += 1;
+    const beginMeasurement = useCallback(() => {
+      const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
+      pendingMeasurementsRef.current += 1;
 
-    if (isInitialMeasurement) {
-      setMeasurementsReady(false);
-    }
-
-    let completed = false;
-    return () => {
-      if (completed) return;
-      completed = true;
-      pendingMeasurementsRef.current -= 1;
-      if (pendingMeasurementsRef.current === 0) {
-        if (!initialMeasurementsCompleteRef.current) {
-          initialMeasurementsCompleteRef.current = true;
-          setMeasurementsReady(true);
-        } else {
-          invalidate();
-        }
+      if (isInitialMeasurement) {
+        setMeasurementsReady(false);
       }
-    };
-  }, [invalidate]);
 
+      let completed = false;
+      return () => {
+        if (completed) return;
+        completed = true;
+        pendingMeasurementsRef.current -= 1;
+        if (pendingMeasurementsRef.current === 0) {
+          if (!initialMeasurementsCompleteRef.current) {
+            initialMeasurementsCompleteRef.current = true;
+            setMeasurementsReady(true);
+          } else {
+            invalidate();
+          }
+        }
+      };
+    }, [invalidate]);
 
     const setEditorRef = useCallback(
       (node: HTMLDivElement | null) => {
@@ -341,7 +342,7 @@ const PaginationDocument = forwardRef<
         <div id={id}>
           <div
             ref={setEditorRef}
-            className="editor"
+            className={`editor ${editorClassName ?? ""}`}
             style={
               {
                 "--page-width": `${PAGE_WIDTH}px`,
