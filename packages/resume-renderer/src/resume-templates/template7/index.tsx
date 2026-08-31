@@ -17,7 +17,7 @@ export const ResumeTemplate7 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
         ref={ref}
         className="text-sm"
         pagePaddingX={36}
-        id="template4"
+        id="template7"
         revision={JSON.stringify(data)}
       >
         <HeaderSection data={data} />
