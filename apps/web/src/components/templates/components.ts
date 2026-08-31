@@ -10,6 +10,7 @@ import {
   ResumeTemplate5,
   ResumeTemplate6,
   ResumeTemplate7,
+  ResumeTemplate8,
 } from "@cv-maker/resume-renderer";
 
 export const DEFAULT_RESUME_TEMPLATE: ResumeTemplateKey = "template1";
@@ -23,6 +24,7 @@ export const resumeTemplates = {
   template5: ResumeTemplate5,
   template6: ResumeTemplate6,
   template7: ResumeTemplate7,
+  template8: ResumeTemplate8,
 } satisfies Partial<Record<ResumeTemplate, ResumeTemplateComponent>>;
 
 export function getResumeTemplateComponent(
