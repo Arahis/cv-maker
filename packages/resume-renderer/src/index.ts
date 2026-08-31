@@ -8,6 +8,7 @@ export { ResumeTemplate5 } from "./resume-templates/template5/index.js";
 export { ResumeTemplate6 } from "./resume-templates/template6/index.js";
 export { ResumeTemplate7 } from "./resume-templates/template7/index.js";
 export { ResumeTemplate8 } from "./resume-templates/template8/index.js";
+export { ResumeTemplate9 } from "./resume-templates/template9/index.js";
 export { icons } from "./icons/index.js";
 export { default as PaginationDocument } from "./pagination/PaginationDocument.js";
 export {
