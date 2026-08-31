@@ -184,7 +184,33 @@ const PaginationDocument = forwardRef<
           boundaryY >= flow.top - EPSILON && boundaryY <= flow.bottom + EPSILON,
       );
 
-      return getDeepestFlows(intersecting);
+      if (intersecting.length > 0) {
+        return getDeepestFlows(intersecting);
+      }
+
+      /*
+       * A page boundary can fall into the margin/gap between two flows. In
+       * that case no flow intersects the boundary, even though the following
+       flow still contains content that must be moved to the next page.
+       * Attach the break to the first flow after the boundary instead of
+       * silently skipping the page break.
+       */
+      const followingFlows = flows.filter(
+        (flow) => flow.top > boundaryY + EPSILON,
+      );
+
+      if (followingFlows.length === 0) {
+        return [];
+      }
+
+      const nextFlowTop = Math.min(
+        ...followingFlows.map((flow) => flow.top),
+      );
+      const nextFlows = followingFlows.filter(
+        (flow) => Math.abs(flow.top - nextFlowTop) <= EPSILON,
+      );
+
+      return getDeepestFlows(nextFlows);
     }, []);
 
     /* -------------------------------------------------------
