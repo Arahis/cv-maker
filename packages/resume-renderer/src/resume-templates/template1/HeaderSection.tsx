@@ -59,7 +59,7 @@ const HeaderSection = ({
           </div>
         </div>
       }
-    ></ColumnsRegion>
+    />
   );
 };
 
