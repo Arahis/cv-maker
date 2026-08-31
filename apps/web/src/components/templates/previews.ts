@@ -7,6 +7,7 @@ export const resumeTemplatesPreview = {
   template6: "/templates/template5.webp",
   template7: "/templates/template4.webp",
   template8: "/templates/template4.webp",
+  template9: "/templates/template4.webp",
 } as const satisfies Record<string, string>;
 
 export type TemplateKey = keyof typeof resumeTemplatesPreview;
