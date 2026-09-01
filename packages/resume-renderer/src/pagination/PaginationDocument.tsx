@@ -240,13 +240,14 @@ const PaginationDocument = forwardRef<
         ]),
       );
 
-      const hasStaleBreak = breaks.some((pageBreak) => {
-        const currentTop = flowTops.get(pageBreak.flowId);
-        return (
-          currentTop === undefined ||
-          Math.abs(currentTop - pageBreak.flowTop) > EPSILON
-        );
-      });
+      // A break changes the position of following flows by design. Comparing
+      // their current top with the top captured before inserting the break
+      // makes pagination oscillate between clearing and re-adding breaks.
+      // Content changes already invalidate breaks through `revision` and
+      // editable input; here we only discard breaks whose flow disappeared.
+      const hasStaleBreak = breaks.some(
+        (pageBreak) => !flowTops.has(pageBreak.flowId),
+      );
 
       if (hasStaleBreak) {
         setBreaks([]);
