@@ -9,6 +9,7 @@ import {
   getResumeTemplateComponent,
   ResumeTemplateKey,
 } from "@/components/templates/components";
+import SentryErrorBoundary from "./SentryErrorBoundary";
 
 const ResumePreview = ({
   template,
@@ -58,11 +59,13 @@ const ResumePreview = ({
             transformOrigin: "top left",
           }}
         >
-          <Template
-            data={formData}
-            photo={croppedPreviewUrl}
-            ref={contentRefForPrint}
-          />
+          <SentryErrorBoundary template={template}>
+            <Template
+              data={formData}
+              photo={croppedPreviewUrl}
+              ref={contentRefForPrint}
+            />
+          </SentryErrorBoundary>
         </div>
       </div>
     </div>
