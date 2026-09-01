@@ -332,8 +332,6 @@ const PaginationDocument = forwardRef<
      * Every new breaker changes browser layout.
      */
     useLayoutEffect(() => {
-      let frameId: number | undefined;
-
       if (previousRevisionRef.current !== revision) {
         previousRevisionRef.current = revision;
         if (breaks.length > 0) {
@@ -345,15 +343,9 @@ const PaginationDocument = forwardRef<
         reconcilePagination();
       }
 
-      frameId = window.requestAnimationFrame(() => {
-        reconcilePagination();
-      });
-
-      return () => {
-        if (frameId !== undefined) {
-          window.cancelAnimationFrame(frameId);
-        }
-      };
+      // Reconciliation is intentionally synchronous here so the preview does
+      // not paint an unpaginated state before the calculated breaks appear.
+      // A second requestAnimationFrame pass caused duplicate state updates.
     }, [revision, breaks, reconcilePagination]);
 
     // handleInput when block is editable in preview
