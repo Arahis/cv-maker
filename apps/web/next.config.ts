@@ -1,10 +1,20 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import path from "path";
 
 initOpenNextCloudflareForDev();
 
+const sentryRelease =
+  process.env.NEXT_PUBLIC_SENTRY_RELEASE ??
+  process.env.WORKERS_CI_COMMIT_SHA ??
+  process.env.CF_PAGES_COMMIT_SHA ??
+  process.env.GITHUB_SHA;
+
 const nextConfig: NextConfig = {
+  env: {
+    ...(sentryRelease ? { NEXT_PUBLIC_SENTRY_RELEASE: sentryRelease } : {}),
+  },
   webpack(config) {
     config.resolve.extensionAlias = {
       ...config.resolve.extensionAlias,
@@ -91,4 +101,19 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  release: sentryRelease ? { name: sentryRelease } : undefined,
+  silent: true,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+});
