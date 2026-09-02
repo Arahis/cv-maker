@@ -10,7 +10,6 @@ import {
   ResumeTemplateKey,
 } from "@/components/templates/components";
 import SentryErrorBoundary from "./SentryErrorBoundary";
-import ResumePreviewSkeleton from "@/components/templates/ResumePreviewSkeleton";
 
 const ResumePreview = ({
   template,
@@ -24,9 +23,14 @@ const ResumePreview = ({
   const { croppedPreviewUrl } = useAvatar();
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { scale, width, height: initialHeight } = useStageScale(containerRef);
+  const {
+    scale,
+    width,
+    height: initialHeight,
+    isMeasured,
+  } = useStageScale(containerRef);
   const [contentHeight, setContentHeight] = useState(initialHeight);
-  const isScaled = scale > 0 && width > 0;
+  const isScaled = isMeasured;
 
   useEffect(() => {
     const content = contentRef.current?.firstElementChild;
@@ -52,7 +56,6 @@ const ResumePreview = ({
       ref={containerRef}
       className="relative h-full min-h-0 w-full overflow-y-auto bg-gray-50 p-4"
     >
-      {!isScaled && <ResumePreviewSkeleton />}
       <div
         className="mx-auto"
         style={{
