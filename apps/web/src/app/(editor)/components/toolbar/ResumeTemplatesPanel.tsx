@@ -1,5 +1,8 @@
 import { trackEvent } from "@/components/analytics/events";
-import { resumeTemplatesPreview } from "@/components/templates/previews";
+import {
+  resumeTemplateMetadata,
+  TemplateKey,
+} from "@/components/templates/previews";
 import ResumeTemplatePreview from "@/components/templates/ResumeTemplatePreview";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +20,7 @@ const ResumeTemplatesPanel = ({
 
   return (
     <div className="flex gap-2">
-      {Object.keys(resumeTemplatesPreview).map((key) => (
+      {Object.keys(resumeTemplateMetadata).map((key) => (
         <div
           key={key}
           className={cn(
@@ -29,9 +32,7 @@ const ResumeTemplatesPanel = ({
             onClick={() => onVarChange(key)}
             className="relative aspect-794/1123 w-35 cursor-pointer overflow-hidden"
           >
-            <ResumeTemplatePreview
-              template={key as keyof typeof resumeTemplatesPreview}
-            />
+            <ResumeTemplatePreview template={key as TemplateKey} />
           </div>
         </div>
       ))}

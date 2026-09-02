@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import ResumePreviewSkeleton from "@/components/templates/ResumePreviewSkeleton";
 
 const ResumeCard = ({
   resume,
@@ -94,11 +95,7 @@ const ResumeCard = ({
             ref={previewRef}
             className="relative aspect-[794/1123] w-full cursor-pointer overflow-hidden"
           >
-            {!isScaled && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center">
-                <Loader2 className="animate-spin text-gray-200" />
-              </div>
-            )}
+            {!isScaled && <ResumePreviewSkeleton />}
             <div
               className="origin-top-left text-left"
               style={{

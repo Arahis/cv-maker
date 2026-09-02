@@ -5,6 +5,7 @@ import { getResumeTemplateComponent } from "@/components/templates/components";
 import { TemplateKey } from "@/components/templates/previews";
 import { resumeMock } from "@/lib/mocks/resume";
 import avatarMock from "@/components/templates/avatar_mock.svg";
+import ResumePreviewSkeleton from "@/components/templates/ResumePreviewSkeleton";
 
 const ResumeTemplatePreview = ({ template }: { template: TemplateKey }) => {
   const Template = getResumeTemplateComponent(template);
@@ -22,13 +23,15 @@ const ResumeTemplatePreview = ({ template }: { template: TemplateKey }) => {
     return () => observer.disconnect();
   }, []);
 
-  const scale = previewWidth > 0 ? previewWidth / 794 : 0.25;
+  const isScaled = previewWidth > 0;
+  const scale = isScaled ? previewWidth / 794 : 0;
 
   return (
     <div
       ref={previewRef}
-      className="aspect-794/1123 min-h-0 w-full cursor-pointer overflow-hidden"
+      className="relative aspect-794/1123 min-h-0 w-full cursor-pointer overflow-hidden"
     >
+      {!isScaled && <ResumePreviewSkeleton />}
       <div
         className="origin-top-left text-left"
         style={{
@@ -36,6 +39,7 @@ const ResumeTemplatePreview = ({ template }: { template: TemplateKey }) => {
           height: 1123,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
+          visibility: isScaled ? "visible" : "hidden",
         }}
       >
         <Template
