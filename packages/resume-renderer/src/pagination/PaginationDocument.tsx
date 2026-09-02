@@ -24,7 +24,6 @@ import {
   getPageContentBottom as getGeometryPageContentBottom,
   getPageContentHeight,
 } from "./geometry.js";
-import { cn } from "../lib/cn.js";
 
 function getRenderedScale(renderedSize: number, layoutSize: number) {
   return layoutSize > 0 ? renderedSize / layoutSize : 1;
@@ -203,9 +202,7 @@ const PaginationDocument = forwardRef<
         return [];
       }
 
-      const nextFlowTop = Math.min(
-        ...followingFlows.map((flow) => flow.top),
-      );
+      const nextFlowTop = Math.min(...followingFlows.map((flow) => flow.top));
       const nextFlows = followingFlows.filter(
         (flow) => Math.abs(flow.top - nextFlowTop) <= EPSILON,
       );

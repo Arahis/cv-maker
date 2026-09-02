@@ -9,6 +9,7 @@ import { ResumeTemplate6 } from "./resume-templates/template6/index.js";
 import { ResumeTemplate7 } from "./resume-templates/template7/index.js";
 import { ResumeTemplate8 } from "./resume-templates/template8/index.js";
 import { ResumeTemplate9 } from "./resume-templates/template9/index.js";
+import { ResumeTemplate10 } from "./resume-templates/template10/index.js";
 
 const resumeTemplates = {
   template1: ResumeTemplate1,
@@ -20,6 +21,7 @@ const resumeTemplates = {
   template7: ResumeTemplate7,
   template8: ResumeTemplate8,
   template9: ResumeTemplate9,
+  template10: ResumeTemplate10,
 } as const;
 
 export function renderResumeTemplate({
