@@ -8,7 +8,7 @@ import {
 const faqItems = [
   {
     q: "Is Cvoop really free?",
-    a: "Yes. Cvoop is a free resume and CV builder. You can create, edit, and download your resume without paying or creating an account.",
+    a: "Yes. Cvoop is a free resume and CV builder. You can create, edit, and export your resume as a PDF without paying or creating an account.",
   },
   {
     q: "Do I need to sign up to use Cvoop?",
@@ -16,11 +16,11 @@ const faqItems = [
   },
   {
     q: "Can I download my resume without an account?",
-    a: "Yes. You can download your resume instantly in PDF format without signing up or providing an email address.",
+    a: "Yes. You can export your resume as a PDF without signing up or providing an email address. In guest mode, the browser's print dialog is used to save the file.",
   },
   {
     q: "How do I download my resume as a PDF?",
-    a: "You can download your resume by clicking the print button and saving it as a PDF. This works on desktop and mobile browsers. Just choose “Save as PDF” in your print options.",
+    a: "Open your resume in the editor and click the print/download button. If you are signed in, the PDF is generated and downloaded automatically. In guest mode, a print dialog opens: choose “Save as PDF” on desktop or the PDF/save option in your mobile browser's print or share menu.",
   },
   {
     q: "Where is my data stored?",
@@ -28,7 +28,7 @@ const faqItems = [
   },
   {
     q: "Why can’t I see my resumes on other devices?",
-    a: "Guest resumes are stored only in the browser where they were created and are not synchronized. To access resumes on supported devices, create an account and save the resumes to your account.",
+    a: "Guest resumes are stored only in the browser where they were created and are not synchronized automatically. After you create an account or sign in, you can save a local resume by clicking it in your resume list, or use its dropdown menu and choose “Sync to account”. You can then open it on other supported devices using the same account.",
   },
   {
     q: "Is Cvoop safe to use?",
@@ -36,7 +36,7 @@ const faqItems = [
   },
   {
     q: "Can I use Cvoop on mobile?",
-    a: "Yes. Cvoop works on mobile, tablet, and desktop browsers. You can create and download your resume from your phone.",
+    a: "Yes. Cvoop works on mobile, tablet, and desktop browsers. You can create, edit, and export your resume as a PDF from your phone or tablet.",
   },
   {
     q: "Are the templates ATS-friendly?",
