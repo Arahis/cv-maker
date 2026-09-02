@@ -34,7 +34,7 @@ function renderServerNode(node: any): string {
 
   switch (node.type) {
     case "text": {
-      let content = escapeHtml(node.text ?? "");
+      let content = `<span style="white-space: pre-wrap;">${escapeHtml(node.text ?? "")}</span>`;
       const format = Number(node.format ?? 0);
 
       if (format & 1) content = `<strong>${content}</strong>`;
@@ -51,7 +51,7 @@ function renderServerNode(node: any): string {
       // browser. Preserve that height in the server-rendered HTML as well;
       // otherwise an empty paragraph becomes <p></p> and collapses during
       // PDF layout/pagination.
-      return `<p>${children || "<br />"}</p>`;
+      return `<p dir="ltr">${children || "<br />"}</p>`;
     case "list": {
       const isNumbered = node.listType === "number";
       const tag = isNumbered ? "ol" : "ul";
@@ -107,5 +107,7 @@ export function createTextReader(value: string) {
 }
 
 export function TextReader({ value }: { value: string }) {
-  return <div dangerouslySetInnerHTML={{ __html: createTextReader(value).html }} />;
+  return (
+    <div dangerouslySetInnerHTML={{ __html: createTextReader(value).html }} />
+  );
 }

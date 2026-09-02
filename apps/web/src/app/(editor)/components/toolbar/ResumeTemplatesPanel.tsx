@@ -1,7 +1,7 @@
 import { trackEvent } from "@/components/analytics/events";
 import { resumeTemplatesPreview } from "@/components/templates/previews";
+import ResumeTemplatePreview from "@/components/templates/ResumeTemplatePreview";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 const ResumeTemplatesPanel = ({
   onChange,
@@ -17,7 +17,7 @@ const ResumeTemplatesPanel = ({
 
   return (
     <div className="flex gap-2">
-      {Object.entries(resumeTemplatesPreview).map(([key, src]) => (
+      {Object.keys(resumeTemplatesPreview).map((key) => (
         <div
           key={key}
           className={cn(
@@ -29,12 +29,8 @@ const ResumeTemplatesPanel = ({
             onClick={() => onVarChange(key)}
             className="relative aspect-794/1123 w-35 cursor-pointer overflow-hidden"
           >
-            <Image
-              src={src}
-              alt={`Template option ${key}`}
-              fill
-              sizes="140px"
-              className="object-cover"
+            <ResumeTemplatePreview
+              template={key as keyof typeof resumeTemplatesPreview}
             />
           </div>
         </div>

@@ -26,7 +26,7 @@ const lexicalText = (...paragraphs: string[]) =>
     },
   });
 
-export const helgaDionisResumeMock: ResumeForm = {
+export const resumeMock: ResumeForm = {
   title: "Helga Dionis — Software Test Engineer",
   description: "",
   firstName: "Helga",
@@ -140,4 +140,3 @@ export const helgaDionisResumeMock: ResumeForm = {
   ],
   socialLinks: [],
 };
-

@@ -23,7 +23,7 @@ export const ResumeTemplate10 = forwardRef<HTMLDivElement, ResumeTemplateProps>(
         revision={JSON.stringify(data)}
       >
         <ColumnsRegion
-          gridTemplateColumns="8fr 2fr"
+          gridTemplateColumns="7fr 3fr"
           className="template10-bg mb-6"
           leftColumn={<HeaderSection data={data} photo={photo} />}
           rightColumn={<Contacts data={data} />}

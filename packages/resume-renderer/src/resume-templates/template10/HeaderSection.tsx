@@ -15,7 +15,7 @@ const HeaderSection = ({
       leftColumn={
         photo && (
           <div
-            className=" w-40 h-40 shrink-0 bg-gray-50 bg-cover bg-center -mt-8"
+            className=" w-30 h-30 shrink-0 bg-gray-50 bg-cover bg-center -mt-8"
             style={{
               backgroundImage: photo ? `url(${photo})` : undefined,
             }}

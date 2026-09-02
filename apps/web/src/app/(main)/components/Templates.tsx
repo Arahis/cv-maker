@@ -2,11 +2,11 @@
 
 import CreateResumeButton from "./CreateResumeButton";
 import { trackEvent } from "@/components/analytics/events";
-import Image from "next/image";
 import {
   resumeTemplatesPreview,
   TemplateKey,
 } from "@/components/templates/previews";
+import ResumeTemplatePreview from "@/components/templates/ResumeTemplatePreview";
 
 const Templates = () => {
   const handleClick = (onClick: () => void, key: string) => {
@@ -30,7 +30,7 @@ const Templates = () => {
       </div>
 
       <div className="mx-auto grid grid-cols-[repeat(auto-fit,140px)] justify-center gap-4 sm:grid-cols-[repeat(auto-fit,160px)] md:grid-cols-[repeat(auto-fit,200px)] md:px-20 lg:px-40">
-        {Object.entries(resumeTemplatesPreview).map(([key, src]) => {
+        {Object.keys(resumeTemplatesPreview).map((key) => {
           return (
             <CreateResumeButton
               key={key}
@@ -40,14 +40,8 @@ const Templates = () => {
                   onClick={() => handleClick(onClick, key)}
                   className="cursor-pointer"
                 >
-                  <div className="relative aspect-794/1123 w-35 cursor-pointer overflow-hidden rounded-md border-2 hover:border-blue-300 sm:w-40 md:w-50">
-                    <Image
-                      src={src}
-                      alt={`Template preview ${key}`}
-                      fill
-                      sizes="(max-width: 640px) 140px, (max-width: 768px) 160px, 200px"
-                      className="object-cover"
-                    />
+                  <div className="relative flex aspect-794/1050 min-h-0 w-35 cursor-pointer overflow-hidden rounded-md border-2 p-1 hover:border-blue-300 sm:w-40 md:w-50">
+                    <ResumeTemplatePreview template={key as TemplateKey} />
                   </div>
                 </div>
               )}
