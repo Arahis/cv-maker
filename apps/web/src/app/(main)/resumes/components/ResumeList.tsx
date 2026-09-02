@@ -67,7 +67,8 @@ const ResumeCard = ({
     return () => observer.disconnect();
   }, []);
 
-  const scale = previewWidth > 0 ? previewWidth / 794 : 0.25;
+  const isScaled = previewWidth > 0;
+  const scale = isScaled ? previewWidth / 794 : 0;
 
   const updatedAtDate =
     typeof updatedAt === "number" ? new Date(updatedAt) : parseISO(updatedAt);
@@ -91,8 +92,13 @@ const ResumeCard = ({
           )}
           <div
             ref={previewRef}
-            className="aspect-[794/1123] w-full cursor-pointer overflow-hidden"
+            className="relative aspect-[794/1123] w-full cursor-pointer overflow-hidden"
           >
+            {!isScaled && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center">
+                <Loader2 className="animate-spin text-gray-200" />
+              </div>
+            )}
             <div
               className="origin-top-left text-left"
               style={{
@@ -100,6 +106,7 @@ const ResumeCard = ({
                 height: 1123,
                 transform: `scale(${scale})`,
                 transformOrigin: "top left",
+                visibility: isScaled ? "visible" : "hidden",
               }}
             >
               <Template data={data} />

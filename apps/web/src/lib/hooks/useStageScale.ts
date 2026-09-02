@@ -33,9 +33,9 @@ export const useStageScale = (
   targetHeight = 1123,
 ) => {
   const [stageSize, setStageSize] = useState<StageSize>({
-    scale: 1,
-    width: targetWidth,
-    height: targetHeight,
+    scale: 0,
+    width: 0,
+    height: 0,
   });
 
   const [zoomIn, setZoomIn] = useState(true);

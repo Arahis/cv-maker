@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useStageScale } from "@/lib/hooks/useStageScale";
 import { ResumeForm } from "@/lib/validation";
 import { useFormContext, useWatch } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 import useAvatar from "../../store/hooks/useAvatar";
 import {
   getResumeTemplateComponent,
@@ -25,6 +26,7 @@ const ResumePreview = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const { scale, width, height: initialHeight } = useStageScale(containerRef);
   const [contentHeight, setContentHeight] = useState(initialHeight);
+  const isScaled = scale > 0 && width > 0;
 
   useEffect(() => {
     const content = contentRef.current?.firstElementChild;
@@ -50,7 +52,19 @@ const ResumePreview = ({
       ref={containerRef}
       className="relative h-full min-h-0 w-full overflow-y-auto bg-gray-50 p-4"
     >
-      <div className="mx-auto" style={{ width, height: contentHeight }}>
+      {!isScaled && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <Loader2 className="animate-spin text-gray-500" />
+        </div>
+      )}
+      <div
+        className="mx-auto"
+        style={{
+          width,
+          height: contentHeight,
+          visibility: isScaled ? "visible" : "hidden",
+        }}
+      >
         <div
           ref={contentRef}
           style={{
