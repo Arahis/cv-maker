@@ -95,8 +95,7 @@ const Templates = () => {
       </div>
 
       <p className="font-brand sr-only text-lg md:not-sr-only md:mx-auto md:w-[60%] md:text-2xl">
-        Choose from modern resume templates and build a professional resume
-        directly in your browser.
+        Modern resume templates with a paged layout and real-time page preview.
       </p>
     </section>
   );
