@@ -37,6 +37,7 @@ export const useStageScale = (
     width: targetWidth,
     height: targetHeight,
   });
+  const [isMeasured, setIsMeasured] = useState(false);
 
   const [zoomIn, setZoomIn] = useState(true);
   // const [isZoomDisabled, setIsZoomDisabled] = useState(false);
@@ -68,6 +69,7 @@ export const useStageScale = (
         width: targetWidth * scale,
         height: targetHeight * scale,
       });
+      setIsMeasured(true);
     });
 
     observer.observe(container.current);
@@ -77,5 +79,5 @@ export const useStageScale = (
     };
   }, [container, maxScale, minScale, targetWidth, targetHeight, zoomIn]);
 
-  return { handleZoomInAndOut, zoomIn, ...stageSize };
+  return { handleZoomInAndOut, zoomIn, isMeasured, ...stageSize };
 };

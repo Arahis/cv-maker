@@ -1,0 +1,16 @@
+.template8-bg {
+  position: relative;
+}
+
+.template8-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  background-color: #000;
+  /* width: 100%; */
+  height: 6px;
+  z-index: 0;
+  pointer-events: none;
+}

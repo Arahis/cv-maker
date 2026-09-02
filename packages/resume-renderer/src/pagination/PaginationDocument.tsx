@@ -24,7 +24,6 @@ import {
   getPageContentBottom as getGeometryPageContentBottom,
   getPageContentHeight,
 } from "./geometry.js";
-import { cn } from "../lib/cn.js";
 
 function getRenderedScale(renderedSize: number, layoutSize: number) {
   return layoutSize > 0 ? renderedSize / layoutSize : 1;
@@ -42,6 +41,7 @@ const PaginationDocument = forwardRef<
     headerFooterHeight?: number;
     pageGap?: number;
     className?: string;
+    editorClassName?: string;
   } & Omit<JSX.IntrinsicElements["div"], "children">
 >(
   (
@@ -52,6 +52,7 @@ const PaginationDocument = forwardRef<
       headerFooterHeight,
       pageGap,
       className,
+      editorClassName,
       id,
     },
     contentRefForPrint,
@@ -70,41 +71,40 @@ const PaginationDocument = forwardRef<
       }),
       [pagePaddingX, headerFooterHeight, pageGap],
     );
-  const editorRef = useRef<HTMLDivElement>(null);
-  const documentFlowRef = useRef<HTMLDivElement>(null);
-  const previousRevisionRef = useRef(revision);
-  const [breaks, setBreaks] = useState<FlowBreak[]>([]);
-  const pendingMeasurementsRef = useRef(0);
-  const initialMeasurementsCompleteRef = useRef(false);
-  const [measurementsReady, setMeasurementsReady] = useState(true);
-  const invalidate = useCallback(() => {
-    setBreaks([]);
-  }, []);
+    const editorRef = useRef<HTMLDivElement>(null);
+    const documentFlowRef = useRef<HTMLDivElement>(null);
+    const previousRevisionRef = useRef(revision);
+    const [breaks, setBreaks] = useState<FlowBreak[]>([]);
+    const pendingMeasurementsRef = useRef(0);
+    const initialMeasurementsCompleteRef = useRef(false);
+    const [measurementsReady, setMeasurementsReady] = useState(true);
+    const invalidate = useCallback(() => {
+      setBreaks([]);
+    }, []);
 
-  const beginMeasurement = useCallback(() => {
-    const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
-    pendingMeasurementsRef.current += 1;
+    const beginMeasurement = useCallback(() => {
+      const isInitialMeasurement = !initialMeasurementsCompleteRef.current;
+      pendingMeasurementsRef.current += 1;
 
-    if (isInitialMeasurement) {
-      setMeasurementsReady(false);
-    }
-
-    let completed = false;
-    return () => {
-      if (completed) return;
-      completed = true;
-      pendingMeasurementsRef.current -= 1;
-      if (pendingMeasurementsRef.current === 0) {
-        if (!initialMeasurementsCompleteRef.current) {
-          initialMeasurementsCompleteRef.current = true;
-          setMeasurementsReady(true);
-        } else {
-          invalidate();
-        }
+      if (isInitialMeasurement) {
+        setMeasurementsReady(false);
       }
-    };
-  }, [invalidate]);
 
+      let completed = false;
+      return () => {
+        if (completed) return;
+        completed = true;
+        pendingMeasurementsRef.current -= 1;
+        if (pendingMeasurementsRef.current === 0) {
+          if (!initialMeasurementsCompleteRef.current) {
+            initialMeasurementsCompleteRef.current = true;
+            setMeasurementsReady(true);
+          } else {
+            invalidate();
+          }
+        }
+      };
+    }, [invalidate]);
 
     const setEditorRef = useCallback(
       (node: HTMLDivElement | null) => {
@@ -183,7 +183,31 @@ const PaginationDocument = forwardRef<
           boundaryY >= flow.top - EPSILON && boundaryY <= flow.bottom + EPSILON,
       );
 
-      return getDeepestFlows(intersecting);
+      if (intersecting.length > 0) {
+        return getDeepestFlows(intersecting);
+      }
+
+      /*
+       * A page boundary can fall into the margin/gap between two flows. In
+       * that case no flow intersects the boundary, even though the following
+       flow still contains content that must be moved to the next page.
+       * Attach the break to the first flow after the boundary instead of
+       * silently skipping the page break.
+       */
+      const followingFlows = flows.filter(
+        (flow) => flow.top > boundaryY + EPSILON,
+      );
+
+      if (followingFlows.length === 0) {
+        return [];
+      }
+
+      const nextFlowTop = Math.min(...followingFlows.map((flow) => flow.top));
+      const nextFlows = followingFlows.filter(
+        (flow) => Math.abs(flow.top - nextFlowTop) <= EPSILON,
+      );
+
+      return getDeepestFlows(nextFlows);
     }, []);
 
     /* -------------------------------------------------------
@@ -213,13 +237,14 @@ const PaginationDocument = forwardRef<
         ]),
       );
 
-      const hasStaleBreak = breaks.some((pageBreak) => {
-        const currentTop = flowTops.get(pageBreak.flowId);
-        return (
-          currentTop === undefined ||
-          Math.abs(currentTop - pageBreak.flowTop) > EPSILON
-        );
-      });
+      // A break changes the position of following flows by design. Comparing
+      // their current top with the top captured before inserting the break
+      // makes pagination oscillate between clearing and re-adding breaks.
+      // Content changes already invalidate breaks through `revision` and
+      // editable input; here we only discard breaks whose flow disappeared.
+      const hasStaleBreak = breaks.some(
+        (pageBreak) => !flowTops.has(pageBreak.flowId),
+      );
 
       if (hasStaleBreak) {
         setBreaks([]);
@@ -305,8 +330,6 @@ const PaginationDocument = forwardRef<
      * Every new breaker changes browser layout.
      */
     useLayoutEffect(() => {
-      let frameId: number | undefined;
-
       if (previousRevisionRef.current !== revision) {
         previousRevisionRef.current = revision;
         if (breaks.length > 0) {
@@ -318,15 +341,9 @@ const PaginationDocument = forwardRef<
         reconcilePagination();
       }
 
-      frameId = window.requestAnimationFrame(() => {
-        reconcilePagination();
-      });
-
-      return () => {
-        if (frameId !== undefined) {
-          window.cancelAnimationFrame(frameId);
-        }
-      };
+      // Reconciliation is intentionally synchronous here so the preview does
+      // not paint an unpaginated state before the calculated breaks appear.
+      // A second requestAnimationFrame pass caused duplicate state updates.
     }, [revision, breaks, reconcilePagination]);
 
     // handleInput when block is editable in preview
@@ -341,7 +358,7 @@ const PaginationDocument = forwardRef<
         <div id={id}>
           <div
             ref={setEditorRef}
-            className="editor"
+            className={`editor ${editorClassName ?? ""}`}
             style={
               {
                 "--page-width": `${PAGE_WIDTH}px`,

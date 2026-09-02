@@ -1,0 +1,15 @@
+.template10-bg {
+  position: relative;
+}
+
+.template10-bg::before {
+  content: "";
+  position: absolute;
+  top: -72px;
+  left: -42px;
+  width: calc(100% + 84px);
+  bottom: 0;
+  background-color: #eaf6ff;
+  z-index: -1;
+  pointer-events: none;
+}

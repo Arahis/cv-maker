@@ -157,10 +157,7 @@ export function KeepTogether({
   className?: string;
 }) {
   return (
-    <PaginationFlow
-      className={`keep-together ${className ?? ""}`}
-      keepTogether
-    >
+    <PaginationFlow className={`keep-together ${className ?? ""}`} keepTogether>
       {children}
     </PaginationFlow>
   );
@@ -172,7 +169,7 @@ export function KeepTogether({
 
 export function FullWidthRegion({ children }: { children: ReactNode }) {
   return (
-    <PaginationFlow className="full-width-region">
+    <PaginationFlow className="full-width-region w-full">
       <div className="region-content">{children}</div>
     </PaginationFlow>
   );

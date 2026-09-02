@@ -11,6 +11,7 @@ const HeaderSection = ({
 }) => {
   return (
     <ColumnsRegion
+      className="mb-6"
       leftColumn={
         <div>
           {photo && (
@@ -35,7 +36,7 @@ const HeaderSection = ({
           <Summary data={data.summary} />
         </div>
       }
-    ></ColumnsRegion>
+    />
   );
 };
 
