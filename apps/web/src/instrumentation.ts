@@ -1,3 +1,5 @@
-// Server-side Sentry instrumentation is intentionally disabled. The app uses
-// the client SDK to monitor frontend and resume-preview errors.
+import * as Sentry from "@sentry/nextjs";
+
 export function register() {}
+
+export const onRequestError = Sentry.captureRequestError;
