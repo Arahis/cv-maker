@@ -147,13 +147,34 @@ async function applyServerPagination(page: import("playwright").Page) {
 
       if (layoutBottom <= boundaryY + geometry.epsilon) break;
 
-      const activeFlows = deepestFlows(
-        getFlows().filter(
-          (flow) =>
-            boundaryY >= flow.top - geometry.epsilon &&
-            boundaryY <= flow.bottom + geometry.epsilon,
-        ),
+      const allFlows = getFlows();
+      const intersectingFlows = allFlows.filter(
+        (flow) =>
+          boundaryY >= flow.top - geometry.epsilon &&
+          boundaryY <= flow.bottom + geometry.epsilon,
       );
+
+      let activeFlows = deepestFlows(intersectingFlows);
+
+      // A boundary may fall into the gap between two flows. In that case the
+      // next flow still needs a break; stopping here would silently drop the
+      // remaining pages and leave the server render shorter than the preview.
+      if (activeFlows.length === 0) {
+        const followingFlows = allFlows.filter(
+          (flow) => flow.top > boundaryY + geometry.epsilon,
+        );
+
+        if (followingFlows.length > 0) {
+          const nextFlowTop = Math.min(
+            ...followingFlows.map((flow) => flow.top),
+          );
+          activeFlows = deepestFlows(
+            followingFlows.filter(
+              (flow) => Math.abs(flow.top - nextFlowTop) <= geometry.epsilon,
+            ),
+          );
+        }
+      }
 
       if (activeFlows.length === 0) break;
 
