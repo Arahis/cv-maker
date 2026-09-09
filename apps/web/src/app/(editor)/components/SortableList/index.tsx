@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -25,6 +25,7 @@ interface Props<T extends BaseItem> {
   onMove(activeIndex: number, overIndex: number): void;
   renderItem(item: T, idx: number): ReactNode;
   className?: string;
+  as?: ElementType;
 }
 
 export function SortableList<T extends BaseItem>({
@@ -32,11 +33,11 @@ export function SortableList<T extends BaseItem>({
   onMove,
   renderItem,
   className,
+  as: Container = "ul",
 }: Props<T>) {
   const [active, setActive] = useState<Active | null>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const activeItem = items.find((item) => item.id === active?.id);
-
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -75,13 +76,13 @@ export function SortableList<T extends BaseItem>({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={items}>
-        <ul role="application" className={className}>
+        <Container role="application" className={className}>
           {items.map((item, idx) => (
             <React.Fragment key={item.id}>
               {renderItem(item, idx)}
             </React.Fragment>
           ))}
-        </ul>
+        </Container>
       </SortableContext>
       <SortableOverlay>
         {activeItem ? renderItem(activeItem, activeIdx) : null}

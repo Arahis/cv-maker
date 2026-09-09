@@ -201,8 +201,9 @@ const WorkExperience = () => {
           className="grid gap-4"
           items={fields}
           onMove={move}
+          as="div"
           renderItem={(item, index) => (
-            <SortableList.Item id={item.id}>
+            <SortableList.Item id={item.id} as="div">
               <WorkExperienceItem
                 index={index}
                 control={control}

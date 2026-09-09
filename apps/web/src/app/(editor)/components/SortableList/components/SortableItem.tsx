@@ -1,5 +1,5 @@
 import React, { createContext, memo, useContext, useMemo } from "react";
-import type { CSSProperties, PropsWithChildren } from "react";
+import type { CSSProperties, ElementType, PropsWithChildren } from "react";
 import type {
   DraggableSyntheticListeners,
   UniqueIdentifier,
@@ -10,6 +10,7 @@ import { GripHorizontal, GripVertical } from "lucide-react";
 
 interface Props {
   id: UniqueIdentifier;
+  as?: ElementType;
 }
 
 interface Context {
@@ -29,6 +30,7 @@ function useSortableItemContext() {
 export const SortableItem = memo(function SortableItem({
   children,
   id,
+  as: ItemTag = "li",
 }: PropsWithChildren<Props>) {
   const {
     attributes,
@@ -56,9 +58,9 @@ export const SortableItem = memo(function SortableItem({
 
   return (
     <SortableItemContext.Provider value={context}>
-      <li className="SortableItem" ref={setNodeRef} style={style}>
+      <ItemTag className="SortableItem" ref={setNodeRef} style={style}>
         {children}
-      </li>
+      </ItemTag>
     </SortableItemContext.Provider>
   );
 });
