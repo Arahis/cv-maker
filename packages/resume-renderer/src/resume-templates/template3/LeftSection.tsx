@@ -2,11 +2,11 @@ import { ResumeForm } from "@cv-maker/shared";
 import { cn } from "../../lib/cn.js";
 import React from "react";
 import { formatDate } from "../../utils/formatDate.js";
-import { TextReader } from "../../text-reader.js";
 import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
 import SectionItem from "./SectionItem.js";
 import { ColumnsRegion } from "../../pagination/Pagination.js";
 import { useFitContentWidth } from "../hooks/useFitContentWidth.js";
+import { WorkExperienceDescription } from "../WorkExperienceDescription.js";
 
 const heightMap = {
   sm: "h-2 mx-2",
@@ -81,7 +81,7 @@ export function JobSection({
     startDate,
     endDate,
     company,
-    description,
+    descriptionBullets,
     isFullDate,
   } = item;
 
@@ -116,7 +116,7 @@ export function JobSection({
         leftColumn={company && <p className="font-semibold">{company}</p>}
         rightColumn={city && <p>{city}</p>}
       />
-      <TextReader value={description || ""} />
+      <WorkExperienceDescription bullets={descriptionBullets} />
     </div>
   );
 }

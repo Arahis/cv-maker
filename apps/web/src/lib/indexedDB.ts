@@ -2,11 +2,13 @@ import { openDB } from "idb";
 import { useEffect, useRef } from "react";
 import { debounce } from "./debounce";
 import { ResumeForm } from "./validation";
+import { EMPTY_LEXICAL_STATE } from "./formDefaults";
 import { ResumeTemplateKey } from "@/components/templates/components";
 
 const DB_NAME = "Resume";
 const STORE_NAME = "resumes";
 const PENDING_CREATION_STORE_NAME = "pending-resume-creations";
+const DB_VERSION = 5;
 
 export type LocalResumeAvatar = {
   croppedBlob: Blob;
@@ -29,7 +31,7 @@ export interface ResumeRecord {
 
 // Initialize IndexedDB
 async function getDB() {
-  return openDB(DB_NAME, 4, {
+  return openDB(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, {
@@ -53,19 +55,81 @@ async function getDB() {
   });
 }
 
+type WorkExperience = NonNullable<ResumeForm["workExperiences"]>[number];
+type LegacyWorkExperience = Omit<WorkExperience, "descriptionBullets"> & {
+  description?: string;
+  descriptionBullets?: WorkExperience["descriptionBullets"];
+};
+
+function migrateDescriptionBullets(data: ResumeForm): {
+  data: ResumeForm;
+  migrated: boolean;
+} {
+  const legacyData = data as unknown as Omit<ResumeForm, "workExperiences"> & {
+    workExperiences?: LegacyWorkExperience[];
+  };
+
+  if (
+    !legacyData.workExperiences?.some(
+      (experience) => "description" in experience,
+    )
+  ) {
+    return { data, migrated: false };
+  }
+
+  return {
+    data: {
+      ...legacyData,
+      workExperiences: legacyData.workExperiences.map((experience) => {
+        const { description, ...rest } = experience;
+
+        if (experience.descriptionBullets) {
+          return rest;
+        }
+
+        return {
+          ...rest,
+          descriptionBullets: [
+            {
+              id: crypto.randomUUID(),
+              text: description ?? EMPTY_LEXICAL_STATE,
+            },
+          ],
+        };
+      }),
+    } as ResumeForm,
+    migrated: true,
+  };
+}
+
 export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
   const db = await getDB();
   const resumes = await db.getAll(STORE_NAME);
-  const needsMigration = resumes.some((resume) => resume.position == null);
+  const migratedResumes = resumes.map((resume) => {
+    const descriptionMigration = migrateDescriptionBullets(resume.data);
+
+    return {
+      ...resume,
+      data: descriptionMigration.data,
+      needsMigration:
+        resume.position == null || descriptionMigration.migrated,
+    };
+  });
+
+  const needsMigration = migratedResumes.some(
+    (resume) => resume.needsMigration,
+  );
 
   if (!needsMigration) {
     return resumes;
   }
 
-  const migrated = resumes.map((resume, index) => ({
-    ...resume,
-    position: resume.position ?? (index + 1) * 1000,
-  }));
+  const migrated = migratedResumes.map(
+    ({ needsMigration: _, ...resume }, index) => ({
+      ...resume,
+      position: resume.position ?? (index + 1) * 1000,
+    }),
+  );
 
   const transaction = db.transaction(STORE_NAME, "readwrite");
   await Promise.all(migrated.map((resume) => transaction.store.put(resume)));

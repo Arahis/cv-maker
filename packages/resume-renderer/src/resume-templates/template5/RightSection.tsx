@@ -7,7 +7,7 @@ import {
 import SectionItem from "./SectionItem.js";
 import { formatDate } from "../../utils/formatDate.js";
 import { ColumnsRegion } from "../../pagination/Pagination.js";
-import { TextReader } from "../../text-reader.js";
+import { WorkExperienceDescription } from "../WorkExperienceDescription.js";
 
 const Education = ({ items }: { items: ResumeForm["educations"] }) => {
   const hasEducation = items?.some(isEducationFilled);
@@ -53,7 +53,7 @@ export function JobSection({
     startDate,
     endDate,
     company,
-    description,
+    descriptionBullets,
     isFullDate,
   } = item;
 
@@ -80,7 +80,7 @@ export function JobSection({
           <div>
             <p className="font-bold uppercase">{position}</p>
             {company && <p className="mb-2 font-semibold">{company}</p>}
-            <TextReader value={description || ""} />
+            <WorkExperienceDescription bullets={descriptionBullets} />
           </div>
         }
       ></ColumnsRegion>

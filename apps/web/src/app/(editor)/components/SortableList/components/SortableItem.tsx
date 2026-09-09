@@ -1,5 +1,5 @@
 import React, { createContext, memo, useContext, useMemo } from "react";
-import type { CSSProperties, PropsWithChildren } from "react";
+import type { CSSProperties, ElementType, PropsWithChildren } from "react";
 import type {
   DraggableSyntheticListeners,
   UniqueIdentifier,
@@ -10,6 +10,7 @@ import { GripHorizontal, GripVertical } from "lucide-react";
 
 interface Props {
   id: UniqueIdentifier;
+  as?: ElementType;
 }
 
 interface Context {
@@ -29,6 +30,7 @@ function useSortableItemContext() {
 export const SortableItem = memo(function SortableItem({
   children,
   id,
+  as: ItemTag = "li",
 }: PropsWithChildren<Props>) {
   const {
     attributes,
@@ -49,16 +51,18 @@ export const SortableItem = memo(function SortableItem({
     [attributes, listeners, setActivatorNodeRef],
   );
   const style: CSSProperties = {
-    opacity: isDragging ? 0.4 : undefined,
+    // Keep the item in the layout so the list does not collapse, but show
+    // only its DragOverlay while it is being dragged.
+    opacity: isDragging ? 0 : undefined,
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
   return (
     <SortableItemContext.Provider value={context}>
-      <li className="SortableItem" ref={setNodeRef} style={style}>
+      <ItemTag className="SortableItem" ref={setNodeRef} style={style}>
         {children}
-      </li>
+      </ItemTag>
     </SortableItemContext.Provider>
   );
 });

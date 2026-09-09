@@ -73,6 +73,9 @@ export const personalInfoSchema = z.object({
 export type PersonalInfoForm = z.infer<typeof personalInfoSchema>;
 export type PersonalInfoKeys = keyof PersonalInfoForm;
 
+export const lexicalEditorStateSchema = z.string();
+export type LexicalEditorState = z.infer<typeof lexicalEditorStateSchema>;
+
 export const workExperienceSchema = z.object({
   workExperiences: z
     .array(
@@ -84,7 +87,12 @@ export const workExperienceSchema = z.object({
         startDate: optionalString,
         endDate: optionalString,
         isFullDate: z.boolean(),
-        description: optionalString,
+        descriptionBullets: z.array(
+          z.object({
+            id: z.string(),
+            text: lexicalEditorStateSchema,
+          }),
+        ),
       }),
     )
     .optional(),
