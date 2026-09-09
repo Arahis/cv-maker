@@ -16,7 +16,7 @@ import { SortableList } from "../SortableList";
 import { EMPTY_LEXICAL_STATE } from "@/lib/formDefaults";
 import { Plus, Trash2 } from "lucide-react";
 import { DatePickerInput } from "@/components/DatePicker";
-import { TextEditor } from "@/components/editor";
+import { TextEditor, TextReader } from "@/components/editor";
 
 const WorkExperienceItem = ({
   index,
@@ -135,6 +135,11 @@ const WorkExperienceItem = ({
             className="grid gap-4"
             items={fields}
             onMove={move}
+            renderOverlay={(item) => (
+              <div className="bg-background min-w-0 rounded-md border p-3 text-sm shadow-lg">
+                <TextReader value={item.text} />
+              </div>
+            )}
             renderItem={(item, bulletIndex) => (
               <SortableList.Item id={item.id}>
                 <div className="flex items-start gap-2">
@@ -187,7 +192,7 @@ const WorkExperienceItem = ({
 };
 
 const WorkExperience = () => {
-  const { control } = useFormContext();
+  const { control } = useFormContext<WorkExperienceForm>();
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -202,6 +207,12 @@ const WorkExperience = () => {
           items={fields}
           onMove={move}
           as="div"
+          renderOverlay={(item) => (
+            <div className="bg-background min-w-0 rounded-md border p-4 shadow-lg">
+              <div className="font-semibold">{item.position}</div>
+              <div>{item.company}</div>
+            </div>
+          )}
           renderItem={(item, index) => (
             <SortableList.Item id={item.id} as="div">
               <WorkExperienceItem

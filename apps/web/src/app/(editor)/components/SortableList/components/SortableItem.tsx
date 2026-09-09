@@ -51,7 +51,9 @@ export const SortableItem = memo(function SortableItem({
     [attributes, listeners, setActivatorNodeRef],
   );
   const style: CSSProperties = {
-    opacity: isDragging ? 0.4 : undefined,
+    // Keep the item in the layout so the list does not collapse, but show
+    // only its DragOverlay while it is being dragged.
+    opacity: isDragging ? 0 : undefined,
     transform: CSS.Transform.toString(transform),
     transition,
   };
