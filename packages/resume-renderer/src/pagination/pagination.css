@@ -68,6 +68,9 @@
 /* ========================================================
    COLUMNS
    ======================================================== */
+.resume-text-bullet-paragraph {
+  text-indent: -1.25rem;
+}
 
 .columns-region {
   display: grid;
@@ -246,8 +249,13 @@
 
 .editor-list-ul {
   margin-bottom: 1em;
-  margin-left: 1.5em;
-  list-style-type: disc;
+  margin-left: 0;
+  list-style-type: none;
+}
+
+.editor-list-ul > .lexical-text-bullet {
+  padding-left: 1.25rem;
+  text-indent: -1.25rem;
 }
 
 /* Keep list spacing inside JobSection consistent with KeepTogether padding. */

@@ -1,10 +1,9 @@
 import SectionItem from "./SectionItem.js";
 import { formatDate } from "../../utils/formatDate.js";
-import { TextReader } from "../../text-reader.js";
 import type { ResumeForm } from "@cv-maker/shared";
-import { EMPTY_LEXICAL_STATE } from "../../empty-lexical-state.js";
 import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
 import Summary from "./Summary.js";
+import { WorkExperienceDescription } from "../WorkExperienceDescription.js";
 
 export function JobSection({
   item,
@@ -17,7 +16,7 @@ export function JobSection({
     startDate,
     endDate,
     company,
-    description,
+    descriptionBullets,
     isFullDate,
   } = item;
   return (
@@ -33,7 +32,7 @@ export function JobSection({
         )}
         <p>{city}</p>
       </div>
-      <TextReader value={description || EMPTY_LEXICAL_STATE} />
+      <WorkExperienceDescription bullets={descriptionBullets} />
     </div>
   );
 }
