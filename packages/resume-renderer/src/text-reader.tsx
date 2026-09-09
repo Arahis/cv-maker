@@ -81,6 +81,23 @@ function createServerTextReader(value: string) {
   };
 }
 
+function fallbackTextReader(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) return { html: "", text: "" };
+
+  // Lexical states are JSON objects. Keep legacy plain text readable, but do
+  // not expose a truncated/corrupted JSON payload in the resume.
+  if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
+    return { html: "", text: "" };
+  }
+
+  return {
+    html: `<p dir="ltr"><span style="white-space: pre-wrap;">${escapeHtml(value)}</span></p>`,
+    text: value,
+  };
+}
+
 function addLexicalListPrefixes(html: string) {
   const prefix = "•\u00a0\u00a0\u00a0";
   const listPattern = /(<ul\b[^>]*class=["'][^"']*\beditor-list-ul\b[^"']*["'][^>]*>)([\s\S]*?)(<\/ul>)/g;
@@ -143,28 +160,33 @@ function addTextPrefix(html: string, prefix: string) {
 }
 
 export function createTextReader(value: string) {
-  if (typeof document === "undefined") {
-    return createServerTextReader(value);
+  try {
+    if (typeof document === "undefined") {
+      return createServerTextReader(value);
+    }
+
+    const editor = createEditor({
+      namespace: "ResumeRenderer",
+      nodes,
+      theme,
+      onError: (error) => console.error(error),
+    });
+    const editorState = editor.parseEditorState(value);
+    editor.setEditorState(editorState);
+
+    let html = "";
+    let text = "";
+
+    editorState.read(() => {
+      text = $getRoot().getTextContent();
+      html = $generateHtmlFromNodes(editor);
+    });
+
+    return { html, text };
+  } catch (error) {
+    console.warn("Invalid Lexical editor state", error);
+    return fallbackTextReader(value);
   }
-
-  const editor = createEditor({
-    namespace: "ResumeRenderer",
-    nodes,
-    theme,
-    onError: (error) => console.error(error),
-  });
-  const editorState = editor.parseEditorState(value);
-  editor.setEditorState(editorState);
-
-  let html = "";
-  let text = "";
-
-  editorState.read(() => {
-    text = $getRoot().getTextContent();
-    html = $generateHtmlFromNodes(editor);
-  });
-
-  return { html, text };
 }
 
 export function TextReader({
