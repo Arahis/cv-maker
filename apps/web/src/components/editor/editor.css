@@ -38,3 +38,16 @@
   margin-left: 1.5em;
   margin-bottom: 1em;
 }
+
+/* The resume renderer uses the same Lexical class names but hides markers so
+ * copied preview bullets can be rendered as text. Restore native markers in
+ * the form editor with a more specific editor-only selector. */
+[contenteditable="true"] .editor-list-ol {
+  list-style-type: decimal;
+  margin-left: 1.5em;
+}
+
+[contenteditable="true"] .editor-list-ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+}

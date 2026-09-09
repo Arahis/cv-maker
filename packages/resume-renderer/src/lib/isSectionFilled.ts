@@ -19,11 +19,13 @@ export function isEducationFilled(
 export function isWorkExperienceFilled(
   item: NonNullable<ResumeForm["workExperiences"]>[number],
 ) {
-  const { description, id, ...fieldsToCheck } = item;
+  const { descriptionBullets, id, ...fieldsToCheck } = item;
 
-  const hasDescription = createTextReader(description || "").text.trim();
+  const hasDescription = descriptionBullets?.some(
+    (bullet) => createTextReader(bullet.text).text.trim() !== "",
+  );
 
-  return hasDescription || hasFilledFields(Object.values(fieldsToCheck));
+  return Boolean(hasDescription) || hasFilledFields(Object.values(fieldsToCheck));
 }
 
 export function isSocialFilled(

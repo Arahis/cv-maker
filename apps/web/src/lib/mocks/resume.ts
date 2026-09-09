@@ -26,6 +26,12 @@ const lexicalText = (...paragraphs: string[]) =>
     },
   });
 
+const lexicalBullets = (idPrefix: string, ...texts: string[]) =>
+  texts.map((text, index) => ({
+    id: `${idPrefix}-${index + 1}`,
+    text: lexicalText(text),
+  }));
+
 export const resumeMock: ResumeForm = {
   title: "Helga Dionis — Software Test Engineer",
   description: "",
@@ -45,7 +51,8 @@ export const resumeMock: ResumeForm = {
       startDate: "2022-09",
       endDate: "",
       isFullDate: false,
-      description: lexicalText(
+      descriptionBullets: lexicalBullets(
+        "helga-work-cloudbridge-bullet",
         "Lead quality assurance for a SaaS customer-support platform used by distributed sales and service teams. Define test strategy for new releases, review product requirements, and coordinate testing across web and API layers.",
         "Created and maintained automated regression suites using Playwright and TypeScript, reducing manual regression time by 45%. Introduced reusable test fixtures and improved test stability in CI environments.",
         "Collaborate with developers, designers, and product managers during planning and refinement sessions. Identify edge cases early, document acceptance criteria, and support production release decisions.",
@@ -61,7 +68,8 @@ export const resumeMock: ResumeForm = {
       startDate: "2019-09",
       endDate: "2022-08",
       isFullDate: false,
-      description: lexicalText(
+      descriptionBullets: lexicalBullets(
+        "helga-work-intelligent-contacts-bullet",
         "Performed functional, integration, regression, and exploratory testing for a cloud contact-center solution. Tested complex user flows involving calls, customer profiles, automation rules, permissions, and billing settings.",
         "Designed test plans for new features and maintained regression checklists for weekly releases. Worked closely with backend engineers to validate REST API responses, error handling, and data consistency.",
         "Expanded automated UI coverage with Selenium and Java. Added API tests with Postman and Newman and integrated them into the CI pipeline.",

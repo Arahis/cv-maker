@@ -24,7 +24,9 @@ export const defaultFormValues = (): ResumeForm => ({
       city: "",
       startDate: "",
       endDate: "",
-      description: EMPTY_LEXICAL_STATE,
+      descriptionBullets: [
+        { id: crypto.randomUUID(), text: EMPTY_LEXICAL_STATE },
+      ],
       isFullDate: false,
     },
   ],

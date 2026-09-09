@@ -41,26 +41,52 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export function createTextReader(value: string) {
-  const initialConfig = {
-    namespace: "EditorPreview",
-    nodes,
-    theme,
-    onError,
+function fallbackTextReader(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) return { html: "", text: "" };
+
+  if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
+    return { html: "", text: "" };
+  }
+
+  const escapedValue = value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+  return {
+    html: `<p dir="ltr"><span style="white-space: pre-wrap;">${escapedValue}</span></p>`,
+    text: value,
   };
+}
 
-  const editor = createEditor(initialConfig);
-  const editorState = editor.parseEditorState(value);
-  editor.setEditorState(editorState);
+export function createTextReader(value: string) {
+  try {
+    const initialConfig = {
+      namespace: "EditorPreview",
+      nodes,
+      theme,
+      onError,
+    };
 
-  let html = "";
-  let text = "";
-  editorState.read(() => {
-    text = $getRoot().getTextContent();
-    html = $generateHtmlFromNodes(editor);
-  });
+    const editor = createEditor(initialConfig);
+    const editorState = editor.parseEditorState(value);
+    editor.setEditorState(editorState);
 
-  return { html, text };
+    let html = "";
+    let text = "";
+    editorState.read(() => {
+      text = $getRoot().getTextContent();
+      html = $generateHtmlFromNodes(editor);
+    });
+
+    return { html, text };
+  } catch (error) {
+    console.warn("Invalid Lexical editor state", error);
+    return fallbackTextReader(value);
+  }
 }
 
 export const TextReader = ({ value }: { value: string }) => {

@@ -81,33 +81,128 @@ function createServerTextReader(value: string) {
   };
 }
 
-export function createTextReader(value: string) {
-  if (typeof document === "undefined") {
-    return createServerTextReader(value);
+function fallbackTextReader(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) return { html: "", text: "" };
+
+  // Lexical states are JSON objects. Keep legacy plain text readable, but do
+  // not expose a truncated/corrupted JSON payload in the resume.
+  if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
+    return { html: "", text: "" };
   }
 
-  const editor = createEditor({
-    namespace: "ResumeRenderer",
-    nodes,
-    theme,
-    onError: (error) => console.error(error),
-  });
-  const editorState = editor.parseEditorState(value);
-  editor.setEditorState(editorState);
-
-  let html = "";
-  let text = "";
-
-  editorState.read(() => {
-    text = $getRoot().getTextContent();
-    html = $generateHtmlFromNodes(editor);
-  });
-
-  return { html, text };
+  return {
+    html: `<p dir="ltr"><span style="white-space: pre-wrap;">${escapeHtml(value)}</span></p>`,
+    text: value,
+  };
 }
 
-export function TextReader({ value }: { value: string }) {
+function addLexicalListPrefixes(html: string) {
+  const prefix = "•\u00a0\u00a0\u00a0";
+  const listPattern = /(<ul\b[^>]*class=["'][^"']*\beditor-list-ul\b[^"']*["'][^>]*>)([\s\S]*?)(<\/ul>)/g;
+
+  return html.replace(listPattern, (list, opening, content, closing) => {
+    const items = content.replace(
+      /<li\b([^>]*)>([\s\S]*?)<\/li>/g,
+      (item: string, attributes: string, itemContent: string) => {
+        const withClass = /\bclass=["']/.test(attributes)
+          ? attributes.replace(
+              /(\bclass=["'][^"']*)["']/, `$1 lexical-text-bullet"`,
+            )
+          : `${attributes} class="lexical-text-bullet"`;
+        const firstSpan = /(<span\b[^>]*>)/;
+
+        if (firstSpan.test(itemContent)) {
+          const prefixedContent = itemContent.replace(
+            firstSpan,
+            `$1${prefix}`,
+          );
+          return `<li${withClass}>${prefixedContent}</li>`;
+        }
+
+        return `<li${withClass}>${prefix}${itemContent}</li>`;
+      },
+    );
+
+    return `${opening}${items}${closing}`;
+  });
+}
+
+function addTextPrefix(html: string, prefix: string) {
+  const escapedPrefix = escapeHtml(prefix);
+  let prefixAdded = false;
+
+  const prefixedHtml = html.replace(
+    /<p\b([^>]*)>([\s\S]*?)<\/p>/g,
+    (paragraph, attributes: string, content: string) => {
+      if (prefixAdded || !content.replace(/<[^>]*>/g, "").trim()) {
+        return paragraph;
+      }
+
+      prefixAdded = true;
+      const attributesWithBulletClass = /\bclass=["']/.test(attributes)
+        ? attributes.replace(
+            /(\bclass=["'][^"']*)["']/, `$1 resume-text-bullet-paragraph"`,
+          )
+        : `${attributes} class="resume-text-bullet-paragraph"`;
+
+      return `<p${attributesWithBulletClass}>${escapedPrefix}${content}</p>`;
+    },
+  );
+
+  if (prefixAdded) return prefixedHtml;
+
+  return html.replace(
+    /(<p\b[^>]*>)/,
+    `$1${escapedPrefix}`,
+  );
+}
+
+export function createTextReader(value: string) {
+  try {
+    if (typeof document === "undefined") {
+      return createServerTextReader(value);
+    }
+
+    const editor = createEditor({
+      namespace: "ResumeRenderer",
+      nodes,
+      theme,
+      onError: (error) => console.error(error),
+    });
+    const editorState = editor.parseEditorState(value);
+    editor.setEditorState(editorState);
+
+    let html = "";
+    let text = "";
+
+    editorState.read(() => {
+      text = $getRoot().getTextContent();
+      html = $generateHtmlFromNodes(editor);
+    });
+
+    return { html, text };
+  } catch (error) {
+    console.warn("Invalid Lexical editor state", error);
+    return fallbackTextReader(value);
+  }
+}
+
+export function TextReader({
+  value,
+  prefix,
+}: {
+  value: string;
+  prefix?: string;
+}) {
+  const html = addLexicalListPrefixes(createTextReader(value).html);
+
   return (
-    <div dangerouslySetInnerHTML={{ __html: createTextReader(value).html }} />
+    <div
+      dangerouslySetInnerHTML={{
+        __html: prefix ? addTextPrefix(html, prefix) : html,
+      }}
+    />
   );
 }

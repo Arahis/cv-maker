@@ -1,10 +1,10 @@
 import { ResumeForm } from "@cv-maker/shared";
 import { formatDate } from "../../utils/formatDate.js";
-import { TextReader } from "../../text-reader.js";
 import SectionItem from "./SectionItem.js";
 import { isWorkExperienceFilled } from "../../lib/isSectionFilled.js";
 import { ColumnsRegion, KeepTogether } from "../../pagination/Pagination.js";
 import { useFitContentWidth } from "../hooks/useFitContentWidth.js";
+import { WorkExperienceDescription } from "../WorkExperienceDescription.js";
 
 // TODO add proper type for item so it could see item fields
 export function JobSection({
@@ -18,7 +18,7 @@ export function JobSection({
     startDate,
     endDate,
     company,
-    description,
+    descriptionBullets,
     isFullDate,
   } = item;
 
@@ -52,7 +52,7 @@ export function JobSection({
           {city && <p className="text-gray-400 italic">{city}</p>}
         </div>
       </KeepTogether>
-      <TextReader value={description || ""} />
+      <WorkExperienceDescription bullets={descriptionBullets} />
     </div>
   );
 }
