@@ -60,8 +60,17 @@ type LegacyWorkExperience = Omit<WorkExperience, "descriptionBullets"> & {
   description?: string;
   descriptionBullets?: WorkExperience["descriptionBullets"];
 };
+type CustomSection = NonNullable<ResumeForm["customSections"]>[number];
+type LegacyCustomSection = Omit<CustomSection, "id" | "sectionItems"> & {
+  id?: string;
+  sectionItems?: Array<
+    Omit<NonNullable<CustomSection["sectionItems"]>[number], "id"> & {
+      id?: string;
+    }
+  >;
+};
 
-function migrateDescriptionBullets(data: ResumeForm): {
+function migrateResumeData(data: ResumeForm): {
   data: ResumeForm;
   migrated: boolean;
 } {
@@ -69,18 +78,23 @@ function migrateDescriptionBullets(data: ResumeForm): {
     workExperiences?: LegacyWorkExperience[];
   };
 
-  if (
-    !legacyData.workExperiences?.some(
+  const hasLegacyDescription = Boolean(
+    legacyData.workExperiences?.some(
       (experience) => "description" in experience,
-    )
-  ) {
+    ),
+  );
+  const legacyCustomSections = (data.customSections ?? []) as unknown as LegacyCustomSection[];
+  const hasMissingCustomIds = legacyCustomSections.some(
+    (section) =>
+      !section.id || section.sectionItems?.some((item) => !item.id),
+  );
+
+  if (!hasLegacyDescription && !hasMissingCustomIds) {
     return { data, migrated: false };
   }
 
-  return {
-    data: {
-      ...legacyData,
-      workExperiences: legacyData.workExperiences.map((experience) => {
+  const workExperiences = hasLegacyDescription
+    ? legacyData.workExperiences?.map((experience) => {
         const { description, ...rest } = experience;
 
         if (experience.descriptionBullets) {
@@ -96,7 +110,21 @@ function migrateDescriptionBullets(data: ResumeForm): {
             },
           ],
         };
-      }),
+      })
+    : legacyData.workExperiences;
+
+  return {
+    data: {
+      ...legacyData,
+      workExperiences,
+      customSections: legacyCustomSections.map((section) => ({
+        ...section,
+        id: section.id ?? crypto.randomUUID(),
+        sectionItems: section.sectionItems?.map((item) => ({
+          ...item,
+          id: item.id ?? crypto.randomUUID(),
+        })),
+      })),
     } as ResumeForm,
     migrated: true,
   };
@@ -106,13 +134,13 @@ export async function loadAllResumes(): Promise<ResumeRecord[] | null> {
   const db = await getDB();
   const resumes = await db.getAll(STORE_NAME);
   const migratedResumes = resumes.map((resume) => {
-    const descriptionMigration = migrateDescriptionBullets(resume.data);
+    const resumeMigration = migrateResumeData(resume.data);
 
     return {
       ...resume,
-      data: descriptionMigration.data,
+      data: resumeMigration.data,
       needsMigration:
-        resume.position == null || descriptionMigration.migrated,
+        resume.position == null || resumeMigration.migrated,
     };
   });
 
