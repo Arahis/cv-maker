@@ -47,7 +47,28 @@ function fallbackTextReader(value: string) {
   if (!trimmedValue) return { html: "", text: "" };
 
   if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
-    return { html: "", text: "" };
+    const recoveredText = [...value.matchAll(/"text"\s*:\s*"((?:\\.|[^"\\])*)"/g)]
+      .map((match) => {
+        try {
+          return JSON.parse(`"${match[1]}"`) as string;
+        } catch {
+          return "";
+        }
+      })
+      .join("");
+
+    if (!recoveredText) return { html: "", text: "" };
+
+    const escapedRecoveredText = recoveredText
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+    return {
+      html: `<p dir="ltr"><span style="white-space: pre-wrap;">${escapedRecoveredText}</span></p>`,
+      text: recoveredText,
+    };
   }
 
   const escapedValue = value

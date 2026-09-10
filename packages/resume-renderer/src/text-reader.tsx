@@ -86,10 +86,25 @@ function fallbackTextReader(value: string) {
 
   if (!trimmedValue) return { html: "", text: "" };
 
-  // Lexical states are JSON objects. Keep legacy plain text readable, but do
-  // not expose a truncated/corrupted JSON payload in the resume.
+  // Recover text nodes from a truncated Lexical state when possible. This
+  // keeps old resumes readable without rendering the broken JSON itself.
   if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
-    return { html: "", text: "" };
+    const recoveredText = [...value.matchAll(/"text"\s*:\s*"((?:\\.|[^"\\])*)"/g)]
+      .map((match) => {
+        try {
+          return JSON.parse(`"${match[1]}"`) as string;
+        } catch {
+          return "";
+        }
+      })
+      .join("");
+
+    if (!recoveredText) return { html: "", text: "" };
+
+    return {
+      html: `<p dir="ltr"><span style="white-space: pre-wrap;">${escapeHtml(recoveredText)}</span></p>`,
+      text: recoveredText,
+    };
   }
 
   return {
