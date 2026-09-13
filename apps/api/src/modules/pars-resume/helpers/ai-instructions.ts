@@ -43,35 +43,45 @@ Work experience:
 31. Do not merge separate work experiences.
 32. Do not split one work experience into multiple entries unless the document clearly presents them as separate roles.
 33. Remove line breaks caused only by PDF text wrapping, column width, or visual layout.
-34. Preserve line breaks only between logical paragraphs, headings, bullet points, technologies, projects, or other separate items.
+34. Preserve line breaks only between logical paragraphs or separate outer description items. Keep compact labeled lists inside one outer description item.
 
-For every work experience description, use this plain-text structure when the corresponding content exists:
+When a work experience description is a continuous prose block without explicit
+bullet points, inspect it for distinct responsibilities, achievements, or
+outcomes. If those separate semantic items are clearly present, return each
+item as a separate element of the description array. Keep genuinely continuous
+narrative as one array element. Do not split merely because a line wraps
+visually, and do not invent, rewrite, or add information while making this
+structural split.
 
-Main description paragraph.
+For every work experience description, return description as an array of
+strings. Each array element becomes one outer bullet in the editor. Use this
+plain-text structure inside the array when the corresponding content exists:
 
-Technologies:
-- Technology 1
-- Technology 2
-- Technology 3
+Use one array element for each semantically separate narrative item, such as a
+responsibility, achievement, or outcome. If the experience contains an
+explicitly labeled compact list of technologies, tools, skills, frameworks,
+projects, certifications, or another similar group, keep the heading and all
+items in one array element on one line, separated by commas. If the list
+contains consecutive standalone links or URLs, put each link on its own line
+instead, while keeping all of them in the same array element. Preserve the
+heading exactly as written; do not assume that it is called "Technologies" or
+"Projects". For example: "Technical Skills: Java, Spring Boot, AWS".
 
-Projects:
-- Project or URL 1
-- Project or URL 2
+Do not put non-link items from a compact labeled list on separate lines and do
+not prefix any item with "-" or another list marker. Consecutive standalone
+links are the exception and must each be on a separate line. This rule applies
+only to compact item lists. Keep full-sentence responsibilities, achievements,
+and project deliverables as separate array elements when they are distinct.
 
-Use "- " at the beginning of every technology and project item.
-Do not use markdown other than the leading "- " list marker.
-
-35. Keep the main description as one or more normal paragraphs.
-36. Put "Technologies:" on its own line.
-37. Put all technologies and tools on the next line, separated by commas.
-38. Put "Projects:" on its own line.
-39. Put each project name or project URL on a separate line.
-40. Omit the "Technologies:" section when no technologies are explicitly listed for that experience.
-41. Omit the "Projects:" section when no projects or project links are explicitly listed for that experience.
-42. Do not add trailing periods to URLs.
-43. Do not convert project URLs into markdown links.
-44. Do not add bullets, markdown syntax, HTML, or JSON inside the description.
-45. Do not repeat technologies or projects inside the main description if they are already placed under their dedicated heading.
+35. Keep each narrative item as a normal paragraph inside one array element.
+36. Keep every explicitly labeled compact list in one array element, with its items on one line separated by commas.
+37. Preserve the original heading of each such list; do not add, rename, or invent section headings.
+38. Do not create a labeled list section when the source does not contain one.
+39. Keep distinct full-sentence responsibilities, achievements, and outcomes as separate array elements.
+40. Do not add trailing periods to URLs.
+41. Do not convert project URLs into markdown links.
+42. Do not add bullets, markdown syntax, HTML, or JSON inside the description.
+43. Do not repeat technologies or projects inside the main description if they are already placed under their dedicated heading.
 
 Education:
 46. Keep education entries in the same order as in the document.
