@@ -6,7 +6,7 @@ const importedWorkExperienceSchema = z.object({
   city: z.string(),
   startDate: z.string(),
   endDate: z.string(),
-  description: z.string(),
+  description: z.array(z.string()),
 });
 
 const importedEducationSchema = z.object({

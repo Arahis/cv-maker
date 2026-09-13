@@ -52,12 +52,18 @@ export function mapImportedResumeToCreateBody(
               city: experience.city,
               startDate: normalizeImportedDate(experience.startDate),
               endDate: normalizeImportedDate(experience.endDate),
-              descriptionBullets: [
-                {
-                  id: crypto.randomUUID(),
-                  text: plainTextToLexicalState(experience.description),
-                },
-              ],
+              descriptionBullets:
+                experience.description.length > 0
+                  ? experience.description.map((description) => ({
+                      id: crypto.randomUUID(),
+                      text: plainTextToLexicalState(description),
+                    }))
+                  : [
+                      {
+                        id: crypto.randomUUID(),
+                        text: EMPTY_LEXICAL_STATE,
+                      },
+                    ],
               isFullDate: false,
             }))
           : [
