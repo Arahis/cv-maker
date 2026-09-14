@@ -5,6 +5,7 @@ import { ResumeRepository } from "./resume.repository.js";
 import type {
   CreateResumeBody,
   SaveLocalResumeToAccountBody,
+  TailorResumeBody,
   UpdateResumeMediaBody,
   UpdateResumeBody,
   UpdateResumeTemplateBody,
@@ -73,6 +74,38 @@ export class ResumeService {
 
     reply.code(201);
     return { resume };
+  }
+
+  async tailor(
+    id: string,
+    input: TailorResumeBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const auth = await getAuthenticatedUserId({
+      request,
+      users: this.users,
+    });
+
+    if (!auth.userId) {
+      return this.handleUnauthorized(auth.error, reply);
+    }
+
+    const resume = await this.resumes.findUserResumeById(auth.userId, id);
+
+    if (!resume) {
+      reply.code(404);
+      return { error: "Resume not found" };
+    }
+
+    // Tailoring logic will be added here. Keep the request contract wired up
+    // and return the parsed input while the implementation is being built.
+    return {
+      resumeId: resume.id,
+      jobTitle: input.jobTitle,
+      jobDescription: input.jobDescription,
+      jobDescriptionUrl: input.jobDescriptionUrl,
+    };
   }
 
   async create(

@@ -4,6 +4,7 @@ import {
   createResumeBodySchema,
   resumeParamsSchema,
   saveLocalResumeToAccountBodySchema,
+  tailorResumeBodySchema,
   updateResumeBodySchema,
   updateResumeMediaBodySchema,
   updateResumeTemplateBodySchema,
@@ -29,6 +30,35 @@ export default async function resumeRoutes(app: FastifyInstance) {
     }
 
     return resumeService.copy(parsedParams.data.id, request, reply);
+  });
+
+  app.post("/:id/tailor", async (request, reply) => {
+    const parsedParams = resumeParamsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      reply.code(400);
+      return {
+        error: "Invalid request params",
+        issues: parsedParams.error.issues,
+      };
+    }
+
+    const parsedBody = tailorResumeBodySchema.safeParse(request.body);
+
+    if (!parsedBody.success) {
+      reply.code(400);
+      return {
+        error: "Invalid request body",
+        issues: parsedBody.error.issues,
+      };
+    }
+
+    return resumeService.tailor(
+      parsedParams.data.id,
+      parsedBody.data,
+      request,
+      reply,
+    );
   });
 
   app.get("/:id", async (request, reply) => {

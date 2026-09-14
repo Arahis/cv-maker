@@ -33,6 +33,15 @@ export const updateResumeMediaBodySchema = z.object({
   media: resumeMediaSchema,
 });
 
+export const tailorResumeBodySchema = z.object({
+  jobTitle: z.string().trim().min(1, "Job title is required"),
+  jobDescription: z
+    .string()
+    .trim()
+    .min(1, "Job description is required"),
+  jobDescriptionUrl: z.url().optional(),
+});
+
 export const resumeParamsSchema = z.object({
   id: z.string().min(1),
 });
@@ -43,6 +52,7 @@ export type UpdateResumeTemplateBody = z.infer<
   typeof updateResumeTemplateBodySchema
 >;
 export type UpdateResumeMediaBody = z.infer<typeof updateResumeMediaBodySchema>;
+export type TailorResumeBody = z.infer<typeof tailorResumeBodySchema>;
 export type SaveLocalResumeToAccountBody = z.infer<
   typeof saveLocalResumeToAccountBodySchema
 >;
