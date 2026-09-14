@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import type { ResumeForm } from "@cv-maker/shared";
 import { getAuthenticatedUserId } from "../../lib/get-authenticated-user-id.js";
 import { UserRepository } from "../users/user.repository.js";
 import { ResumeRepository } from "./resume.repository.js";
@@ -10,14 +11,18 @@ import type {
   UpdateResumeBody,
   UpdateResumeTemplateBody,
 } from "./resume.schema.js";
+import { prepareTailorInput } from "../../services/resume-tailor/prepare-tailor-input.js";
+import { ResumeTailorService } from "../../services/resume-tailor/tailor.service.js";
 
 export class ResumeService {
   private readonly users;
   private readonly resumes;
+  private readonly resumeTailor;
 
   constructor(app: FastifyInstance) {
     this.users = new UserRepository(app.prisma);
     this.resumes = new ResumeRepository(app.prisma);
+    this.resumeTailor = new ResumeTailorService();
   }
 
   async list(request: FastifyRequest, reply: FastifyReply) {
@@ -98,14 +103,11 @@ export class ResumeService {
       return { error: "Resume not found" };
     }
 
-    // Tailoring logic will be added here. Keep the request contract wired up
-    // and return the parsed input while the implementation is being built.
-    return {
-      resumeId: resume.id,
+    return this.resumeTailor.tailorResume({
+      resume: prepareTailorInput(resume.data as unknown as ResumeForm),
       jobTitle: input.jobTitle,
       jobDescription: input.jobDescription,
-      jobDescriptionUrl: input.jobDescriptionUrl,
-    };
+    });
   }
 
   async create(
