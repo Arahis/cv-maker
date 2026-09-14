@@ -18,6 +18,7 @@ import { defaultFormValues } from "@/lib/formDefaults";
 import { useResumePersistenceController } from "../useResumePersistenceController";
 import useAvatar from "../store/hooks/useAvatar";
 import { generateAccountResumePdf } from "@/api/pdf";
+import TailorPanel from "./TailorPanel";
 
 const useResumeForm = () =>
   useForm({
@@ -130,6 +131,7 @@ const ResumeAppInner = ({ resumeId }: { resumeId: string }) => {
           ref={contentRef}
         />
       </Form>
+      <TailorPanel resumeId={resumeId} />
     </div>
   );
 };
