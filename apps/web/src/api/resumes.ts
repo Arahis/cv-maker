@@ -1,4 +1,4 @@
-import { ResumeForm, ResumeMedia, TailorAnalysis } from "@cv-maker/shared";
+import { ResumeForm, ResumeMedia } from "@cv-maker/shared";
 import { apiFetch } from "./api-fetch";
 import { ResumeTemplateKey } from "@/components/templates/components";
 import { LocalResumeMedia } from "@/lib/indexedDB";
@@ -18,12 +18,6 @@ type CreateFromLocalResumeInput = {
   data: ResumeForm;
   media: ResumeMedia;
   localResumeId: string;
-};
-
-export type TailorResumeInput = {
-  jobTitle: string;
-  jobDescription: string;
-  jobDescriptionUrl?: string;
 };
 
 export type Source = "local" | "account";
@@ -125,19 +119,6 @@ export async function updateResumeMedia({
   );
 
   return response.resume;
-}
-
-export async function tailorResume({
-  resumeId,
-  input,
-}: {
-  resumeId: string;
-  input: TailorResumeInput;
-}) {
-  return apiFetch<TailorAnalysis>(`/resumes/${resumeId}/tailor`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
 }
 
 // TODO: Proper type the input

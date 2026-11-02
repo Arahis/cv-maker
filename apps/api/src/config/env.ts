@@ -50,6 +50,10 @@ export const env = {
 
   openAiApiKey: process.env.OPENAI_API_KEY!,
   openAiModel: process.env.OPENAI_MODEL!,
+  openAiTailorClarificationModel:
+    process.env.OPENAI_TAILOR_CLARIFICATION_MODEL ?? "gpt-5.6-luna",
+  openAiTailorGenerationModel:
+    process.env.OPENAI_TAILOR_GENERATION_MODEL ?? "gpt-5.6-luna",
   resumeImportMaxPages,
   resumeImportMaxFileSizeBytes: resumeImportMaxFileSizeMb * 1024 * 1024,
 };

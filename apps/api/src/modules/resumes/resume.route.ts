@@ -8,6 +8,9 @@ import {
   updateResumeBodySchema,
   updateResumeMediaBodySchema,
   updateResumeTemplateBodySchema,
+  createTailorConversationBodySchema,
+  tailorConversationParamsSchema,
+  sendTailorConversationMessageBodySchema,
 } from "./resume.schema.js";
 import z from "zod";
 
@@ -59,6 +62,32 @@ export default async function resumeRoutes(app: FastifyInstance) {
       request,
       reply,
     );
+  });
+
+  app.post("/:id/tailor/session", async (request, reply) => {
+    const parsedParams = resumeParamsSchema.safeParse(request.params);
+    const parsedBody = createTailorConversationBodySchema.safeParse(request.body);
+    if (!parsedParams.success || !parsedBody.success) {
+      reply.code(400);
+      return { error: "Invalid Tailor conversation request", issues: [...(parsedParams.success ? [] : parsedParams.error.issues), ...(parsedBody.success ? [] : parsedBody.error.issues)] };
+    }
+    return resumeService.createTailorConversation(parsedParams.data.id, parsedBody.data, request, reply);
+  });
+
+  app.get("/:id/tailor/session/:sessionId", async (request, reply) => {
+    const parsedParams = tailorConversationParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) { reply.code(400); return { error: "Invalid Tailor session params", issues: parsedParams.error.issues }; }
+    return resumeService.getTailorConversation(parsedParams.data.id, parsedParams.data.sessionId, request, reply);
+  });
+
+  app.post("/:id/tailor/session/:sessionId/messages", async (request, reply) => {
+    const parsedParams = tailorConversationParamsSchema.safeParse(request.params);
+    const parsedBody = sendTailorConversationMessageBodySchema.safeParse(request.body);
+    if (!parsedParams.success || !parsedBody.success) {
+      reply.code(400);
+      return { error: "Invalid Tailor conversation message", issues: [...(parsedParams.success ? [] : parsedParams.error.issues), ...(parsedBody.success ? [] : parsedBody.error.issues)] };
+    }
+    return resumeService.sendTailorConversationMessage(parsedParams.data.id, parsedParams.data.sessionId, parsedBody.data, request, reply);
   });
 
   app.get("/:id", async (request, reply) => {

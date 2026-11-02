@@ -14,7 +14,6 @@ const planFeatures = [
   ["Free templates", "Yes", "Yes"],
   // ["Premium templates", "No", "No"],
   ["PDF export", "Yes", "Yes"],
-  // ["Create a tailored version", "Manually", "Limited"],
   // ["AI text enhancement", "No", "1 trial"],
   // ["ATS check", "No", "Preview result"],
   // ["Cover letter", "No", "No"],

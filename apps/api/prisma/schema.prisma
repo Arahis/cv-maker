@@ -26,6 +26,7 @@ model User {
   refreshTokens RefreshSession[]
   authAccounts  AuthAccount[]
   resumes       Resume[]
+  tailorSessions TailorSession[]
 
   emailVerificationCode EmailVerificationCode?
   passwordResetCode     PasswordResetCode?
@@ -113,10 +114,33 @@ model Resume {
   updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tailorSessions TailorSession[]
 
   @@unique([userId, localResumeId])
   @@index([userId, updatedAt])
   @@index([userId, position])
+}
+
+model TailorSession {
+  id               String   @id @default(cuid())
+  userId           String
+  resumeId         String
+  jobTitle         String
+  jobDescription   String
+  normalizedResume Json
+  status           String   @default("clarifying")
+  messages         Json
+  confirmedFacts   Json
+  currentTurn     Json
+  initialAnalysis  Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([resumeId, updatedAt])
 }
 
 model AnonymousResumeQuota {

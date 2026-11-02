@@ -3,6 +3,9 @@ import {
   resumeMediaSchema,
   resumeSchema,
   resumeTemplateSchema,
+  tailorAnswerSchema,
+  confirmedTailorFactSchema,
+  tailorRefinementTargetSchema,
 } from "@cv-maker/shared";
 
 export const createResumeBodySchema = z.object({
@@ -33,13 +36,43 @@ export const updateResumeMediaBodySchema = z.object({
   media: resumeMediaSchema,
 });
 
-export const tailorResumeBodySchema = z.object({
+const tailorJobInputSchema = {
   jobTitle: z.string().trim().min(1, "Job title is required"),
   jobDescription: z
     .string()
     .trim()
     .min(1, "Job description is required"),
   jobDescriptionUrl: z.url().optional(),
+};
+
+export const tailorResumeBodySchema = z.discriminatedUnion("mode", [
+  z.object({
+    ...tailorJobInputSchema,
+    mode: z.literal("generate"),
+    answers: z.array(tailorAnswerSchema).default([]),
+    confirmedFacts: z.array(confirmedTailorFactSchema).default([]),
+    confirmedSkills: z.array(z.string().min(1).max(80)).default([]),
+    sessionId: z.string().min(1).optional(),
+  }),
+  z.object({
+    ...tailorJobInputSchema,
+    mode: z.literal("refine"),
+    target: tailorRefinementTargetSchema,
+    userInstruction: z.string().trim().min(1),
+    currentValue: z.string(),
+    originalValue: z.string().default(""),
+    answers: z.array(tailorAnswerSchema).default([]),
+    confirmedSkills: z.array(z.string().min(1).max(80)).default([]),
+  }),
+]);
+export const createTailorConversationBodySchema = z.object({
+  jobTitle: z.string().trim().min(1),
+  jobDescription: z.string().trim().min(1),
+});
+export const tailorConversationParamsSchema = z.object({ id: z.string().min(1), sessionId: z.string().min(1) });
+export const sendTailorConversationMessageBodySchema = z.object({
+  messageId: z.string().min(1),
+  text: z.string().trim().min(1).max(4000),
 });
 
 export const resumeParamsSchema = z.object({
@@ -53,6 +86,8 @@ export type UpdateResumeTemplateBody = z.infer<
 >;
 export type UpdateResumeMediaBody = z.infer<typeof updateResumeMediaBodySchema>;
 export type TailorResumeBody = z.infer<typeof tailorResumeBodySchema>;
+export type CreateTailorConversationBody = z.infer<typeof createTailorConversationBodySchema>;
+export type SendTailorConversationMessageBody = z.infer<typeof sendTailorConversationMessageBodySchema>;
 export type SaveLocalResumeToAccountBody = z.infer<
   typeof saveLocalResumeToAccountBodySchema
 >;

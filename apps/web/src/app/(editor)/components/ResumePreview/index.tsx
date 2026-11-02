@@ -16,10 +16,10 @@ const ResumePreview = ({
   ref: contentRefForPrint,
 }: {
   template: ResumeTemplateKey | undefined;
-  ref: React.RefObject<HTMLDivElement | null>;
+  ref?: React.RefObject<HTMLDivElement | null>;
 }) => {
   const { control } = useFormContext<ResumeForm>();
-  const formData = useWatch({ control }) as ResumeForm;
+  const watchedFormData = useWatch({ control }) as ResumeForm;
   const { croppedPreviewUrl } = useAvatar();
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,7 @@ const ResumePreview = ({
     observer.observe(content);
 
     return () => observer.disconnect();
-  }, [scale, formData, template]);
+  }, [scale, watchedFormData, template]);
 
   const Template = getResumeTemplateComponent(template);
 
@@ -74,7 +74,7 @@ const ResumePreview = ({
         >
           <SentryErrorBoundary template={template}>
             <Template
-              data={formData}
+              data={watchedFormData}
               photo={croppedPreviewUrl}
               ref={contentRefForPrint}
             />
